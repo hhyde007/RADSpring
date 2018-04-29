@@ -1,0 +1,35 @@
+packageName=com.radinfodesign.fboace.controller
+reposistoryImport=com.radinfodesign.fboace.dao.FlightRepository
+modelEntityImport=com.radinfodesign.fboace.model.Flight
+XXXXXotherRepositoryImport_=import com.radinfodesign.fboace.dao.${FKRefEntity}Repository;
+XXXXXotherModelEntityImport_=import com.radinfodesign.fboace.model.${FKRefEntity};
+webControllerClass=FlightWebController
+ENTITY_URL=/Flight
+MODEL_ENTITY=Flight
+BUSINESS_ENTITY=Flight
+INSTANCE=flight
+INSTANCES=instances
+ALL_ENTITY_URL=""
+ENTITY_GET_ONE_URL=""
+ENTITY_EDIT_PAGE=flight/edit
+ENTITY_ATT_ID=flightId
+GET_ENTITY_ATT_ID=getFlightId
+EntityRepository=FlightRepository
+XXXXXENTITY_ATTRIB_=public static final String ENTITY_ATTRIB_${ENTITY_ATTRIB_UPPER_NAME}="${entityAttrib}";
+XXXXXENTITY_FK_ATTRIB=public static final String ENTITY_ATTRIB_${FKRefEntity}S="${FKRefEntityLowerPlural}";
+
+XXXXXOtherEntityRepository_Airport=@Autowired\n  AirportRepository airportRepository;
+XXXXXOtherEntityRepository_Aircraft=@Autowired\n  AircraftRepository aircraftRepository;
+XXXXXOtherEntityRepository_Pilot=@Autowired\n  PilotRepository pilotRepository;
+XXXXXMODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB=model.addAttribute(${ENTITY_ATTRIB}, ${FKRefEntityVar}Repository.findAll());
+XXXXXREQUEST_PARAM_ENTITY_ATTRIB=, @RequestParam(${ENTITY_ATTRIB_UPPER_NAME}) String ${entityAttrib}
+XXXXXPARSE_DATE_TIME_ATTRIB=LocalDateTime {$dateAttrib}_ = LocalDateTime.parse({$dateAttrib}, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+XXXXXENTITY_SET_SIMPLE_ATTRIB=entity.set${ENTITY_ATRRIB_INIT_CAP_NAME}(${ENTITY_ATTRIB_NAME});
+XXXXXENTITY_SET_FK_REF_ATTRIB=entity.set${ENTITY_ATRRIB_INIT_CAP_NAME}(${FK_REF_ENTITY_VAR_NAME}Repository.findOne(${FKRefAttrib}));
+
+
+
+
+
+
+

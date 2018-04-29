@@ -1,0 +1,53 @@
+packageName=com.radinfodesign.fboace.controller
+reposistoryImport=com.radinfodesign.fboace.dao.PilotRepository
+modelEntityImport=com.radinfodesign.fboace.model.Pilot
+
+otherRepositoryImport_Flight=import com.radinfodesign.fboace.dao.FlightRepository;
+otherModelEntityImport_Flight=import com.radinfodesign.fboace.model.Flight;
+
+webControllerClass=PilotWebController
+
+ENTITY_URL=/Pilot
+MODEL_ENTITY=Pilot
+BUSINESS_ENTITY=Pilot
+INSTANCE=pilot
+INSTANCES=instances
+ALL_ENTITY_URL=""
+ENTITY_GET_ONE_URL=""
+ENTITY_EDIT_PAGE=pilot/edit
+
+ENTITY_ATT_ID=pilotId
+GET_ENTITY_ATT_ID=getPilotId
+ENTITY_ATTRIB_LAST_NAME=public static final String ENTITY_ATTRIB_LAST_NAME="lastName";
+ENTITY_ATTRIB_FIRST_NAME=public static final String ENTITY_ATTRIB_FIRST_NAME="firstName";
+ENTITY_ATTRIB_MIDDLE_INITIAL=public static final String ENTITY_ATTRIB_MIDDLE_INITIAL="middleInitial";
+ENTITY_ATTRIB_BIRTHDATE=public static final String ENTITY_ATTRIB_BIRTHDATE="birthDate";
+ENTITY_ATTRIB_NATIONAL_ID_NUMBER=public static final String ENTITY_ATTRIB_NATIONAL_ID_NUMBER="nationalIdNumber";
+ENTITY_ATTRIB_NOTES=public static final String ENTITY_ATTRIB_NOTES="notes";
+
+EntityRepository=PilotRepository
+
+REQUEST_PARAM_ENTITY_ATTRIB_LAST_NAME=, @RequestParam(ENTITY_ATTRIB_LAST_NAME) String lastName
+REQUEST_PARAM_ENTITY_ATTRIB_FIRST_NAME=, @RequestParam(ENTITY_ATTRIB_FIRST_NAME) String firstName
+REQUEST_PARAM_ENTITY_ATTRIB_MIDDLE_INITIAL=, @RequestParam(ENTITY_ATTRIB_MIDDLE_INITIAL) String middleInitial
+REQUEST_PARAM_ENTITY_ATTRIB_NATIONAL_ID_NUMBER=, @RequestParam(ENTITY_ATTRIB_NATIONAL_ID_NUMBER) String nationalIdNumber
+REQUEST_PARAM_ENTITY_ATTRIB_BIRTH_DATE=, @RequestParam(ENTITY_ATTRIB_BIRTH_DATE) String birthDate
+REQUEST_PARAM_ENTITY_ATTRIB_NOTES=, @RequestParam(ENTITY_ATTRIB_NOTES) String notes
+REQUEST_PARAM_ENTITY_ATTRIB_PILOT_ID=, @RequestParam(ENTITY_ATTRIB_PILOT_ID) Integer pilotId
+
+PARSE_DATE_ATTRIB_BIRTH_DATE=LocalDateTime birthdt = LocalDate.parse(birthdate, DateTimeFormatter.ISO_LOCAL_DATE);
+
+ENTITY_SET_SIMPLE_ATTRIB_LAST_NAME=entity.setLastName(lastName);
+ENTITY_SET_SIMPLE_ATTRIB_FIRST_NAME=entity.setFirstName(firstName);
+ENTITY_SET_SIMPLE_ATTRIB_MIDDLE_INITIAL=entity.setMiddleInitial(middleInitial);
+ENTITY_SET_SIMPLE_ATTRIB_NATIONAL_ID_NUMBER=entity.setNationalIdNumber(nationalIdNumber);
+ENTITY_SET_SIMPLE_ATTRIB_BIRTH_DATE=entity.setBirthDate(birthDate);
+ENTITY_SET_SIMPLE_ATTRIB_NOTES=entity.setNotes(notes);
+
+
+
+
+
+
+
+

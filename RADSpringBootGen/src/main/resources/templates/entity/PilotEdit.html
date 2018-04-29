@@ -1,0 +1,287 @@
+<html layout:decorator="layout">
+  <div layout:fragment="content">
+
+    <form method="post" name="comment_form" id="comment_form" th:action="${formAction}" modelAttribute="pilot" role="form">    
+      <table class="table table-striped" id="pilot_edit">
+        <thead> 
+          <tr>
+        <i th:text="${message}"></i>
+        <th><h3>Edit Pilot</h3></th>
+        <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <div class="form-group">
+                    <tr>
+            <td><label for="lastName">Last Name</label></td>
+            <td><input type="text" id="lastName" size="20" name="lastName" th:value="${pilot.lastName}"/></td>
+          </tr>
+
+                    <tr>
+            <td><label for="firstName">First Name</label></td>
+            <td><input type="text" id="firstName" size="20" name="firstName" th:value="${pilot.firstName}"/></td>
+          </tr>
+
+                    <tr>
+            <td><label for="middleInitial">Middle Initial</label></td>
+            <td><input type="text" id="middleInitial" size="1" name="middleInitial" th:value="${pilot.middleInitial}"/></td>
+          </tr>
+
+                    <tr>
+            <td><label for="nationalIdNumber">National Id Number</label></td>
+            <td><input type="text" id="nationalIdNumber" size="20" name="nationalIdNumber" th:value="${pilot.nationalIdNumber}"/></td>
+          </tr>
+
+                    <tr>
+            <td><label for="birthdate">Birthdate</label></td>
+            <td><input type="date" id="birthdate" size="12" name="birthdate" th:value="${pilot.birthdate}"/></td>
+          </tr>
+
+                    <tr>
+            <td><label for="notes">Notes</label></td>
+            <td><textarea rows="1" id="notes" name="notes" cols="40" th:text="${pilot.notes}"/></td>
+          </tr>
+
+          
+        </div>
+        <input type="hidden" th:field="${pilot.pilotId}"/>
+        <button type="submit" id="submit" class="btn btn-primary">Save</button> 
+        <a class="btn btn-primary" th:href="@{'{list}'(list=${listPath})}">Cancel/Return</a>
+        <button data-btn="pilot-refresh" th:attr="data-pilotId=${pilot.pilotId}" type="SUBMIT" class="btn btn-primary" NAME="frmRefresh" VALUE="Refresh (Discard Changes)">Discard Changes/Refresh</button>
+        </tbody>
+      </table>
+      
+<HR />
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <td colspan="5"><h4>Pilot Rare Thing</h4></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td class="spacer">_</td>
+            <th><h5>Short Name</h5></th>
+            <th><h5>Long Name</h5></th>
+            <th><h5>Notes</h5></th>
+            </tr>
+        </thead>
+        <tbody>
+          <tr data-th-each="pilotRareThing: ${pilot.pilotRareThingCollection}">
+            <td>
+            </td>
+            <td>
+              <button data-btn="pilotRareThing-delete" 
+                      th:attr="data-pilotId=${pilot.pilotId}" 
+                      type="SUBMIT" 
+                      class="frmDelete" 
+                      NAME="frmDelete" 
+                      VALUE="Delete Pilot Rare Thing">
+                <span class="fa-stack">
+                  <i class="glyphicon glyphicon-trash"></i>
+                </span>
+              </button>
+            </td>
+            <td></td>
+<!--             <td><input type="text" id="pilotRareThingShortName" size="20" name="pilotRareThingShortName" th:value="${pilot.pilotRareThing==null?'':pilot.pilotRareThing.shortName}"/></td>
+            <td><input type="text" id="pilotRareThingLongName" size="20" name="pilotRareThingLongName" th:value="${pilot.pilotRareThing==null?'':pilot.pilotRareThing.longName}"/></td>
+            <td><textarea rows="1" id="pilotRareThingNotes" name="pilotRareThingNotes" cols="40" th:text="${pilot.pilotRareThing==null?'':pilot.pilotRareThing.notes}"/></td>
+-->
+            <td><input type="text" id="pilotRareThingShortName" size="30" name="pilotRareThingShortName" th:value="${pilotRareThing.shortName}"/></td>
+            <td><input type="text" id="pilotRareThingLongName" size="40" name="pilotRareThingLongName" th:value="${pilotRareThing.longName}"/></td>
+            <td><textarea rows="1" id="pilotRareThingNotes" name="pilotRareThingNotes" cols="50" th:text="${pilotRareThing.notes}"/></td>
+        </tr>
+          <tr th:if="${pilot.pilotRareThingCollection.size()==0}">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><input type="text" id="pilotRareThingShortName" size="30" name="pilotRareThingShortName" value=""/></td>
+            <td><input type="text" id="pilotRareThingLongName" size="40" name="pilotRareThingLongName" value=""/></td>
+            <td><textarea rows="1" id="pilotRareThingNotes" name="pilotRareThingNotes" cols="50" text=""/></td>
+        </tr>
+
+        </tbody>
+      </table>
+<HR />
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <td colspan="5"><h4>Pilot Certifications</h4></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td class="spacer">_</td>
+            <th><h5>Aircraft Type</h5></th>
+            <th><h5>Certification Number</h5></th>
+            <th><h5>Valid From Date</h5></th>
+            <th><h5>Expiration Date</h5></th>
+            <th><h5>Notes</h5></th>
+            </tr>
+        </thead>
+        <tbody>
+          <tr data-th-each="pilotCertification : ${pilot.pilotCertificationCollection}">
+             
+            <td>
+              <button data-btn="aircraftTypeId-edit" th:attr="data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}" 
+                      type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit AircraftType">
+                <span class="fa-stack">
+                  <i class="glyphicon glyphicon-edit"></i>
+                </span>
+              </button>
+            </td>
+            <td>
+              <button data-btn="pilotCertification-delete" 
+                      th:attr="data-pilotId=${pilotCertification.pilotCertificationPK.pilotId}, data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}" 
+                      type="SUBMIT" 
+                      class="frmDelete" 
+                      NAME="frmDelete" 
+                      VALUE="Delete Pilot Certification">
+                <span class="fa-stack">
+                  <i class="glyphicon glyphicon-trash"></i>
+                </span>
+              </button>
+            </td>
+            
+            <td></td>
+            <td class="aircraftType" data-th-text="${pilotCertification.aircraftType}"></td>
+              <input type="hidden" id="pilotCertificationAircraftTypeId" name="pilotCertificationAircraftTypeId" th:value="${pilotCertification.pilotCertificationPK}==null?null:${pilotCertification.pilotCertificationPK.aircraftTypeId}"/>                            
+                          <td><input type="text" id="pilotCertificationCertificationNumber" size="20" name="pilotCertificationCertificationNumber" th:value="${pilotCertification.certificationNumber}"/></td>
+            <td><input type="date" id="pilotCertificationValidFromDate" size="12" name="pilotCertificationValidFromDate" th:value="${pilotCertification.validFromDate}"/></td>
+            <td><input type="date" id="pilotCertificationExpirationDate" size="12" name="pilotCertificationExpirationDate" th:value="${pilotCertification.expirationDate}"/></td>
+            <td><textarea rows="1" id="pilotCertificationNotes" name="pilotCertificationNotes" cols="40" th:text="${pilotCertification.notes}"/></td>
+
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td class="spacer">_</td>
+        </tr>
+        <tr>
+          <td colspan="5"><h4>Add a Pilot Certification</h4></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td class="spacer">_</td>
+            <th><h5>Aircraft Type</h5></th>
+            <th><h5>Certification Number</h5></th>
+            <th><h5>Valid From Date</h5></th>
+            <th><h5>Expiration Date</h5></th>
+            <th><h5>Notes</h5></th>
+            </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>
+            <select name="pilotCertificationAircraftTypeId">
+              <option value="0">[Please select...]</option>
+              <option th:each="aircraftType : ${aircraftTypes}" 
+                      th:value="${aircraftType.aircraftTypeId}" 
+                      th:text="${aircraftType}">NULL</option>
+            </select>                  
+          </td>
+                          <td><input type="text" id="pilotCertificationCertificationNumber" size="20" name="pilotCertificationCertificationNumber" value=""/></td>
+            <td><input type="date" id="pilotCertificationValidFromDate" size="12" name="pilotCertificationValidFromDate" value=""/></td>
+            <td><input type="date" id="pilotCertificationExpirationDate" size="12" name="pilotCertificationExpirationDate" value=""/></td>
+            <td><textarea rows="2" id="pilotCertificationNotes" name="pilotCertificationNotes" cols="40" text=""/></td>
+
+        </tr>
+
+        </tbody>
+      </table>
+
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <td colspan="5"><h4>Flight Crew Members</h4></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td class="spacer">_</td>
+            <th><h5>Flight</h5></th>
+            <th><h5>Notes</h5></th>
+            </tr>
+        </thead>
+        <tbody>
+          <tr data-th-each="flightCrewMember : ${pilot.flightCrewMemberCollection}">
+             
+            <td>
+              <button data-btn="flightId-edit" th:attr="data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}" 
+                      type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit Flight">
+                <span class="fa-stack">
+                  <i class="glyphicon glyphicon-edit"></i>
+                </span>
+              </button>
+            </td>
+            <td>
+              <button data-btn="flightCrewMember-delete" 
+                      th:attr="data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}, data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}" 
+                      type="SUBMIT" 
+                      class="frmDelete" 
+                      NAME="frmDelete" 
+                      VALUE="Delete Flight Crew Member">
+                <span class="fa-stack">
+                  <i class="glyphicon glyphicon-trash"></i>
+                </span>
+              </button>
+            </td>
+            
+            <td></td>
+            <td class="flight" data-th-text="${flightCrewMember.flight}"></td>
+              <input type="hidden" id="flightCrewMemberFlightId" name="flightCrewMemberFlightId" th:value="${flightCrewMember.flightCrewMemberPK}==null?null:${flightCrewMember.flightCrewMemberPK.flightId}"/>                            
+                          <td><textarea rows="1" id="flightCrewMemberNotes" name="flightCrewMemberNotes" cols="40" th:text="${flightCrewMember.notes}"/></td>
+
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td class="spacer">_</td>
+        </tr>
+        <tr>
+          <td colspan="5"><h4>Add a Flight Crew Member</h4></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td class="spacer">_</td>
+            <th><h5>Flight</h5></th>
+            <th><h5>Notes</h5></th>
+            </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>
+            <select name="flightCrewMemberFlightId">
+              <option value="0">[Please select...]</option>
+              <option th:each="flight : ${flights}" 
+                      th:value="${flight.flightId}" 
+                      th:text="${flight}">NULL</option>
+            </select>                  
+          </td>
+                          <td><textarea rows="2" id="flightCrewMemberNotes" name="flightCrewMemberNotes" cols="40" text=""/></td>
+
+        </tr>
+
+        </tbody>
+      </table>
+       
+
+      
+      <hr />
+      <hr />
+      <button type="submit" id="submit" class="btn btn-primary">Save</button>
+      <a class="btn btn-primary" th:href="@{'{list}'(list=${listPath})}">Cancel/Return</a>
+      <button data-btn="pilot-refresh" th:attr="data-pilotId=${pilot.pilotId}" type="SUBMIT" class="btn btn-primary" NAME="frmRefresh" VALUE="Refresh (Discard Changes)">Discard Changes/Refresh</button>
+    </form>
+    
+        
+    <script src='/js/pilot.js'></script>
+
+  </div>
+
+</html>
+

@@ -1,0 +1,186 @@
+package ${packageName};
+
+import static java.lang.System.out;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
+import ${reposistoryImport};
+import ${modelEntityImport};
+${${ACT_FK_REF_ENTITIES=import com.radinfodesign.fboace.dao.${FK_REF_ENTITY}Repository;}}
+${${ACT_FK_REF_ENTITIES=import com.radinfodesign.fboace.model.${FK_REF_ENTITY};}}
+${${ACT_FK_CHILD_AND_THIRD_ENTITIES=import com.radinfodesign.fboace.dao.${FK_CHILD_ENTITY}Repository;}}
+${${ACT_FK_CHILD_AND_THIRD_ENTITIES=import com.radinfodesign.fboace.model.${FK_CHILD_ENTITY};}}
+ 
+@Controller
+@RequestMapping(${webControllerClass}.ENTITY_URL)
+public class ${webControllerClass} {
+
+  public static final String ENTITY_URL = "${ENTITY_URL}";
+  public static final String BUSINESS_ENTITY = "${BUSINESS_ENTITY}";
+  public static final String BUSINESS_ENTITY_VAR = "businessEntity";
+  public static final String INSTANCE = "${INSTANCE}";
+  public static final String INSTANCES = "instances";
+  public static final String ALL_ENTITY_URL = "";
+  public static final String ENTITY_EDIT_URL = "/Edit";
+  public static final String ENTITY_DELETE_URL = "/Delete";
+  public static final String ENTITY_PUT_URL = "/Put";
+  public static final String ENTITY_LIST_PAGE = "entity/list";
+  public static final String ENTITY_EDIT_PAGE = "${ENTITY_EDIT_PAGE}";
+  public static final String ENTITY_ATT_ID = "${ENTITY_ATT_ID}";
+  ${${ACT_ALL_ATTRIBS=public static final String ENTITY_ATTRIB_${ENTITY_ATTRIB_UPPER_NAME}="${ENTITY_ATTRIB_NAME}";}}
+  
+  ${${ACT_FK_CHILD_ENTITY_ATTRIBS=public static final String ENTITY_ATTRIB_${FK_CHILD_ENTITY_UPPER}_${ENTITY_ATTRIB_UPPER_NAME}="${FK_CHILD_ENTITY_INIT_SMALL}${ENTITY_ATTRIB_INITCAPS}";}}
+  
+  ${${ACT_FK_REF_ENTITIES=public static final String ENTITY_ATTRIB_${FK_REF_ENTITY_UPPER_PLURAL}="${FK_REF_ENTITY_LOWER_PLURAL}";}}
+  ${${ACT_THIRD_ENTITIES=public static final String ENTITY_ATTRIB_${FK_CHILD_ENTITY_UPPER_PLURAL}="${FK_CHILD_ENTITY_LOWER_PLURAL}";}}
+
+  public static final String MODEL_ATTRIBUTE_FORM_ACTION = "formAction";
+  public static final String MODEL_ATTRIBUTE_DELETE_FORM_ACTION = "deleteFormAction";
+  public static final String MODEL_ATTRIBUTE_ENTITY_ID = "entityId";
+  public static final String MODEL_ATTRIBUTE_LIST_PATH = "listPath";
+
+  public static final String MESSAGE = "message";
+  public static final String MSG = "msg";
+
+//  public static final String 
+    
+  
+  @Autowired
+  ${EntityRepository} repository; 
+ 
+  ${${ACT_FK_CHILD_AND_THIRD_ENTITIES=@Autowired\n  ${FK_CHILD_ENTITY}Repository ${FK_CHILD_ENTITY_INIT_SMALL}Repository;}}
+  ${${ACT_FK_REF_ENTITIES=@Autowired\n  ${FK_REF_ENTITY}Repository ${FK_REF_ENTITY_INIT_SMALL}Repository;}}
+ 
+  @GetMapping(value=ALL_ENTITY_URL)
+  public String listEntities (Model model) {
+    model.addAttribute(INSTANCES, repository.findAll());
+    model.addAttribute(BUSINESS_ENTITY_VAR, BUSINESS_ENTITY);
+    model.addAttribute(MODEL_ATTRIBUTE_FORM_ACTION, ENTITY_URL+ENTITY_EDIT_URL);
+    model.addAttribute(MODEL_ATTRIBUTE_DELETE_FORM_ACTION, ENTITY_URL+ENTITY_DELETE_URL);
+    model.addAttribute(MODEL_ATTRIBUTE_ENTITY_ID, ENTITY_ATT_ID);
+    return ENTITY_LIST_PAGE;
+  }
+
+
+  @PostMapping(value=ENTITY_EDIT_URL)
+  public String editEntity ( @RequestParam (name=ENTITY_ATT_ID, defaultValue="0") Integer ${ENTITY_ATT_ID}
+                           , Model model
+                           , HttpServletRequest request
+                           ) {
+    ${MODEL_ENTITY} entity = null;
+    Map modelMap = model.asMap();
+    Integer ${ENTITY_ATT_ID}2 = (Integer)request.getAttribute(ENTITY_ATT_ID);
+    String message = (String)modelMap.get(MESSAGE);
+    if (${ENTITY_ATT_ID}==null || ${ENTITY_ATT_ID}==0) {
+      ${ENTITY_ATT_ID} = ${ENTITY_ATT_ID}2;
+      if (${ENTITY_ATT_ID}==null || ${ENTITY_ATT_ID}==0)
+        entity = new
+                 ${MODEL_ENTITY}();
+      else
+        entity = repository.findOne(${ENTITY_ATT_ID});
+    }
+    else entity = repository.findOne(${ENTITY_ATT_ID});
+
+    model.addAttribute(INSTANCE, entity);
+    model.addAttribute(MODEL_ATTRIBUTE_LIST_PATH, ENTITY_URL+ALL_ENTITY_URL);
+    model.addAttribute(MESSAGE, (String)request.getAttribute(MSG));
+    model.addAttribute(MODEL_ATTRIBUTE_FORM_ACTION, ENTITY_URL+ENTITY_PUT_URL);
+    ${${ACT_FK_REF_ENTITIES=model.addAttribute(ENTITY_ATTRIB_${FK_REF_ENTITY_UPPER_PLURAL}, ${FK_REF_ENTITY_INIT_SMALL}Repository.findAll());}}
+    ${${ACT_THIRD_ENTITIES=model.addAttribute(ENTITY_ATTRIB_${FK_CHILD_ENTITY_UPPER_PLURAL}, ${FK_CHILD_ENTITY_INIT_SMALL}Repository.findAll());}}
+    return ENTITY_EDIT_PAGE;
+  }
+    
+     
+  @PostMapping(value = ENTITY_PUT_URL)
+  public String putEntity ( @RequestParam(name=ENTITY_ATT_ID, defaultValue="0") Integer ${ENTITY_ATT_ID}
+                          ${${ACT_ALL_ATTRIBS=, @RequestParam(name=ENTITY_ATTRIB_${ENTITY_ATTRIB_UPPER_NAME}, required=false) ${ENTITY_ATTRIB_DEFAULT_DATATYPE} ${ENTITY_ATTRIB_NAME}}}
+                          ${${ACT_FK_CHILD_ENTITY_ATTRIBS=, @RequestParam(name=ENTITY_ATTRIB_${FK_CHILD_ENTITY_UPPER}_${ENTITY_ATTRIB_UPPER_NAME}, required=false) ${ENTITY_ATTRIB_DEFAULT_DATATYPE}[] ${FK_CHILD_ENTITY_INIT_SMALL}${ENTITY_ATTRIB_INITCAPS}s}}
+                          
+                          , Model model
+                          , HttpServletRequest request
+                          )
+  {
+    ${MODEL_ENTITY} entity;
+    if (${ENTITY_ATT_ID}==null || ${ENTITY_ATT_ID}==0) entity = new ${MODEL_ENTITY}();
+    else entity = repository.findOne(${ENTITY_ATT_ID});
+
+    ${${ACT_DATE_TIME_ATTRIBS=LocalDateTime ${ENTITY_DATE_TIME_ATTRIB_NAME}_ = null;
+    try {
+       ${ENTITY_DATE_TIME_ATTRIB_NAME}_ = LocalDateTime.parse(${ENTITY_DATE_TIME_ATTRIB_NAME}, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    } catch (DateTimeParseException e) {
+      out.println("No good value for ${ENTITY_DATE_TIME_ATTRIB_NAME}: " + e.getMessage());
+    }
+    }} 
+    ${${ACT_NON_TEMPORAL_ATTRIBS=entity.set${ENTITY_ATTRIB_INITCAPS}(${ENTITY_ATTRIB_NAME});}}
+    ${${ACT_DATE_ATTRIBS=entity.set${ENTITY_ATTRIB_INITCAPS}(${ENTITY_DATE_ATTRIB_NAME}_);}}
+    ${${ACT_DATE_TIME_ATTRIBS=entity.set${ENTITY_ATTRIB_INITCAPS}(${ENTITY_DATE_TIME_ATTRIB_NAME}_);}}
+    ${${ACT_FK_REF_ATTRIBS=entity.set${FK_REF_ATTRIB_INITCAPS}(${FK_REF_ENTITY_LOWER}Repository.findOne(${FK_REF_ATTRIB_NAME}));}}
+
+    entity = repository.save(entity);
+
+    ${${ACT_FK_CHILD_ENTITIES=${FK_CHILD_ENTITY} ${FK_CHILD_ENTITY_INIT_SMALL} = null;}}
+    ${${ACT_FK_CHILD_EMBEDDED_ID=${FK_REF_ENTITY} ${FK_REF_ENTITY_INIT_SMALL} = null;}}
+
+    ${${ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS=
+					    if (${FK_CHILD_ENTITY_INIT_SMALL} != null) {
+					      out.println("${FK_CHILD_ENTITY_INIT_SMALL}PilotIds.length = " + ${FK_CHILD_ENTITY_INIT_SMALL}PilotIds.length);
+					      for (int i=0; i<${FK_CHILD_ENTITY_INIT_SMALL}PilotIds.length; i++) {
+					        if (${FK_CHILD_ENTITY_INIT_SMALL}PilotIds[i] != null && ${FK_CHILD_ENTITY_INIT_SMALL}PilotIds[i] != 0) {
+					          out.println("${FK_CHILD_ENTITY_INIT_SMALL}PilotIds["+i+"] = " + ${FK_CHILD_ENTITY_INIT_SMALL}PilotIds[i]);
+      ${FK_CHILD_EMBEDDED_PK_INIT_SMALL} = new ${FK_CHILD_EMBEDDED_PK}(entity.getFlightId(), ${FK_CHILD_ENTITY_INIT_SMALL}PilotIds[i]);
+					          out.println("flightCrewMemberPK = " + flightCrewMemberPK);
+					          ${FK_CHILD_ENTITY_INIT_SMALL} = new FlightCrewMember(flightCrewMemberPK); 
+					          out.println("${FK_CHILD_ENTITY_INIT_SMALL}.getPilotId() = " + ${FK_CHILD_ENTITY_INIT_SMALL}.getPilotId());
+					          try {
+					            ${FK_CHILD_ENTITY_INIT_SMALL}.setNotes(${FK_CHILD_ENTITY_INIT_SMALL}Notes[i]);
+					          } catch (ArrayIndexOutOfBoundsException e) {}
+					            ${FK_CHILD_ENTITY_INIT_SMALL} = ${FK_CHILD_ENTITY_INIT_SMALL}Repository.save(${FK_CHILD_ENTITY_INIT_SMALL});
+					            entity.getFlightCrewMemberCollection().add(${FK_CHILD_ENTITY_INIT_SMALL});
+					        }
+					      }
+					    }
+    }}				    
+ 
+    System.out.println("${MODEL_ENTITY}WebController.putEntity: id = " + entity.${GET_ENTITY_ATT_ID}());
+    //entity=null; // testing
+    String message = "${BUSINESS_ENTITY} saved.";
+    if (entity == null) message = "Sorry, ${BUSINESS_ENTITY} NOT saved.";
+    request.setAttribute(MSG, message);
+    request.setAttribute(ENTITY_ATT_ID, entity.${GET_ENTITY_ATT_ID}());
+    request.setAttribute(RedirectView.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.TEMPORARY_REDIRECT);
+    return "forward:"+ENTITY_URL+ENTITY_EDIT_URL;
+  }
+    
+  @PostMapping(value = ENTITY_DELETE_URL)
+  public String deleteEntity ( @RequestParam(name=ENTITY_ATT_ID, defaultValue="0") Integer ${ENTITY_ATT_ID}
+                             ) 
+  {
+    ${MODEL_ENTITY} entity = repository.findOne(${ENTITY_ATT_ID});
+    repository.delete(entity);
+    return "redirect:"+ENTITY_URL;
+  }
+
+}
+

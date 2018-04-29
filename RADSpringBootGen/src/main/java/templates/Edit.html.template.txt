@@ -1,0 +1,339 @@
+!! editTemplate.html.txt
+<!--
+ *  Generated from RADSpringBootGen
+ *  Copyright(c) 2018 by RADical Information Design Corporation
+ *  Template: editTemplate.html.txt
+-->
+ 
+<html layout:decorator="layout">
+  <div layout:fragment="content">
+
+    <form method="post" name="comment_form" id="comment_form" th:action="${formAction}" modelAttribute="{${MODEL_ENTITY_INIT_SMALL}$}" role="form">    
+      <table class="table table-striped" id="{${MODEL_ENTITY_INIT_SMALL}$}_edit">
+        <thead> 
+          <tr>
+        <i th:text="${message}"></i>
+        <th><h3>Edit {${MODEL_ENTITY}$}</h3></th>
+        <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <div class="form-group">
+          {${ACT_ALL_ATTRIBS={${HTML_FORM_VERTICAL_INPUT}$}
+          }$}
+        </div>
+        <input type="hidden" th:field="${{${MODEL_ENTITY_INIT_SMALL}$}.{${ENTITY_ATT_ID}$}}"/>
+        <button type="submit" id="submit" class="btn btn-primary">Save</button> 
+        <a class="btn btn-primary" th:href="@{'{list}'(list=${listPath})}">Cancel/Return</a>
+        <button data-btn="{${MODEL_ENTITY_INIT_SMALL}$}-refresh" th:attr="data-{${MODEL_ENTITY_INIT_SMALL}$}Id=${{${MODEL_ENTITY_INIT_SMALL}$}.{${MODEL_ENTITY_INIT_SMALL}$}Id}" type="SUBMIT" class="btn btn-primary" NAME="frmRefresh" VALUE="Refresh (Discard Changes)">Discard Changes/Refresh</button>
+        </tbody>
+      </table>
+      
+<HR />
+      {${ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS=<table class="table table-hover">
+!!      {${ACT_ALL_FK_CHILD_ENTITIES=<table class="table table-hover">
+        <thead>
+          <tr>
+            <td colspan="5"><h4>{${FK_CHILD_ENTITY_LABEL}$}s</h4></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td class="spacer">_</td>
+            {${ACT_UI_ATTRIBS=<th><h5>{${ENTITY_ATTRIB_LABEL}$}</h5></th>
+            }$}</tr>
+        </thead>
+        <tbody>
+          <tr data-th-each="{${FK_CHILD_ENTITY_INIT_SMALL}$} : ${{${MODEL_ENTITY_INIT_SMALL}$}.{${FK_CHILD_ENTITY_INIT_SMALL}$}Collection}">
+            {${ACT_OTHER_REF_ENTITIES= 
+            <td>
+              <button data-btn="{${FK_REF_ENTITY_ID}$}-edit" th:attr="data-{${FK_REF_ENTITY_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}" 
+!!              <button data-btn="{${FK_REF_ENTITY_QUALIFIED}$}-edit" th:attr="data-{${FK_REF_ENTITY_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}" 
+!!              <button data-btn="{${FK_REF_ENTITY_INIT_SMALL}$}-edit" th:attr="data-{${FK_REF_ENTITY_ID}$}=${{${FK_CHILD_TO_REF_ENTITY_VAR_EXPR}$}}" 
+!!              <button data-btn="pilotId-edit" th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}"
+                      type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit {${FK_REF_ENTITY}$}">
+                <span class="fa-stack">
+                  <i class="glyphicon glyphicon-edit"></i>
+                </span>
+              </button>
+            </td>
+            <td>
+              <button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete" 
+!!                      th:attr="data-{${FK_REF_ENTITY_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}, data-{${MODEL_ENTITY_INIT_SMALL}$}Id=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}" 
+!!                      th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}, data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}"
+                      th:attr="{${GET_TH_HTML_FORM_DATA_VARS}$}" 
+                      type="SUBMIT" 
+                      class="frmDelete" 
+                      NAME="frmDelete" 
+                      VALUE="Delete {${FK_CHILD_ENTITY_LABEL}$}">
+                <span class="fa-stack">
+                  <i class="glyphicon glyphicon-trash"></i>
+                </span>
+              </button>
+            </td>
+            }$}
+            <td></td>
+            <td class="{${FK_REF_ENTITY_INIT_SMALL}$}" data-th-text="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_FK_REF_ENTITY_INIT_SMALL}$}}"></td>
+              <input type="hidden" id="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ENTITY_ID_INIT_CAP}$}" name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ENTITY_ID_INIT_CAP}$}" th:value="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}}==null?null:${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}"/>                            
+              {${ACT_ALL_ATTRIBS={${HTML_FORM_HORIZONTAL_INPUT}$}}$}
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td class="spacer">_</td>
+        </tr>
+        <tr>
+          <td colspan="5"><h4>Add a {${FK_CHILD_ENTITY_LABEL}$}</h4></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td class="spacer">_</td>
+            {${ACT_UI_ATTRIBS=<th><h5>{${ENTITY_ATTRIB_LABEL}$}</h5></th>
+            }$}</tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>
+            <select name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ENTITY_ID_INIT_CAP}$}">
+              <option value="0">[Please select...]</option>
+              <option th:each="{${FK_REF_ENTITY_INIT_SMALL}$} : ${{${FK_REF_ENTITY_INIT_SMALL}$}s}" 
+                      th:value="${{${FK_REF_ENTITY_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}" 
+                      th:text="${{${FK_REF_ENTITY_INIT_SMALL}$}}">NULL</option>
+            </select>                  
+          </td>
+              {${ACT_ALL_ATTRIBS={${HTML_FORM_HORIZONTAL_INPUT_BLANK}$}}$}
+        </tr>
+
+        </tbody>
+      </table>
+      }$} 
+!! END ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS !!
+
+!!      {${ACT_ALL_FK_CHILD_ENTITIES=<table class="table table-hover">
+      {${ACT_FK_CHILD_ENTITIES=<table class="table table-hover">
+        <thead>
+          <tr>
+            <td colspan="5"><h4>{${FK_CHILD_ENTITY_LABEL}$}s</h4></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td class="spacer">_</td>
+            {${ACT_UI_ATTRIBS=<th><h5>{${ENTITY_ATTRIB_LABEL}$}</h5></th>
+            }$}</tr>
+        </thead>
+        <tbody>
+!!          <tr data-th-each="{${FK_CHILD_ENTITY_INIT_SMALL}$} : ${{${MODEL_ENTITY_INIT_SMALL}$}.{${FK_CHILD_ENTITY_INIT_SMALL}$}Collection}">
+          <tr data-th-each="{${FK_CHILD_ENTITY_INIT_SMALL}$} : ${{${MODEL_ENTITY_INIT_SMALL}$}.{${FK_CHILD_ENTITY_IDENTIFIER}$}}">
+            <td>
+!!              <button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}-edit" th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}" 
+!!              <button data-btn="{${FK_CHILD_ENTITY_QUALIFIED}$}-edit" th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}" 
+              <button data-btn="{${PK_ID_FIELD}$}-edit" th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}" 
+                      type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit {${FK_CHILD_ENTITY}$}">
+                <span class="fa-stack">
+                  <i class="glyphicon glyphicon-edit"></i>
+                </span>
+              </button>
+            </td>
+            <td>
+              <button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete" 
+                      th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}, data-{${ENTITY_ATT_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${ENTITY_ATT_ID}$}.{${ENTITY_ATT_ID}$}}" 
+!!                      th:attr="{${GET_TH_HTML_FORM_DATA_VARS}$}" 
+                      type="SUBMIT" 
+                      class="frmDelete" 
+                      NAME="frmDelete" 
+                      VALUE="Delete {${FK_CHILD_ENTITY_LABEL}$}">
+                <span class="fa-stack">
+                  <i class="glyphicon glyphicon-trash"></i>
+                </span>
+              </button>
+            </td>
+!!            }$}
+            <td></td>
+!!            <td class="{${FK_CHILD_ENTITY_INIT_SMALL}$}" data-th-text="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}"></td>
+              <input type="hidden" id="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" th:value="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}"/>                            
+              {${ACT_ALL_ATTRIBS={${HTML_FORM_HORIZONTAL_INPUT}$}}$}
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td class="spacer">_</td>
+        </tr>
+        <tr>
+          <td colspan="5"><h4>Add a {${FK_CHILD_ENTITY_LABEL}$}</h4></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td class="spacer">_</td>
+            {${ACT_UI_ATTRIBS=<th><h5>{${ENTITY_ATTRIB_LABEL}$}</h5></th>
+            }$}</tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+            <input type="hidden" id="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" value=""/>                            
+            {${ACT_ALL_ATTRIBS={${HTML_FORM_HORIZONTAL_INPUT_BLANK}$}}$}
+        </tr>
+
+        </tbody>
+      </table>
+      }$}
+      <hr />
+      <hr />
+      <button type="submit" id="submit" class="btn btn-primary">Save</button>
+      <a class="btn btn-primary" th:href="@{'{list}'(list=${listPath})}">Cancel/Return</a>
+      <button data-btn="{${MODEL_ENTITY_INIT_SMALL}$}-refresh" th:attr="data-{${MODEL_ENTITY_INIT_SMALL}$}Id=${{${MODEL_ENTITY_INIT_SMALL}$}.{${MODEL_ENTITY_INIT_SMALL}$}Id}" type="SUBMIT" class="btn btn-primary" NAME="frmRefresh" VALUE="Refresh (Discard Changes)">Discard Changes/Refresh</button>
+    </form>
+    
+    {${ACT_FK_CHILD_ENTITIES_FORCE_INCLUDE=<hr/>
+    <table>
+      <thead>
+        <tr>
+          <th><h4>{${ENTITY_ATTRIB_LABEL}$}</h4></th>
+          <th></th>
+        </tr>
+      </thead>
+!!      <tr data-th-each="flight: ${airport.flightDepartureCollection}">
+      <tr data-th-each="{${FK_CHILD_ENTITY_INIT_SMALL}$}: ${{${MODEL_ENTITY_INIT_SMALL}$}.{${FK_CHILD_ENTITY_IDENTIFIER}$}}">
+        <td class="shortName" data-th-text="${{${FK_CHILD_ENTITY_INIT_SMALL}$}}"></td>
+        <td>
+          <form method="post" name="list_form" id="list_form" action="/{${FK_CHILD_ENTITY}$}/Edit" role="form">
+         <input type="HIDDEN" class="EntityID" NAME="{${PK_ID_FIELD}$}" th:VALUE="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}" />
+         <button type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit">
+                   <span class="fa-stack">
+                      <i class="glyphicon glyphicon-edit"></i>
+                   </span>
+            </button>
+          </form>                    
+        </td>
+     </tr>
+    </table>
+    }$}    
+    
+    <script>
+      $(document).ready(function(){
+      
+        $("button[data-btn='{${MODEL_ENTITY_INIT_SMALL}$}-refresh']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='{${ENTITY_ATT_ID}$}';
+            input.value=$(this).attr('data-{${ENTITY_ATT_ID}$}');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/{${MODEL_ENTITY}$}/Edit';
+            form.submit();
+          });
+          
+        {${ACT_FK_REF_ATTRIBS=$("button[data-btn='{${FK_REF_ATTRIB_NAME}$}-edit']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='{${FK_REF_ENTITY_ID}$}';
+            input.value=$(this).attr('data-{${FK_REF_ATTRIB_NAME}$}');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/{${FK_REF_ENTITY}$}/Edit';
+            form.submit();
+          });
+          }$}
+
+        {${ACT_THIRD_ENTITIES_ONLY=$("button[data-btn='{${PK_ID_FIELD}$}-edit']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='{${PK_ID_FIELD}$}';
+            input.value=$(this).attr('data-{${PK_ID_FIELD}$}');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/{${FK_CHILD_ENTITY}$}/Edit';
+            form.submit();
+          });
+        }$}  
+        {${ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS=$("button[data-btn='{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete']").on('click', function(e){
+          e.preventDefault();
+          var formDelete=document.createElement('form');
+          document.body.appendChild(formDelete);
+          
+          {${ACT_PK_ATTRIBS=var {${ENTITY_ATTRIB_NAME}$}=document.createElement('{${ENTITY_ATTRIB_NAME}$}');
+          {${ENTITY_ATTRIB_NAME}$}.type='hidden';
+          {${ENTITY_ATTRIB_NAME}$}.name='{${ENTITY_ATTRIB_NAME}$}';
+          {${ENTITY_ATTRIB_NAME}$}.value=$(this).attr('data-{${ENTITY_ATTRIB_NAME}$}');
+
+!!          var input2=document.createElement('input');
+!!          input2.type='hidden';
+!!          input2.name='aircraftTypeId';
+!!          input2.value=$(this).attr('data-aircraftTypeId');
+          formDelete.appendChild({${ENTITY_ATTRIB_NAME}$});
+!!          formDelete.appendChild(input2);
+          }$}
+          
+          formDelete.method='post';
+          formDelete.action='/{${MODEL_ENTITY}$}/Delete{${FK_CHILD_ENTITY}$}';
+!!          formDelete.action='/AircraftType/DeletePilotCertification';
+          formDelete.submit();
+        });
+          }$}{${ACT_FK_CHILD_ENTITIES=$("button[data-btn='{${PK_ID_FIELD}$}-edit']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='{${PK_ID_FIELD}$}';
+            input.value=$(this).attr('data-{${PK_ID_FIELD}$}');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/{${FK_CHILD_ENTITY}$}/Edit';
+            form.submit();
+          });
+          }$}{${ACT_FK_CHILD_ENTITIES=$("button[data-btn='{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete']").on('click', function(e){
+            e.preventDefault();
+            var formDelete=document.createElement('form');
+            document.body.appendChild(formDelete);
+            var aircraftId=document.createElement('input');
+            {${PK_ID_FIELD}$}.type='hidden';
+            {${PK_ID_FIELD}$}.name='{${PK_ID_FIELD}$}';
+            {${PK_ID_FIELD}$}.value=$(this).attr('data-{${PK_ID_FIELD}$}');
+            formDelete.appendChild({${PK_ID_FIELD}$});
+            var {${ENTITY_ATT_ID}$}=document.createElement('input');
+            {${ENTITY_ATT_ID}$}.type='hidden';
+            {${ENTITY_ATT_ID}$}.name='{${ENTITY_ATT_ID}$}';
+            {${ENTITY_ATT_ID}$}.value=$(this).attr('data-{${ENTITY_ATT_ID}$}');
+            formDelete.appendChild({${ENTITY_ATT_ID}$});
+            formDelete.method='post';
+            formDelete.action='/{${MODEL_ENTITY}$}/Delete{${FK_CHILD_ENTITY}$}';
+            formDelete.submit();
+          });
+        }$}
+          
+
+<!--          var spacers = document.getElementsByClassName('spacer');
+          var numSpacers = spacers.length;
+          console.log('numSpacers: ', numSpacers);
+          console.log('typeof numSpacers: ', typeof numSpacers);
+          console.log('spacers: ', spacers);
+          for (var i=0; i<numSpacers; i++){
+          	console.log('spacers[i] = ', spacers[i]);
+            	spacers[i].style.visibility = "hidden";
+            }
+-->
+});
+    
+    
+    </script>
+
+    <script src='/js/{${MODEL_ENTITY_LOWER}$}.js'></script>
+
+  </div>
+
+</html>
+

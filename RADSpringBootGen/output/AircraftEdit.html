@@ -1,0 +1,158 @@
+<!--
+ *  Generated from GenSpringBootComponents(TM)
+ *  Copyright(c) 2018 by RADical Information Design Corporation
+ *  Template: editTemplate.html.txt
+-->
+ 
+<html layout:decorator="layout">
+  <div layout:fragment="content">
+
+    <form method="post" name="comment_form" id="comment_form" th:action="${formAction}" modelAttribute="aircraft" role="form">    
+      <table class="table table-striped" id="aircraft_edit">
+        <thead> 
+          <tr>
+        <i th:text="${message}"></i>
+        <th><h3>Edit Aircraft</h3></th>
+        <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <div class="form-group">
+                    <tr>
+            <td><label for="shortName">Short Name</label></td>
+            <td><input type="text" id="shortName" size="20" name="shortName" th:value="${aircraft.shortName}"/></td>
+          </tr>
+
+                    <tr>
+            <td><label for="longName">Long Name</label></td>
+            <td><input type="text" id="longName" size="20" name="longName" th:value="${aircraft.longName}"/></td>
+          </tr>
+
+                    <tr>
+            <td><label for="description">Description</label></td>
+            <td><input type="text" id="description" size="20" name="description" th:value="${aircraft.description}"/></td>
+          </tr>
+
+                    <tr>
+            <td><label for="notes">Notes</label></td>
+            <td><input type="text" id="notes" size="20" name="notes" th:value="${aircraft.notes}"/></td>
+          </tr>
+
+                    <tr>
+            <td><label for="aircraftTypeId">Aircraft Type</label></td>
+            <td>
+            <select th:field="*{aircraft.aircraftTypeId}">
+            <option value="0">[Please select...]</option>
+            <option th:each="aircraftType : ${aircraftTypes}" 
+                    th:value="${aircraftType.aircraftTypeId}" 
+                    th:text="${aircraftType}">null</option>
+            </select>
+                        <button data-btn="aircraftTypeId-edit" th:attr="data-aircraftTypeId=${aircraft.aircraftTypeId}==null?0:${aircraft.aircraftTypeId.aircraftTypeId}" type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit AircraftType">
+                        <span class="fa-stack">
+                            <i class="glyphicon glyphicon-edit"></i>
+                        </span>
+                        </button>
+            </td>
+          </tr>
+
+          
+        </div>
+        <input type="hidden" th:field="${aircraft.aircraftId}"/>
+        <button type="submit" id="submit" class="btn btn-primary">Save</button> 
+        <a class="btn btn-primary" th:href="@{'{list}'(list=${listPath})}">Cancel/Return</a>
+        <button data-btn="aircraft-refresh" th:attr="data-aircraftId=${aircraft.aircraftId}" type="SUBMIT" class="btn btn-primary" NAME="frmRefresh" VALUE="Refresh (Discard Changes)">Discard Changes/Refresh</button>
+        </tbody>
+      </table>
+      
+<HR />
+       
+
+      
+      <hr />
+      <hr />
+      <button type="submit" id="submit" class="btn btn-primary">Save</button>
+      <a class="btn btn-primary" th:href="@{'{list}'(list=${listPath})}">Cancel/Return</a>
+      <button data-btn="aircraft-refresh" th:attr="data-aircraftId=${aircraft.aircraftId}" type="SUBMIT" class="btn btn-primary" NAME="frmRefresh" VALUE="Refresh (Discard Changes)">Discard Changes/Refresh</button>
+    </form>
+    
+    <hr/>
+    <table>
+      <thead>
+        <tr>
+          <th><h4>Flights scheduled for this Aircraft</h4></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tr data-th-each="flight: ${aircraft.flightCollection}">
+        <td class="shortName" data-th-text="${flight}"></td>
+        <td>
+          <form method="post" name="list_form" id="list_form" action="/Flight/Edit" role="form">
+         <input type="HIDDEN" class="EntityID" NAME="flightId" th:VALUE="${flight.flightId}" />
+         <button type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit">
+                   <span class="fa-stack">
+                      <i class="glyphicon glyphicon-edit"></i>
+                   </span>
+            </button>
+          </form>                    
+        </td>
+     </tr>
+    </table>
+        
+    
+    <script>
+      $(document).ready(function(){
+      
+        $("button[data-btn='aircraft-refresh']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='aircraftId';
+            input.value=$(this).attr('data-aircraftId');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/Aircraft/Edit';
+            form.submit();
+          });
+          
+        $("button[data-btn='aircraftTypeId-edit']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='aircraftTypeId';
+            input.value=$(this).attr('data-aircraftTypeId');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/AircraftType/Edit';
+            form.submit();
+          });
+          
+
+          
+        
+          
+
+<!--          var spacers = document.getElementsByClassName('spacer');
+          var numSpacers = spacers.length;
+          console.log('numSpacers: ', numSpacers);
+          console.log('typeof numSpacers: ', typeof numSpacers);
+          console.log('spacers: ', spacers);
+          for (var i=0; i<numSpacers; i++){
+          	console.log('spacers[i] = ', spacers[i]);
+            	spacers[i].style.visibility = "hidden";
+            }
+-->
+});
+    
+    
+    </script>
+
+    <script src='/js/aircraft.js'></script>
+
+  </div>
+
+</html>
+
