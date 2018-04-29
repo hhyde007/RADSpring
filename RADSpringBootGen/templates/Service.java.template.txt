@@ -1,5 +1,5 @@
 /*
- *  Generated from GenSpringBootComponents(TM)
+ *  Generated from GenSpringBootGen
  *  Copyright(c) 2018 by RADical Information Design Corporation
  *  Template: ServiceTemplate.java.txt
 */ 
