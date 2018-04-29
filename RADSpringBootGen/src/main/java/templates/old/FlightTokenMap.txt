@@ -1,0 +1,78 @@
+packageName=com.radinfodesign.fboace.controller
+reposistoryImport=com.radinfodesign.fboace.dao.FlightRepository
+modelEntityImport=com.radinfodesign.fboace.model.Flight
+
+otherRepositoryImport_Airport=import com.radinfodesign.fboace.dao.AirportRepository;
+otherRepositoryImport_Aircraft=import com.radinfodesign.fboace.dao.AircraftRepository;
+otherRepositoryImport_Pilot=import com.radinfodesign.fboace.dao.PilotRepository;
+otherModelEntityImport_Airport=import com.radinfodesign.fboace.model.Airport;
+otherModelEntityImport_Aircraft=import com.radinfodesign.fboace.model.Aircraft;
+otherModelEntityImport_Pilot=import com.radinfodesign.fboace.model.Pilot;
+
+webControllerClass=FlightWebController
+
+ENTITY_URL=/Flight
+MODEL_ENTITY=Flight
+BUSINESS_ENTITY=Flight
+INSTANCE=flight
+INSTANCES=instances
+ALL_ENTITY_URL=""
+ENTITY_GET_ONE_URL=""
+ENTITY_EDIT_PAGE=flight/edit
+
+ENTITY_ATT_ID=flightId
+GET_ENTITY_ATT_ID=getFlightId
+ENTITY_ATTRIB_SHORT_NAME=public static final String ENTITY_ATTRIB_SHORT_NAME="shortName";
+ENTITY_ATTRIB_LONG_NAME=public static final String ENTITY_ATTRIB_LONG_NAME="longName";
+ENTITY_ATTRIB_AIRCRAFT_ID=public static final String ENTITY_ATTRIB_AIRCRAFT_ID="aircraftId";
+ENTITY_ATTRIB_AIRPORT_ID_DEPART=public static final String ENTITY_ATTRIB_AIRPORT_ID_DEPART="airportIdDeparture";
+ENTITY_ATTRIB_AIRPORT_ID_DEST=public static final String ENTITY_ATTRIB_AIRPORT_ID_DEST="airportIdDestination";
+ENTITY_ATTRIB_DEPART_DATE_TIME=public static final String ENTITY_ATTRIB_DEPART_DATE_TIME="departureDateTime";
+ENTITY_ATTRIB_ARRIVAL_DATE_TIME=public static final String ENTITY_ATTRIB_ARRIVAL_DATE_TIME="arrivalDateTime";
+ENTITY_ATTRIB_PILOT_ID=public static final String ENTITY_ATTRIB_PILOT_ID="pilotId";
+ENTITY_ATTRIB_NOTES=public static final String ENTITY_ATTRIB_NOTES="notes";
+ENTITY_ATTRIB_PILOTS=public static final String ENTITY_ATTRIB_PILOTS="pilots";
+ENTITY_ATTRIB_AIRPORTS=public static final String ENTITY_ATTRIB_AIRPORTS="airports";
+ENTITY_ATTRIB_AIRCRAFTS=public static final String ENTITY_ATTRIB_AIRCRAFTS="aircrafts";
+
+EntityRepository=FlightRepository
+OtherEntityRepository_Airport=@Autowired\n  AirportRepository airportRepository;
+OtherEntityRepository_Aircraft=@Autowired\n  AircraftRepository aircraftRepository;
+OtherEntityRepository_Pilot=@Autowired\n  PilotRepository pilotRepository;
+
+MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB_
+MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB_PILOTS=model.addAttribute(ENTITY_ATTRIB_PILOTS, pilotRepository.findAll());
+MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB_AIRCRAFT=model.addAttribute(ENTITY_ATTRIB_AIRCRAFTS, aircraftRepository.findAll());
+MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB_AIRPORTS=model.addAttribute(ENTITY_ATTRIB_AIRPORTS, airportRepository.findAll());
+
+
+REQUEST_PARAM_ENTITY_ATTRIB_SHORT_NAME=, @RequestParam(ENTITY_ATTRIB_SHORT_NAME) String shortName
+REQUEST_PARAM_ENTITY_ATTRIB_LONG_NAME=, @RequestParam(ENTITY_ATTRIB_LONG_NAME) String longName
+REQUEST_PARAM_ENTITY_ATTRIB_AIRCRAFT_ID=, @RequestParam(ENTITY_ATTRIB_AIRCRAFT_ID) Integer aircraftId
+REQUEST_PARAM_ENTITY_ATTRIB_AIRPORT_ID_DEPART=, @RequestParam(ENTITY_ATTRIB_AIRPORT_ID_DEPART) Integer airportIdDeparture
+REQUEST_PARAM_ENTITY_ATTRIB_AIRPORT_ID_DEST=, @RequestParam(ENTITY_ATTRIB_AIRPORT_ID_DEST) Integer airportIdDestination
+REQUEST_PARAM_ENTITY_ATTRIB_DEPART_DATE_TIME=, @RequestParam(ENTITY_ATTRIB_DEPART_DATE_TIME) String departureDateTime
+REQUEST_PARAM_ENTITY_ATTRIB_ARRIVAL_DATE_TIME=, @RequestParam(ENTITY_ATTRIB_ARRIVAL_DATE_TIME) String arrivalDateTime
+REQUEST_PARAM_ENTITY_ATTRIB_PILOT_ID=, @RequestParam(ENTITY_ATTRIB_PILOT_ID) Integer pilotId
+REQUEST_PARAM_ENTITY_ATTRIB_NOTES=, @RequestParam(ENTITY_ATTRIB_NOTES) String notes
+
+PARSE_DATE_ATTRIB_DEPART_DATE_TIME=LocalDateTime departureDtTm = LocalDateTime.parse(departureDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+PARSE_DATE_ATTRIB_ARRIVAL_DATE_TIME=LocalDateTime arrivalDtTm = LocalDateTime.parse(arrivalDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+ENTITY_SET_SIMPLE_ATTRIB_SHORT_NAME=entity.setShortName(shortName);
+ENTITY_SET_SIMPLE_ATTRIB_LONG_NAME=entity.setLongName(longName);
+ENTITY_SET_SIMPLE_ATTRIB_DEPART_DATE_TIME=entity.setDepartureDateTime(departureDtTm);
+ENTITY_SET_SIMPLE_ATTRIB_ARRIVAL_DATE_TIME=entity.setArrivalDateTime(arrivalDtTm);
+ENTITY_SET_SIMPLE_ATTRIB_NOTES=entity.setNotes(notes);
+
+ENTITY_SET_FK_REF_ATTRIB_PILOT_ID=entity.setPilotId(pilotRepository.findOne(pilotId));
+ENTITY_SET_FK_REF_ATTRIB_AIRCRAFT_ID=entity.setAircraftId(aircraftRepository.findOne(aircraftId));
+ENTITY_SET_FK_REF_ATTRIB_AIRPORT_ID_DEPART=entity.setAirportIdDeparture(airportRepository.findOne(airportIdDeparture));
+ENTITY_SET_FK_REF_ATTRIB_AIRPORT_ID_DEST=entity.setAirportIdDestination(airportRepository.findOne(airportIdDestination));
+
+
+
+
+
+
+

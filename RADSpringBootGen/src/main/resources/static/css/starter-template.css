@@ -1,0 +1,12 @@
+@charset "ISO-8859-1";
+
+body {
+    padding-top: 50px;
+}
+.starter-template {
+    padding: 40px 15px;
+    text-align: center;
+}
+td {
+	width: 100px;
+}
