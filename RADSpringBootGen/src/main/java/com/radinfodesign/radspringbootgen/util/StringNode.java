@@ -19,11 +19,31 @@ import static java.lang.System.out;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a node in a hierarchical tree (input template or generated output code) of strings. 
+ * May have zero or one parent nodes and zero or any number of child nodes.
+ * If used in an @InputStringTree, will be read in from template file, which contains a mix
+ * of verbatim code and token-identified expressions. These may result in simple substitution
+ * of one generated value apiece, or multiple value based on some form of iteration,
+ * as with all of the columns within a database table. 
+ */
 public class StringNode  {
+  /**
+   * Sequence of characters that indicate the opening of a variable or macro-substitution token
+   */
   public static final String TOKEN_OPEN = "{${";
+
+  /**
+   * Sequence of characters that indicate the closing of a variable or macro-substitution token
+   */
   public static final String TOKEN_CLOSE = "}$}";
-  public static final int TOKEN_OPEN_LENGTH = TOKEN_OPEN.length();
-  public static final int TOKEN_CLOSE_LENGTH = TOKEN_CLOSE.length();
+  
+  protected static final int TOKEN_OPEN_LENGTH = TOKEN_OPEN.length();
+  protected static final int TOKEN_CLOSE_LENGTH = TOKEN_CLOSE.length();
+  
+  /**
+   * Character used to separate the token from its content/value
+   */
   public static final String STRING_TOKEN_SEPARATOR = "=";
 
   protected String nodeValue = null;
@@ -33,6 +53,11 @@ public class StringNode  {
   protected List<StringNode> children = new ArrayList<>();
   protected int childCount = 0;
   
+  /**
+   * Assigns @param nodeValue to member variable; If the node value is a single- or 
+   * multi-valued expression, then tokenKey or tokenInstruction get assigned values
+   * parsed from the nodeValue.
+   */
   public StringNode (String nodeValue) {
     this.nodeValue=nodeValue;
     if (this.isSingleTokenExpression()) {
@@ -65,20 +90,6 @@ public class StringNode  {
                  ==(this.getValue().length()-TOKEN_CLOSE_LENGTH)));
         
   }
-//  public boolean isSingleTokenExpressionX () {
-//    int indexOfTokenOpen = this.getValue().indexOf(TOKEN_OPEN);
-//    int indexOfTokenClose = this.getValue().indexOf(TOKEN_CLOSE);
-//    int indexOfSeconTokenOpen = this.getValue().indexOf(TOKEN_OPEN, indexOfTokenClose+1);
-//    if ((indexOfTokenOpen >=0) && (indexOfTokenClose > indexOfTokenOpen) && (indexOfSeconTokenOpen < 0)) {
-//      out.println("isSingleTokenExpressionX returning true: " + this.getValue());
-//      return true;
-//    }
-//    else
-//    {
-//      return false;
-//    }
-//  }
-
   public boolean isMultiTokenExpression () {
     int tokenOpenIndex = this.getValue().indexOf(TOKEN_OPEN);
     if (tokenOpenIndex!=0) return false;

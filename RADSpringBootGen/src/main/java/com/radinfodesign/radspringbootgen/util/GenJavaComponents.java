@@ -30,18 +30,14 @@ import org.springframework.stereotype.Component;
 import com.radinfodesign.radspringbootgen.dao.DbUserTableColumnRepository;
 
 
-/** 
- * 
- * @author Tarzan
- */
 @Component
 public class GenJavaComponents {
   // DEPRECATED CONSTANTS
-  public static final String DOUBLE_TOKEN_OPEN = "${${";
-  public static final String NESTED_DOUBLE_TOKEN_OPEN = "$[$[";
-  public static final String NESTED_DOUBLE_TOKEN_CLOSE = "$]$]";
-  public static final String TRIPLE_TOKEN_CLOSE = "}}}";
-  public static final String QUAD_TOKEN_CLOSE = "}}}}";
+//  public static final String DOUBLE_TOKEN_OPEN = "${${";
+//  public static final String NESTED_DOUBLE_TOKEN_OPEN = "$[$[";
+//  public static final String NESTED_DOUBLE_TOKEN_CLOSE = "$]$]";
+//  public static final String TRIPLE_TOKEN_CLOSE = "}}}";
+//  public static final String QUAD_TOKEN_CLOSE = "}}}}";
   
   // END DEPRECATED CONSTANTS
 
@@ -380,9 +376,9 @@ public class GenJavaComponents {
   /**
    * @param args the command line arguments
    */
-  public static void main(String[] args) throws IOException {
-    out.println ("GenJavaComponents.main(" + args + ")");
-  }
+//  public static void main(String[] args) throws IOException {
+//    out.println ("GenJavaComponents.main(" + args + ")");
+//  }
 
 }
 
