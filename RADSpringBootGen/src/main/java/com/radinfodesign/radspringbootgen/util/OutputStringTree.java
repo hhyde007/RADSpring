@@ -29,6 +29,11 @@ import java.util.TreeMap;
 
 import com.radinfodesign.radspringbootgen.util.MetaInfo.FieldMetaInfo;
 
+/**
+ * Input tree of input template txt file transformed by relational metadata
+ * implicit in model entity class definitions and annotations plus some metadata
+ * read from database into resulting output tree, to be written to output files. 
+ */
 public class OutputStringTree extends IOStringTree {
   // Constants named "ACT_*" indicate instruction to ACT upon various elements of table/MetaInfo or column/attribute/FieldMetaInfo
   public static final String ACT_ALL_ATTRIBS = "ACT_ALL_ATTRIBS"; // Flag indicating logic applying to all (non-collection) attributes of the entity

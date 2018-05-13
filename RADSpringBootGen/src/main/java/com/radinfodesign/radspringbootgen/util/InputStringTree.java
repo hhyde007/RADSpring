@@ -22,6 +22,9 @@ import java.util.TreeMap;
 
 import com.radinfodesign.radspringbootgen.util.MetaInfo.FieldMetaInfo;
 
+/**
+ * Parse tree of input template txt file. 
+ */
 public class InputStringTree extends IOStringTree {
   
   protected final String TOKEN_DRIVING_ENTITY_NAME = "drivingEntityName"; 
