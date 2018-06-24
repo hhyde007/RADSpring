@@ -24,21 +24,34 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.radinfodesign.radspringbootgen.dao.DbUserTableColumnRepository;
-import com.radinfodesign.radspringbootgen.util.GenJavaComponents;
+import com.radinfodesign.radspringbootgen.util.GenJavaService;
 
+/**
+ * Web controller for code generation.
+ * @author Howard Hyde
+ *
+ */
 @Controller
 @RequestMapping("/Generate")
 public class GenDBJavaController {
 
   @Autowired
-  DbUserTableColumnRepository dbUserTableColumnRepository;
-  
+  protected GenJavaService genJavaService;
+    
   @GetMapping(value="/home")
   public String home () {
     return "app/index";
   }
 
+  /**
+   * Calls GenJavaComponents.launch() with instructions received from web user
+   * @param entityList: List of data model entities for which to generate code.
+   * @param basePackage: Name of base application package under which all sub-packages and generated classes shall reside
+   * @param outputDir: Output file directory, typically "output" under the root of the RADSpringBootGen app.
+   * @param components: List (array) of components to generate for each of the entities: Service interface, Service implementation class, 
+   * (web) Controller class, and/or Edit.html.
+   * @return Name of landing html file.
+   */
   @PostMapping(value="/Go")
   public String launchGen ( @RequestParam(name="entityList") String entityList
                           , @RequestParam(name="basePackage") String basePackage
@@ -48,17 +61,11 @@ public class GenDBJavaController {
 //                          , HttpServletRequest request
                           )
                       {
-    
-    
-    
-    out.println("GenDBJavaController.launchGen: dbUserTableColumnRepository = " + dbUserTableColumnRepository);
-//    GenJavaComponents.launch(dbUserTableColumnRepository);
-    GenJavaComponents.launch( dbUserTableColumnRepository
-                            , entityList
-                            , basePackage
-                            , outputDir
-                            , components
-                            );
+    genJavaService.launch( entityList
+                         , basePackage
+                         , outputDir
+                         , components
+                         );
     return "app/index"; // SHOULD HAVE A BETTER LANDING SCREEN.
   }
 

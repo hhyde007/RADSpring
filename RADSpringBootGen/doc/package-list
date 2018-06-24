@@ -1,1 +1,12 @@
+com.radinfodesign
+com.radinfodesign.config
+com.radinfodesign.fboace
+com.radinfodesign.fboace.controller
+com.radinfodesign.fboace.dao
+com.radinfodesign.fboace.model
+com.radinfodesign.fboace.service
+com.radinfodesign.metamodel
+com.radinfodesign.radspringbootgen.controller
+com.radinfodesign.radspringbootgen.dao
+com.radinfodesign.radspringbootgen.model
 com.radinfodesign.radspringbootgen.util

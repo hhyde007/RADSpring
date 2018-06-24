@@ -27,15 +27,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.radinfodesign.radspringbootgen.util.MetaInfo.FieldMetaInfo;
+import com.radinfodesign.radspringbootgen.util.EntityMeta.FieldMeta;
 
 /**
  * Input tree of input template txt file transformed by relational metadata
  * implicit in model entity class definitions and annotations plus some metadata
  * read from database into resulting output tree, to be written to output files. 
  */
+//@Component
 public class OutputStringTree extends IOStringTree {
-  // Constants named "ACT_*" indicate instruction to ACT upon various elements of table/MetaInfo or column/attribute/FieldMetaInfo
+//  public class OutputStringTreeImpl extends IOStringTree implements OutputStringTree {
+  // Constants named "ACT_*" indicate instruction to ACT upon various elements of table/EntityMeta or column/attribute/FieldMeta
   public static final String ACT_ALL_ATTRIBS = "ACT_ALL_ATTRIBS"; // Flag indicating logic applying to all (non-collection) attributes of the entity
   public static final String ACT_UI_ATTRIBS = "ACT_UI_ATTRIBS"; // 
   public static final String ACT_SIMPLE_ATTRIBS = "ACT_SIMPLE_ATTRIBS"; // Flag indicating logic applying only to simple attributes (non-temporal primitives and wrapper types) 
@@ -50,8 +52,8 @@ public class OutputStringTree extends IOStringTree {
   
   public static final String ACT_FK_CHILD_ENTITIES = "ACT_FK_CHILD_ENTITIES"; // Flag indicating logic applying only to child entities. 
   public static final String ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS = "ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS"; // Flag indicating logic applying only to child entities have compound primary keys, one component being inherited from the Driving Entity 
-  public static final String ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS_FORCE_INCLUDE = "ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS_FORCE_INCLUDE"; // Include this node even if FieldMetaInfo.isExcludedEditFromParentModule()  
-  public static final String ACT_FK_CHILD_ENTITIES_FORCE_INCLUDE = "ACT_FK_CHILD_ENTITIES_FORCE_INCLUDE"; // Include this node even if FieldMetaInfo.isExcludedEditFromParentModule()  
+  public static final String ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS_FORCE_INCLUDE = "ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS_FORCE_INCLUDE"; // Include this node even if FieldMeta.isExcludedEditFromParentModule()  
+  public static final String ACT_FK_CHILD_ENTITIES_FORCE_INCLUDE = "ACT_FK_CHILD_ENTITIES_FORCE_INCLUDE"; // Include this node even if FieldMeta.isExcludedEditFromParentModule()  
   public static final String ACT_FK_CHILD_AND_THIRD_ENTITIES = "ACT_FK_CHILD_AND_THIRD_ENTITIES"; // Flag indicating logic applying only to child entities and entities referenced by child entities, excluding the driving entity. 
   public static final String ACT_FK_CHILD_W_COMPOUND_KEYS_AND_THIRD_ENTITIES = "ACT_FK_CHILD_W_COMPOUND_KEYS_AND_THIRD_ENTITIES"; // Logic applying only to child entities with compound primary keys, plus any third entities referenced by the same. 
   public static final String ACT_THIRD_ENTITIES_ONLY = "ACT_THIRD_ENTITIES_ONLY"; // Flag indicating logic applying only to third entities referenced by child entities that have compound primary keys. 
@@ -140,8 +142,6 @@ public class OutputStringTree extends IOStringTree {
   public static final String DATATYPE_LOCAL_DATE_TIME = "LocalDateTime";
   public static final String DATATYPE_COLLECTION = "java.util.Collection";
   public static final String SERIAL_VERSION_UID = "serialVersionUID";
-  public static final String META_INFO = "MetaInfo";
-  public static final String FIELD_META_INFO = "FieldMetaInfo";
   public static final String COLLECTION = "Collection";
   public static final String FIELD = "Field";
   public static final String JAVA_TIME_LOCAL_DATE = "java.time.LocalDate";
@@ -162,66 +162,100 @@ public class OutputStringTree extends IOStringTree {
   public static final String DEBUG_NULL_CHILD_TOKEN = ""; // Leave blank for "production"
 
 
-  protected final InputStringTree inputStringTree;
+//  protected final InputStringTree inputStringTree;
+  protected InputStringTree inputStringTree;
   static Map<String, String> enclosedTypesMap = new HashMap<>(); // REVISIT THIS
   
-  public OutputStringTree(InputStringTree inputStringTree) {
+  private OutputStringTree (InputStringTree inputStringTree) {
     super(inputStringTree.getTopNode().getValue());
+    this.inputStringTree = inputStringTree;
+  }
+  
+  private static Map<InputStringTree, OutputStringTree> outputStringTreeMap = new HashMap<>();
+  public static OutputStringTree getOutputStringTree (InputStringTree inputStringTree) {
+    OutputStringTree outputStringTree = outputStringTreeMap.get(inputStringTree);
+    if (outputStringTree == null) {
+      outputStringTree = new OutputStringTree(inputStringTree);
+    }
+    if (outputStringTree != null) {
+      if (!outputStringTree.isBuilt()) {
+        outputStringTree.build();
+      }
+    } else {
+      out.println("OutputStringTree getOutputStringTree(): outputStringTree is null. THIS SHOULD NEVER HAPPEN!");
+    }
+    return outputStringTree;
+  }
+  
+  public void setInputStringTree (InputStringTree inputStringTree) {
     this.inputStringTree = inputStringTree;
   }
   
   public InputStringTree getInputStringTree() { return this.inputStringTree; } 
   
-  public static boolean isPrimitiveOrWrapper (Class testClass){ // DEPRECATED? USE MetaInfo methods instead
+  public static boolean isPrimitiveOrWrapper (Class testClass){ // DEPRECATED? USE EntityMeta methods instead
     if (testClass.getName().indexOf(".") < 0 ) return true;
     if (testClass.getName().startsWith(JAVA_PACKAGE)) return true;
     else return false;
   }
   
-  public static boolean isPrimitiveOrWrapper (MetaInfo.FieldMetaInfo testField){ // DEPRECATED? USE METAINFO METHODS INSTEAD
-    if (testField.getType().getName().indexOf(MetaInfo.PERIOD) < 0 ) return true;
+  public static boolean isPrimitiveOrWrapper (EntityMeta.FieldMeta testField){ // DEPRECATED? USE METAINFO METHODS INSTEAD
+    if (testField.getType().getName().indexOf(EntityMeta.PERIOD) < 0 ) return true;
     if (testField.getType().getName().startsWith(JAVA_PACKAGE)) return true;
     else return false;
   }
      
 //  public static boolean hasEmbeddedId(Class testClass) {
-//    return MetaInfo.foundFieldAnnotationContains(testClass, ANNOTATION_EMBEDDED_ID);
+//    return EntityMeta.foundFieldAnnotationContains(testClass, ANNOTATION_EMBEDDED_ID);
 ///  } 
   
-  public static boolean isLocalDate (MetaInfo.FieldMetaInfo testField){
+  public static boolean isLocalDate (EntityMeta.FieldMeta testField){
     //out.println("isLocalDate() testField = " + testField.getName() + ": " + testField.getType().getName());
     if (testField.getType().getName().equals(JAVA_TIME_LOCAL_DATE)) return true;
     else return false;
   } 
-  public static boolean isLocalDateTime (MetaInfo.FieldMetaInfo testField){
+  public static boolean isLocalDateTime (EntityMeta.FieldMeta testField){
     //out.println("isLocalDateTime() testField = " + testField.getName() + ": " + testField.getType().getName());
     if (testField.getType().getName().equals(JAVA_TIME_LOCAL_DATETIME)) return true;
     else return false;
   }
-  public static boolean isTemporalType (MetaInfo.FieldMetaInfo testField){
+  public static boolean isTemporalType (EntityMeta.FieldMeta testField){
     return isLocalDate(testField) || isLocalDateTime(testField);
   }
   
   
+//  @Override
+//  public void build() throws Exception {
+//    out.println("Please call overload of OutputStringTree.build with (TreeMap<String, String> tokenMap, EntityMeta drivingEntityMeta.)");
+//    throw new Exception ("Please call overload of OutputStringTree.build with (TreeMap<String, String> tokenMap, EntityMeta drivingEntityMeta.)");
+//  }
+    
   @Override
-  public void build() throws Exception {
-    out.println("Please call overload of OutputStringTree.build with (TreeMap<String, String> tokenMap, MetaInfo drivingMetaInfo.)");
-    throw new Exception ("Please call overload of OutputStringTree.build with (TreeMap<String, String> tokenMap, MetaInfo drivingMetaInfo.)");
+  public void build() {
+    this.build( this.getInputStringTree().getTopNode()
+              , this.getTopNode()
+              , this.getInputStringTree().getTokenMap()
+              , this.getInputStringTree().getDrivingEntityMeta()
+              , null
+              , this.getInputStringTree().getDrivingEntityMeta()
+              );
+    this.built = true;
   }
     
-  public void build(TreeMap<String, String> tokenMap, MetaInfo drivingMetaInfo, MetaInfo currentMetaInfo) {
-    this.build(this.getInputStringTree().getTopNode(), this.getTopNode(), tokenMap, drivingMetaInfo, null, currentMetaInfo);
-  }
+//  //@Override
+//  public void build(TreeMap<String, String> tokenMap, EntityMeta drivingEntityMeta, EntityMeta currentEntityMeta) {
+//    this.build(this.getInputStringTree().getTopNode(), this.getTopNode(), tokenMap, drivingEntityMeta, null, currentEntityMeta);
+//  }
     
   private void build ( StringNode inputNode
                      , StringNode outputNode
                      , TreeMap<String, String> tokenMap
-                     , MetaInfo drivingMetaInfo
-                     , FieldMetaInfo drivingMetaInfoField
-                     , MetaInfo currentMetaInfo
+                     , EntityMeta drivingEntityMeta
+                     , FieldMeta drivingEntityMetaField
+                     , EntityMeta currentEntityMeta
 //                     , boolean childOfMultiToken
                      ) {
-//    out.println("build[MetaInfo] " + inputNode.getValue());
+//    out.println("build[EntityMeta] " + inputNode.getValue());
 ////    out.println("  tokenMap = " + tokenMap);
 //    out.println("  inputNode.getTokenKey() = " + inputNode.getTokenKey());
 //    out.println("  inputNode.getTokenInstruction() = " + inputNode.getTokenInstruction());
@@ -230,26 +264,26 @@ public class OutputStringTree extends IOStringTree {
     List<StringNode> childNodes = inputNode.getChildren();
     StringNode nextOutputNode = outputNode;
     String tokenValue = null;
-    String tokenInstruction = null;
+    //String tokenInstruction = null;
     
-    if (!(inputNode.isSingleTokenExpression() | (inputNode.isMultiTokenExpression()))) {
+//    if (!(inputNode.isSingleTokenExpression() | (inputNode.isMultiTokenExpression()))) {
+//    if ((!inputNode.isSingleTokenExpression() & (!inputNode.isMultiTokenExpression()))) {
+    if (inputNode.isLiteralExpression()) {
 //      out.println("addNode( !(inputNode.isSingleTokenExpression() | (inputNode.isMultiTokenExpression())) ): " + inputNode.getValue());
       nextOutputNode = this.addNode(inputNode.getValue(), outputNode);
     }
-    // else
-    if (inputNode.isSingleTokenExpression()) {
+    else if (inputNode.isSingleTokenExpression()) {
       tokenValue = tokenMap.get(inputNode.getTokenKey());
       if (tokenValue==null) {
-        tokenValue = getAttributeAttribute (drivingMetaInfo, drivingMetaInfoField, currentMetaInfo, inputNode.getTokenKey(), tokenMap);
+        tokenValue = getAttributeAttribute (drivingEntityMeta, drivingEntityMetaField, currentEntityMeta, inputNode.getTokenKey(), tokenMap);
       }
 //      out.println("addNode( (inputNode.isSingleTokenExpression() ): " + (tokenValue!=null?tokenValue:inputNode.getValue()));
       nextOutputNode = this.addNode(tokenValue!=null?tokenValue:inputNode.getValue(), outputNode);
     }
-    //else 
-    if (inputNode.isMultiTokenExpression()) {
+    else if (inputNode.isMultiTokenExpression()) {
 //      out.println("tokenInstruction = :");
      // Next look for potentially multivalued instructions    
-      tokenInstruction = inputNode.getTokenInstruction();
+      String tokenInstruction = inputNode.getTokenInstruction();
       //out.println("tokenInstruction = :" + tokenInstruction);
       
 //      for (StringNode childNode: inputNode.getChildren()) {
@@ -257,34 +291,33 @@ public class OutputStringTree extends IOStringTree {
         buildMultivaluedExpression ( inputNode
                                    , outputNode
                                    , tokenMap
-                                   , drivingMetaInfo
-                                   , currentMetaInfo
+                                   , drivingEntityMeta
+                                   , currentEntityMeta
 //                                   , inputNode.getTokenInstruction()
                                    );
 //  }
-      return;
-      
+      return; 
     }
-    if (nextOutputNode == null) { //?????????????????
-      //nextOutputNode = this.addNode(inputNode.getValue(), outputNode);
-    }
+//    if (nextOutputNode == null) { //?????????????????
+//      //nextOutputNode = this.addNode(inputNode.getValue(), outputNode);
+//    }
+
     for (StringNode childNode: childNodes) {
       //nextOutputNode = outputFileTree.addNode(childNode.getValue(), outputNode);
-      this.build(childNode, nextOutputNode, tokenMap, drivingMetaInfo, null, currentMetaInfo);
+      this.build(childNode, nextOutputNode, tokenMap, drivingEntityMeta, null, currentEntityMeta);
     }
     return; // outputFileTree;
   }  
   
   
-  
   private void build ( StringNode inputNode
                      , StringNode outputNode
                      , TreeMap<String, String> tokenMap
-                     , MetaInfo drivingMetaInfo
-                     , MetaInfo currentMetaInfo
-                     , FieldMetaInfo currentField // Difference
+                     , EntityMeta drivingEntityMeta
+                     , EntityMeta currentEntityMeta
+                     , FieldMeta currentField // Difference
                      ) {
-//    out.println("OutputStringTree.build[FieldMetaInfo] " + currentMetaInfo.getSimpleName()+"."+currentField.getName());
+//    out.println("OutputStringTree.build[FieldMeta] " + currentEntityMeta.getSimpleName()+"."+currentField.getName());
 //    out.println("  tokenMap = " + tokenMap);
     StringNode nextOutputNode = null;
     String tokenValue = null;
@@ -297,7 +330,7 @@ public class OutputStringTree extends IOStringTree {
     if (inputNode.isSingleTokenExpression()) {
       tokenValue = tokenMap.get(inputNode.getTokenKey());
       if (tokenValue==null) {
-        tokenValue = getAttributeAttribute (drivingMetaInfo, currentMetaInfo, currentField, inputNode.getTokenKey(), tokenMap);
+        tokenValue = getAttributeAttribute (drivingEntityMeta, currentEntityMeta, currentField, inputNode.getTokenKey(), tokenMap);
       }
 //      out.println("addNode( (inputNode.isSingleTokenExpression() ): " + (tokenValue!=null?tokenValue:inputNode.getValue()));
       nextOutputNode = this.addNode(tokenValue!=null?tokenValue:inputNode.getValue(), outputNode);
@@ -307,7 +340,7 @@ public class OutputStringTree extends IOStringTree {
     }
     for (StringNode childNode: inputNode.getChildren()) { // DOES NESTING/RECURSION GO THIS DEEP?
       //nextOutputNode = outputFileTree.addNode(childNode.getValue(), outputNode);
-      this.build(childNode, nextOutputNode, tokenMap, drivingMetaInfo, currentField, currentMetaInfo);
+      this.build(childNode, nextOutputNode, tokenMap, drivingEntityMeta, currentField, currentEntityMeta);
     }
     return; // outputFileTree;
   }  
@@ -316,22 +349,22 @@ public class OutputStringTree extends IOStringTree {
   private void buildMultivaluedExpression ( StringNode inputNode
                                           , StringNode outputNode
                                           , TreeMap<String, String> tokenMap
-                                          , MetaInfo drivingMetaInfo
-                                          , MetaInfo currentMetaInfo
+                                          , EntityMeta drivingEntityMeta
+                                          , EntityMeta currentEntityMeta
   //                                        , String tokenInstruction
                                           ) {
 //    out.println("");
 //    out.println("****************************");
 //  out.println("buildMultivaluedExpression (" + inputNode.getValue() + ")");
-//  out.println("buildMultivaluedExpression currentMetaInfo = " + currentMetaInfo.getSimpleName());
+//  out.println("buildMultivaluedExpression currentEntityMeta = " + currentEntityMeta.getSimpleName());
 //    out.println("  tokenMap = " + tokenMap);
 //    Annotation[] fieldAnnotations = null;
-    TempMetaInfo collectionOfMetaInfo = null; // Representation of Child table records encapsulated in a Collection attribute of the main driving entity MetaInfo object
-    List<TempMetaInfo> collectionOfMetaInfos = null;
-    FieldMetaInfo[] fields = currentMetaInfo.getFieldMetaInfoArray();
-    Map<String, FieldMetaInfo> duplicateFKRefClassMap = new HashMap<>(); 
-    Map<String, FieldMetaInfo> duplicateFKChildClassMap = new HashMap<>(); 
-    Map<String, MetaInfo> duplicateMetaInfoMap = new HashMap<>(); 
+    TempEntityMeta collectionOfEntityMeta = null; // Representation of Child table records encapsulated in a Collection attribute of the main driving entity EntityMeta object
+    List<TempEntityMeta> collectionOfEntityMetas = null;
+    FieldMeta[] fields = currentEntityMeta.getFieldMetaArray();
+    Map<String, FieldMeta> duplicateFKRefClassMap = new HashMap<>(); 
+    Map<String, FieldMeta> duplicateFKChildClassMap = new HashMap<>(); 
+    Map<String, EntityMeta> duplicateEntityMetaMap = new HashMap<>(); 
     String tokenInstruction = inputNode.getTokenInstruction();
     
 
@@ -344,21 +377,21 @@ public class OutputStringTree extends IOStringTree {
       case ACT_ALL_ATTRIBS: 
         if (fields[i].isId()) continue;
 //        out.println("case " + ACT_ALL_ATTRIBS);
-        if (getCollectionEnclosedMetaInfo(fields[i]) != null) break; // skip collections...continue?
+        if (getCollectionEnclosedEntityMeta(fields[i]) != null) break; // skip collections...continue?
         for (StringNode childNode: inputNode.getChildren()) {
 //          out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-          this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+          this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
         }
         break;
       case ACT_UI_ATTRIBS: 
         if (fields[i].isId()) continue;
 //        out.println("case " + ACT_ALL_ATTRIBS);
-        if (getCollectionEnclosedMetaInfo(fields[i]) != null) break; // skip collections...continue?
+        if (getCollectionEnclosedEntityMeta(fields[i]) != null) break; // skip collections...continue?
         if (fields[i].isEmbeddedIdMemberField()) continue;
         if (!(fields[i].isPrimitiveOrWrapper() | fields[i].isEmbeddedId())) continue; 
         for (StringNode childNode: inputNode.getChildren()) {
 //          out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-          this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+          this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
         }
         break;
       case ACT_NON_KEY_ATTRIBS: 
@@ -366,13 +399,13 @@ public class OutputStringTree extends IOStringTree {
 //        out.println("case " + ACT_NON_KEY_ATTRIBS);
 //        out.println("fields[i].getName() = " + fields[i].getName());
 //        out.println("fields[i].getResolvedIdentifier() = " + fields[i].getResolvedIdentifier());
-        if (getCollectionEnclosedMetaInfo(fields[i]) != null) break; // skip collections
+        if (getCollectionEnclosedEntityMeta(fields[i]) != null) break; // skip collections
         if (fields[i].isId()) { break; }
         if (fields[i].isEmbeddedIdMemberField()) { break; }// skip primary key column attributes
         if (fields[i].isEmbeddedId()) { break; }// skip embedded compound primary key object
         for (StringNode childNode: inputNode.getChildren()) {
 //          out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-          this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+          this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
         }
 //        this.addNode("\n", outputNode);
         break;
@@ -380,14 +413,14 @@ public class OutputStringTree extends IOStringTree {
         if (!(fields[i].isId() | fields[i].isEmbeddedIdMemberField())) { break; }// Process ONLY primary key column attributes
         for (StringNode childNode: inputNode.getChildren()) {
 //          out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-          this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+          this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
         }
         break;
       case ACT_PK_ATTRIBS_COMMA_SEPARATED: 
 //        out.println("case " + ACT_PK_ATTRIBS_COMMA_SEPARATED);
-//        if (currentMetaInfo.getSimpleName().startsWith("F")) { // TEST/DEBUG
+//        if (currentEntityMeta.getSimpleName().startsWith("F")) { // TEST/DEBUG
 //          out.println(""); 
-//          out.println("ACT_PK_ATTRIBS_COMMA_SEPARATED currentMetaInfo = " + currentMetaInfo.getSimpleName()); 
+//          out.println("ACT_PK_ATTRIBS_COMMA_SEPARATED currentEntityMeta = " + currentEntityMeta.getSimpleName()); 
 //          out.println("fields["+i+"].getName() = " + fields[i].getName());
 //          out.println("fields["+i+"].isId() = " + fields[i].isId());
 //          out.println("fields["+i+"].isEmbeddedIdMemberField = " + fields[i].isEmbeddedIdMemberField());
@@ -396,7 +429,7 @@ public class OutputStringTree extends IOStringTree {
         if (!(fields[i].isId() | fields[i].isEmbeddedIdMemberField())) { break; }// Process ONLY primary key column attributes
         //int iteration = 0;
         for (StringNode childNode: inputNode.getChildren()) {
-          this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+          this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
         }
         if (fields[i].isEmbeddedIdMemberField() & (!fields[i].isLastEmbeddedIdMemberField())) {
           this.addNode(", ", outputNode);
@@ -407,7 +440,7 @@ public class OutputStringTree extends IOStringTree {
         if (isPrimitiveOrWrapper(fields[i])) {
           for (StringNode childNode: inputNode.getChildren()) {
 //            out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-            this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+            this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
           }
         }
 //        this.addNode("\r\n", outputNode);
@@ -417,7 +450,7 @@ public class OutputStringTree extends IOStringTree {
         if (isLocalDate(fields[i])) {
           for (StringNode childNode: inputNode.getChildren()) {
 //            out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-            this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+            this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
           }
         }
 //        this.addNode("\r\n", outputNode);
@@ -426,27 +459,27 @@ public class OutputStringTree extends IOStringTree {
         if (isLocalDateTime(fields[i])) {
           for (StringNode childNode: inputNode.getChildren()) {
 //            out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-            this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+            this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
           }
         }
         break;
       case ACT_FK_REF_ATTRIBS:
-        if (drivingMetaInfo.getSimpleName().equals("Flight")) { // Hard-coded test/debug
-          out.println("case ACT_FK_REF_ATTRIBS:");
-          out.println("  fields["+i+"]) = " + fields[i].getName());
-          out.println("  isPrimitiveOrWrapper(fields["+i+"]) = " + isPrimitiveOrWrapper(fields[i]));
-          out.println("  getCollectionEnclosedMetaInfo(fields["+i+"]) = " + getCollectionEnclosedMetaInfo(fields[i]));
+        if (drivingEntityMeta.getSimpleName().equals("Flight")) { // Hard-coded test/debug
+//          out.println("case ACT_FK_REF_ATTRIBS:");
+//          out.println("  fields["+i+"]) = " + fields[i].getName());
+//          out.println("  isPrimitiveOrWrapper(fields["+i+"]) = " + isPrimitiveOrWrapper(fields[i]));
+//          out.println("  getCollectionEnclosedEntityMeta(fields["+i+"]) = " + getCollectionEnclosedEntityMeta(fields[i]));
         }
-        if (!isPrimitiveOrWrapper(fields[i]) & getCollectionEnclosedMetaInfo(fields[i]) == null) {
-          out.println("    if (!isPrimitiveOrWrapper(fields["+i+"]) & getCollectionEnclosedMetaInfo(fields[i]) == null) PASSED");
+        if (!isPrimitiveOrWrapper(fields[i]) & getCollectionEnclosedEntityMeta(fields[i]) == null) {
+          out.println("    if (!isPrimitiveOrWrapper(fields["+i+"]) & getCollectionEnclosedEntityMeta(fields[i]) == null) PASSED");
           for (StringNode childNode: inputNode.getChildren()) {
-            if (fields[i].getType().getSimpleName().equals(drivingMetaInfo.getSimpleName())) {
-              out.println("    if (fields["+i+"].getType().getSimpleName().equals(drivingMetaInfo.getSimpleName())) TRUE");
+            if (fields[i].getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) {
+//              out.println("    if (fields["+i+"].getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) TRUE");
               continue; 
             }
-            out.println("    if (fields["+i+"].getType().getSimpleName().equals(drivingMetaInfo.getSimpleName())) FALSE");
+//            out.println("    if (fields["+i+"].getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) FALSE");
 //              out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-              this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+              this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
           }
         }
         break;
@@ -461,8 +494,8 @@ public class OutputStringTree extends IOStringTree {
             // perAttributeLine = replaceTokens(subSegment, fields[i].getType());
             for (StringNode childNode: inputNode.getChildren()) {
 //              out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-              this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
-              //perAttributeLine = replaceTokens(subSegment, MetaInfo.getMetaInfo(fields[i].getType().getName()), tokenMap);
+              this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
+              //perAttributeLine = replaceTokens(subSegment, EntityMeta.getEntityMeta(fields[i].getType().getName()), tokenMap);
             }
           }
           break;
@@ -479,26 +512,26 @@ public class OutputStringTree extends IOStringTree {
           if (fields[i].isExcludedEditFromParentModule() & (!tokenInstruction.contains(FORCE_INCLUDE))) break;
           if (!fields[i].isExcludedEditFromParentModule() & (tokenInstruction.contains(FORCE_INCLUDE))) break;
           duplicateFKChildClassMap.put(fields[i].getType().getName(), fields[i]); // Necessary in this case?
-          collectionOfMetaInfo = null;
-          if ((collectionOfMetaInfo = getCollectionEnclosedMetaInfo(fields[i])) != null) {
-            //out.println ("Found " + collectionOfMetaInfo.getMetaInfo().getSimpleName() + " enclosed in field " + fields[i].getName());
+          collectionOfEntityMeta = null;
+          if ((collectionOfEntityMeta = getCollectionEnclosedEntityMeta(fields[i])) != null) {
+            //out.println ("Found " + collectionOfEntityMeta.getEntityMeta().getSimpleName() + " enclosed in field " + fields[i].getName());
             if (tokenInstruction.equals(ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS)) {
-//              if (drivingMetaInfo.getSimpleName().equals("Pilot")) { // & fields[i].getName().startsWith("FlightCrewMember")) { // TEST/DEBUG
+//              if (drivingEntityMeta.getSimpleName().equals("Pilot")) { // & fields[i].getName().startsWith("FlightCrewMember")) { // TEST/DEBUG
 //                out.println("case ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS Pilot/FlightCrewMember");
 //                out.println("  fields[i].getName() = " + fields[i].getName());
 //              }
-              if (!(collectionOfMetaInfo.getMetaInfo().hasEmbeddedId())) { 
+              if (!(collectionOfEntityMeta.getEntityMeta().hasEmbeddedId())) { 
               break;
               } 
             }
             if (tokenInstruction.equals(ACT_FK_CHILD_ENTITIES)) {
-              if (collectionOfMetaInfo.getMetaInfo().hasEmbeddedId()) { 
+              if (collectionOfEntityMeta.getEntityMeta().hasEmbeddedId()) { 
               break;
               } 
             }
             for (StringNode childNode: inputNode.getChildren()) {
 //              out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-              this.build(childNode, outputNode, tokenMap, drivingMetaInfo, fields[i], collectionOfMetaInfo.getMetaInfo()); // <------------< **************
+              this.build(childNode, outputNode, tokenMap, drivingEntityMeta, fields[i], collectionOfEntityMeta.getEntityMeta()); // <------------< **************
             }
           }
           break;
@@ -515,31 +548,31 @@ public class OutputStringTree extends IOStringTree {
             // if (isCollection(fields[i], collectionOfClass)) {
             // if ((collectionOfClass = getCollectionEnclosedClass(fields[i])) != null) {
             int iteration = 0;
-            if ((collectionOfMetaInfos = getCollectionEnclosedMetaInfos(fields[i])) != null) {
-              duplicateMetaInfoMap = new HashMap<>();
-              for (TempMetaInfo childMetaInfo : collectionOfMetaInfos) {
-                if (childMetaInfo.isEmbeddedPkInfo()) continue;
+            if ((collectionOfEntityMetas = getCollectionEnclosedEntityMetas(fields[i])) != null) {
+              duplicateEntityMetaMap = new HashMap<>();
+              for (TempEntityMeta childEntityMeta : collectionOfEntityMetas) {
+                if (childEntityMeta.isEmbeddedPkInfo()) continue;
                 iteration++; 
-                if (duplicateMetaInfoMap.get(childMetaInfo.getMetaInfo().getSimpleName()) != null) {
+                if (duplicateEntityMetaMap.get(childEntityMeta.getEntityMeta().getSimpleName()) != null) {
                   continue;
                 }
-                duplicateMetaInfoMap.put(childMetaInfo.getMetaInfo().getSimpleName(), childMetaInfo.getMetaInfo());
+                duplicateEntityMetaMap.put(childEntityMeta.getEntityMeta().getSimpleName(), childEntityMeta.getEntityMeta());
                 if ((tokenInstruction.equals(ACT_FK_CHILD_W_COMPOUND_KEYS_AND_THIRD_ENTITIES)) | (tokenInstruction.equals(ACT_THIRD_ENTITIES_ONLY))) {
-  //                if (!(childMetaInfo.getMetaInfo().hasEmbeddedId()) | (childMetaInfo.isXReferenced())) { 
-                  if (!(childMetaInfo.isXReferenced())) { 
+  //                if (!(childEntityMeta.getEntityMeta().hasEmbeddedId()) | (childEntityMeta.isXReferenced())) { 
+                  if (!(childEntityMeta.isXReferenced())) { 
                     continue;
                   }
                 }
                 if ((iteration == 1) & (tokenInstruction.equals(ACT_THIRD_ENTITIES_ONLY))) {
   //                if (tokenInstruction.equals(ACT_THIRD_ENTITIES_ONLY)) {
                   continue; // Skip the child entity, go for the third
-  //                  if (childMetaInfo.isEmbeddedPkInfo()) continue;
+  //                  if (childEntityMeta.isEmbeddedPkInfo()) continue;
                 }
-                if (childMetaInfo.getMetaInfo().getSimpleName().equals(drivingMetaInfo.getSimpleName())) continue; 
-  //              perAttributeLine += "\n" + indent + replaceTokens(subSegment, metaInfo, tokenMap);
+                if (childEntityMeta.getEntityMeta().getSimpleName().equals(drivingEntityMeta.getSimpleName())) continue; 
+  //              perAttributeLine += "\n" + indent + replaceTokens(subSegment, entityMeta, tokenMap);
                 for (StringNode childNode: inputNode.getChildren()) {
-                  this.build(childNode, outputNode, tokenMap, drivingMetaInfo, fields[i], childMetaInfo.getMetaInfo()); // <------------< ********
-                  //perAttributeLine = replaceTokens(subSegment, MetaInfo.getMetaInfo(fields[i].getType().getName()), tokenMap);
+                  this.build(childNode, outputNode, tokenMap, drivingEntityMeta, fields[i], childEntityMeta.getEntityMeta()); // <------------< ********
+                  //perAttributeLine = replaceTokens(subSegment, EntityMeta.getEntityMeta(fields[i].getType().getName()), tokenMap);
                 }
               }
             }
@@ -548,13 +581,13 @@ public class OutputStringTree extends IOStringTree {
 //        case ACT_IF_THIRD_ENTITIES_EXIST:
 //          {
 //            if (fields[i].isExcludedEditFromParentModule()) break;
-//            if ((collectionOfMetaInfos = getCollectionEnclosedMetaInfos(fields[i])) != null) {
-//              for (TempMetaInfo childMetaInfo : collectionOfMetaInfos) {
-//                if (childMetaInfo.isThirdEntity) {
+//            if ((collectionOfEntityMetas = getCollectionEnclosedEntityMetas(fields[i])) != null) {
+//              for (TempEntityMeta childEntityMeta : collectionOfEntityMetas) {
+//                if (childEntityMeta.isThirdEntity) {
 //                  for (StringNode childNode: inputNode.getChildren()) {
 //                    out.println("case ACT_IF_THIRD_ENTITIES_EXIST: childNode = [" + childNode.nodeValue+"]");
-//                    this.build(childNode, outputNode, tokenMap, drivingMetaInfo, fields[i], currentMetaInfo); // No drill-down here; Stay at same level
-////                  this.build(childNode, outputNode, tokenMap, drivingMetaInfo, fields[i], childMetaInfo.getMetaInfo()); 
+//                    this.build(childNode, outputNode, tokenMap, drivingEntityMeta, fields[i], currentEntityMeta); // No drill-down here; Stay at same level
+////                  this.build(childNode, outputNode, tokenMap, drivingEntityMeta, fields[i], childEntityMeta.getEntityMeta()); 
 //                  }
 //                  break; // Break the outer loop; only one response to positive match
 //                }  
@@ -563,15 +596,15 @@ public class OutputStringTree extends IOStringTree {
 //          }
 //          break;
         case ACT_OTHER_REF_ENTITIES:
-          if (!currentMetaInfo.hasEmbeddedId()) continue;
+          if (!currentEntityMeta.hasEmbeddedId()) continue;
           out.println("case ACT_OTHER_REF_ENTITIES:");
           if (fields[i].isEmbeddedIdMemberField()) {
-            if (fields[i].getType().getName().equals(drivingMetaInfo.getClassName())) {
+            if (fields[i].getType().getName().equals(drivingEntityMeta.getClassName())) {
               continue;
             }
             else { // This is an "other" that we want.
               for (StringNode childNode: inputNode.getChildren()) {
-                this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);
+                this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);
               }
             }
           }
@@ -582,23 +615,23 @@ public class OutputStringTree extends IOStringTree {
             break;
           }
           duplicateFKChildClassMap.put(fields[i].getType().getName(), fields[i]);
-          if ((collectionOfMetaInfos = getCollectionEnclosedMetaInfos(fields[i])) != null) {
-            for (TempMetaInfo childMetaInfo : collectionOfMetaInfos) {
-              if (duplicateMetaInfoMap.get(childMetaInfo.getMetaInfo().getSimpleName()) != null) {
+          if ((collectionOfEntityMetas = getCollectionEnclosedEntityMetas(fields[i])) != null) {
+            for (TempEntityMeta childEntityMeta : collectionOfEntityMetas) {
+              if (duplicateEntityMetaMap.get(childEntityMeta.getEntityMeta().getSimpleName()) != null) {
                 break;
               }
-              duplicateMetaInfoMap.put(childMetaInfo.getMetaInfo().getSimpleName(), childMetaInfo.getMetaInfo());
-              if (childMetaInfo.getMetaInfo().getSimpleName().equals(drivingMetaInfo.getSimpleName()))  continue;
-//              out.println("metaInfo = " + childMetaInfo);
-// /             out.println("getCollectionEnclosedMetaInfo(fields[i]).getSimpleName()) = "
-//                  + getCollectionEnclosedMetaInfo(fields[i]).getSimpleName());
-              if (childMetaInfo.getMetaInfo().getSimpleName().equals(getCollectionEnclosedMetaInfo(fields[i]).getMetaInfo().getSimpleName()))
+              duplicateEntityMetaMap.put(childEntityMeta.getEntityMeta().getSimpleName(), childEntityMeta.getEntityMeta());
+              if (childEntityMeta.getEntityMeta().getSimpleName().equals(drivingEntityMeta.getSimpleName()))  continue;
+//              out.println("entityMeta = " + childEntityMeta);
+// /             out.println("getCollectionEnclosedEntityMeta(fields[i]).getSimpleName()) = "
+//                  + getCollectionEnclosedEntityMeta(fields[i]).getSimpleName());
+              if (childEntityMeta.getEntityMeta().getSimpleName().equals(getCollectionEnclosedEntityMeta(fields[i]).getEntityMeta().getSimpleName()))
                 continue; // What remains are entity classes referenced by a child entity class
-//              perAttributeLine += "\n" + indent + replaceTokens(subSegment, metaInfo, tokenMap);
+//              perAttributeLine += "\n" + indent + replaceTokens(subSegment, entityMeta, tokenMap);
               for (StringNode childNode: inputNode.getChildren()) {
 //                out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-                this.build(childNode, outputNode, tokenMap, drivingMetaInfo, fields[i], childMetaInfo.getMetaInfo()); // <------------< **************
-                //perAttributeLine = replaceTokens(subSegment, MetaInfo.getMetaInfo(fields[i].getType().getName()), tokenMap);
+                this.build(childNode, outputNode, tokenMap, drivingEntityMeta, fields[i], childEntityMeta.getEntityMeta()); // <------------< **************
+                //perAttributeLine = replaceTokens(subSegment, EntityMeta.getEntityMeta(fields[i].getType().getName()), tokenMap);
               }
               //this.addNode("\r\n", outputNode);
             }
@@ -615,22 +648,22 @@ public class OutputStringTree extends IOStringTree {
 //          duplicateFKChildClassMap.put(fields[i].getType().getName(), fields[i]);
           // out.println("duplicateFKChildClassMap = " + duplicateFKChildClassMap);
           // Class refClass = null;
-          collectionOfMetaInfo = null;
-          if ((collectionOfMetaInfo = getCollectionEnclosedMetaInfo(fields[i])) != null) {
+          collectionOfEntityMeta = null;
+          if ((collectionOfEntityMeta = getCollectionEnclosedEntityMeta(fields[i])) != null) {
             // out.println("refClass = " + refClass);
-            if (collectionOfMetaInfo.getMetaInfo().getSimpleName().equals(drivingMetaInfo.getSimpleName()))
+            if (collectionOfEntityMeta.getEntityMeta().getSimpleName().equals(drivingEntityMeta.getSimpleName()))
               continue;
-            if (tokenInstruction.equals(ACT_FK_CHILD_ENTITY_W_COMPOUND_KEY_ATTRIBS) & !collectionOfMetaInfo.getMetaInfo().hasEmbeddedId()) break;
-            MetaInfo.FieldMetaInfo[] childEntityFields = collectionOfMetaInfo.getMetaInfo().getFieldMetaInfoArray();
+            if (tokenInstruction.equals(ACT_FK_CHILD_ENTITY_W_COMPOUND_KEY_ATTRIBS) & !collectionOfEntityMeta.getEntityMeta().hasEmbeddedId()) break;
+            EntityMeta.FieldMeta[] childEntityFields = collectionOfEntityMeta.getEntityMeta().getFieldMetaArray();
             // out.println("childEntityFields = " + childEntityFields);
             // out.println("subSegment = " + subSegment);
-            for (MetaInfo.FieldMetaInfo childField : childEntityFields) {
-//              if (drivingMetaInfo.getSimpleName().startsWith("Air")) { // DEBUG
+            for (EntityMeta.FieldMeta childField : childEntityFields) {
+//              if (drivingEntityMeta.getSimpleName().startsWith("Air")) { // DEBUG
 //                System.out.println("Debugging isExcludedEditFromParentModule()");
 //                System.out.println("  fields[i] = " + fields[i].getName());
 //              }
 //              if (childField.isExcludedEditFromParentModule()) break;
-              if (childField.getType().getSimpleName().equals(drivingMetaInfo.getSimpleName())) {
+              if (childField.getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) {
 //                // out.println("SKIPPING [redundant back-reference]" +
 //                // childField.getType().getSimpleName());
                 continue; // [Skip;] WILL HAVE TO REVISIT THIS FOR MULTIPLE FOREIGN KEYS REFERENCING
@@ -643,7 +676,7 @@ public class OutputStringTree extends IOStringTree {
               }
               for (StringNode childNode: inputNode.getChildren()) {
 //                out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-                this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, childField);  // <-------------------------<
+                this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, childField);  // <-------------------------<
               }
             }
             break;
@@ -658,16 +691,16 @@ public class OutputStringTree extends IOStringTree {
 //        duplicateFKChildClassMap.put(fields[i].getType().getName(), fields[i]);
 //        out.println("duplicateFKChildClassMap = " + duplicateFKChildClassMap);
 //        // Class refClass = null;
-//        collectionOfMetaInfo = null;
-//        if ((collectionOfMetaInfo = getCollectionEnclosedMetaInfo(fields[i])) != null) {
-//          out.println("collectionOfClass = " + collectionOfMetaInfo);
-//          if (collectionOfMetaInfo.getSimpleName().equals(drivingEntityClass.getSimpleName()))
+//        collectionOfEntityMeta = null;
+//        if ((collectionOfEntityMeta = getCollectionEnclosedEntityMeta(fields[i])) != null) {
+//          out.println("collectionOfClass = " + collectionOfEntityMeta);
+//          if (collectionOfEntityMeta.getSimpleName().equals(drivingEntityClass.getSimpleName()))
 //            continue;
-//          MetaInfo.FieldMetaInfo[] childEntityFields = collectionOfMetaInfo.getFieldMetaInfoArray(); // .getDeclaredFields();
+//          EntityMeta.FieldMeta[] childEntityFields = collectionOfEntityMeta.getFieldMetaArray(); // .getDeclaredFields();
 //          out.println("childEntityFields = " + childEntityFields);
 //          out.println("subSegment = " + subSegment);
 //          int iteration = 0;
-//          for (MetaInfo.FieldMetaInfo childField : childEntityFields) {
+//          for (EntityMeta.FieldMeta childField : childEntityFields) {
 //            // for (int k=0; k< childEntityFields.length; k++) {
 //            out.println("childField.getName() = " + childField.getName());
 //            out.println("childField.getType().getSimpleName() = '" + childField.getType().getSimpleName() + "'");
@@ -691,13 +724,13 @@ public class OutputStringTree extends IOStringTree {
         case ACT_NON_TEMPORAL_ATTRIBS:
           if (fields[i].isId()) continue;
           if ((isPrimitiveOrWrapper(fields[i])) & (!isTemporalType(fields[i]))
-              & (getCollectionEnclosedMetaInfo(fields[i]) == null) // Not collection type
+              & (getCollectionEnclosedEntityMeta(fields[i]) == null) // Not collection type
           ) {
 //            perAttributeLine = replaceTokens(subSegment, fields[i], tokenMap);
             for (StringNode childNode: inputNode.getChildren()) {
 //              out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-              this.build(childNode, outputNode, tokenMap, drivingMetaInfo, currentMetaInfo, fields[i]);  
-              //perAttributeLine = replaceTokens(subSegment, MetaInfo.getMetaInfo(fields[i].getType().getName()), tokenMap);
+              this.build(childNode, outputNode, tokenMap, drivingEntityMeta, currentEntityMeta, fields[i]);  
+              //perAttributeLine = replaceTokens(subSegment, EntityMeta.getEntityMeta(fields[i].getType().getName()), tokenMap);
             }
 //            this.addNode("\r\n", outputNode);
           }
@@ -706,9 +739,9 @@ public class OutputStringTree extends IOStringTree {
     }
   }
   
-  public String getAttributeAttribute ( MetaInfo drivingMetaInfo
-                                      , MetaInfo currentMetaInfo
-                                      , MetaInfo.FieldMetaInfo field
+  public String getAttributeAttribute ( EntityMeta drivingEntityMeta
+                                      , EntityMeta currentEntityMeta
+                                      , EntityMeta.FieldMeta field
                                       , String token
                                       , Map<String, String> parentTokenMap
                                       ) {
@@ -720,47 +753,47 @@ public class OutputStringTree extends IOStringTree {
     String returnValue = null;
     String interim = null;
     //Field[] fields = entityClass.getDeclaredFields();
-    TempMetaInfo collectionOfMetaInfo = null;
-    if ((collectionOfMetaInfo = getCollectionEnclosedMetaInfo (field)) != null) {
+    TempEntityMeta collectionOfEntityMeta = null;
+    if ((collectionOfEntityMeta = getCollectionEnclosedEntityMeta (field)) != null) {
   //  if (isCollection(field, collectionOfClass)) { 
       switch (token) {
       case FK_CHILD_ENTITY:
-//      out.println("Found " + FK_CHILD_ENTITY + " " + field.getResolvedIdentifier() + ": " + collectionOfMetaInfo);
-        returnValue = collectionOfMetaInfo.getMetaInfo().getSimpleName();
+//      out.println("Found " + FK_CHILD_ENTITY + " " + field.getResolvedIdentifier() + ": " + collectionOfEntityMeta);
+        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName();
         break;
 //      case FK_CHILD_ENTITY_IDENTIFIER:
 //        returnValue = field.getName();
 //        break;
       case FK_CHILD_ENTITY_LABEL:
-//      out.println("Found " + FK_CHILD_ENTITY + " " + field.getResolvedIdentifier() + ": " + collectionOfMetaInfo);
-        returnValue = collectionOfMetaInfo.getMetaInfo().getLabel();
+//      out.println("Found " + FK_CHILD_ENTITY + " " + field.getResolvedIdentifier() + ": " + collectionOfEntityMeta);
+        returnValue = collectionOfEntityMeta.getEntityMeta().getLabel();
         break;
       case FK_CHILD_ENTITY_INIT_SMALL:
-//        out.println("Found " + FK_CHILD_ENTITY_INIT_SMALL + " " + field.getResolvedIdentifier() + ": " + collectionOfMetaInfo);
-        interim = collectionOfMetaInfo.getMetaInfo().getSimpleName();
+//        out.println("Found " + FK_CHILD_ENTITY_INIT_SMALL + " " + field.getResolvedIdentifier() + ": " + collectionOfEntityMeta);
+        interim = collectionOfEntityMeta.getEntityMeta().getSimpleName();
         returnValue = interim.substring(0,1).toLowerCase()+interim.substring(1);
         break;
       case FK_CHILD_ENTITY_LOWER:
-        returnValue = collectionOfMetaInfo.getMetaInfo().getSimpleName().toLowerCase();
+        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName().toLowerCase();
         break;
 
       case FK_CHILD_ENTITY_LOWER_PLURAL:
-        returnValue = collectionOfMetaInfo.getMetaInfo().getSimpleName().toLowerCase()+"s";
+        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName().toLowerCase()+"s";
         break;
       case FK_CHILD_ENTITY_UPPER:
-        returnValue = collectionOfMetaInfo.getMetaInfo().getSimpleName().toUpperCase();
+        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName().toUpperCase();
         break;
       case FK_CHILD_ENTITY_UPPER_PLURAL:
-        returnValue = collectionOfMetaInfo.getMetaInfo().getSimpleName().toUpperCase()+"S";
+        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName().toUpperCase()+"S";
         break;
 //      case FK_CHILD_EMBEDDED_PK:
 //        out.println("case FK_CHILD_EMBEDDED_PK");
 //      case FK_CHILD_EMBEDDED_PK_INIT_SMALL:
 //        out.println("case FK_CHILD_EMBEDDED_PK_INIT_SMALL");
-////        out.println("Found FK_CHILD_EMBEDDED_ID " + FK_CHILD_EMBEDDED_ID + " " + currentMetaInfo.getSimpleName() + ": " + currentMetaInfo);
-//        MetaInfo embeddedPK = currentMetaInfo.getEmbeddedPKInfo();
+////        out.println("Found FK_CHILD_EMBEDDED_ID " + FK_CHILD_EMBEDDED_ID + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
+//        EntityMeta embeddedPK = currentEntityMeta.getEmbeddedPKInfo();
 //        if (embeddedPK != null) {
-//          out.println("Found FK_CHILD_EMBEDDED_ID " + FK_CHILD_EMBEDDED_ID + " " + currentMetaInfo.getSimpleName() + ": " + currentMetaInfo);
+//          out.println("Found FK_CHILD_EMBEDDED_ID " + FK_CHILD_EMBEDDED_ID + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
 //          returnValue = embeddedPK.getSimpleName();
 //        }
 //        if (returnValue!=null & token.equals(FK_CHILD_EMBEDDED_PK_INIT_SMALL)) {
@@ -778,7 +811,7 @@ public class OutputStringTree extends IOStringTree {
       break;
       case FK_REF_ENTITY_QUALIFIED: 
 //        try {
-//          returnValue = MetaInfo.getMetaInfo(field.getType().getName()).getLabel().replaceAll(" ", "");
+//          returnValue = EntityMeta.getEntityMeta(field.getType().getName()).getLabel().replaceAll(" ", "");
           returnValue = field.getLabel().replaceAll(" ", "");
 //        } catch (IOException e) {
 //          out.println("case FK_REF_ENTITY_QUALIFIED should NEVER throw IOException!!!");
@@ -800,15 +833,15 @@ public class OutputStringTree extends IOStringTree {
       case FK_REF_ENTITY_ID:
         try {
           out.println("case FK_REF_ENTITY_ID: ");
-          out.println("  currentMetaInfo = " + currentMetaInfo.getSimpleName());
+          out.println("  currentEntityMeta = " + currentEntityMeta.getSimpleName());
           out.println("  field = " + field.getName());
           
-          returnValue = MetaInfo.getMetaInfo(field.getType().getName()).getIDField().getName(); 
-//              currentMetaInfo.getIDField().getName();
+          returnValue = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(field.getType().getName()).getIDField().getName(); 
+//              currentEntityMeta.getIDField().getName();
 //              
 //        } catch (IOException e) {
         } catch (Exception e) {
-          returnValue = "MetaInfo.getMetaInfo() SHOULD NOT THROW Exception (getAttributeAttribute case FK_REF_ENTITY_ID)";
+          returnValue = "EntityMeta.getEntityMeta() SHOULD NOT THROW Exception (getAttributeAttribute case FK_REF_ENTITY_ID)";
         }
         break;
       case FK_REF_ATTRIB_NAME:
@@ -822,7 +855,7 @@ public class OutputStringTree extends IOStringTree {
       switch (token) {
         case FK_CHILD_EMBEDDED_ID:
         case FK_CHILD_EMBEDDED_ID_INIT_SMALL:
-          returnValue = currentMetaInfo.getEmbeddedPKInfo().getSimpleName(); // .getEmbeddedPKInfo().getSimpleName();
+          returnValue = currentEntityMeta.getEmbeddedPKInfo().getSimpleName(); // .getEmbeddedPKInfo().getSimpleName();
           if (token.equals(FK_CHILD_EMBEDDED_ID_INIT_SMALL)) {
             returnValue = returnValue.substring(0, 1).toLowerCase()+ returnValue.substring(1);
           }
@@ -840,7 +873,7 @@ public class OutputStringTree extends IOStringTree {
           break;
         case ENTITY_ATTRIB_LABEL:
           if (field.isEmbeddedId()) {
-            returnValue = field.getLabel(drivingMetaInfo);
+            returnValue = field.getLabel(drivingEntityMeta);
           }
           else {
             returnValue = field.getLabel();
@@ -886,11 +919,11 @@ public class OutputStringTree extends IOStringTree {
         {
           returnValue = "";
           int iteration = 0;
-          String compoundEntityPlusPK = currentMetaInfo.getSimpleName().substring(0,1).toLowerCase()+currentMetaInfo.getSimpleName().substring(1)
+          String compoundEntityPlusPK = currentEntityMeta.getSimpleName().substring(0,1).toLowerCase()+currentEntityMeta.getSimpleName().substring(1)
                                       + "."
-                                      + currentMetaInfo.getEmbeddedPKInfo().getSimpleName().substring(0,1).toLowerCase()
-                                      + currentMetaInfo.getEmbeddedPKInfo().getSimpleName().substring(1);
-          for (String embeddidIdField: currentMetaInfo.getEmbeddedIdFieldIdentifiers()) {
+                                      + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(0,1).toLowerCase()
+                                      + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(1);
+          for (String embeddidIdField: currentEntityMeta.getEmbeddedIdFieldIdentifiers()) {
             if (iteration > 0) {returnValue += ", ";}
             returnValue += "data-" + embeddidIdField + "=${" + compoundEntityPlusPK + "." + embeddidIdField + "}";
       //    th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}, data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}"
@@ -904,8 +937,8 @@ public class OutputStringTree extends IOStringTree {
 //          StringBuilder sb = new StringBuilder("");
 //          String indent = "          "; // 10 spaces
 //          
-//          boolean isFkRef = (!isPrimitiveOrWrapper(field) & getCollectionEnclosedMetaInfo(field) == null);
-//          boolean isFKChildCollection = (getCollectionEnclosedMetaInfo(field) != null);
+//          boolean isFkRef = (!isPrimitiveOrWrapper(field) & getCollectionEnclosedEntityMeta(field) == null);
+//          boolean isFKChildCollection = (getCollectionEnclosedEntityMeta(field) != null);
 //          String htmlFormInputControl = field.getHtmlFormInputControl();
 //          
 //          
@@ -934,7 +967,7 @@ public class OutputStringTree extends IOStringTree {
 //            String fkRefEntity = fkRefEntityInitUpper.substring(0, 1).toLowerCase() + fkRefEntityInitUpper.substring(1);
 //            String fkRefEntityId = "COULD NOT GET fkRefEntityId";
 //            try {
-//              fkRefEntityId = MetaInfo.getMetaInfo(field.getType().getName()).getIDField().getName();
+//              fkRefEntityId = EntityMeta.getEntityMeta(field.getType().getName()).getIDField().getName();
 //            } catch (IOException e) {}
 //            sb.append(indent + "  <td>\r\n");
 //            sb.append(indent + "  <select th:field=\"*{" + htmlFormVar + "}\">\r\n");
@@ -964,13 +997,13 @@ public class OutputStringTree extends IOStringTree {
           StringBuilder sb = new StringBuilder("");
           String indent = "          "; // 10 spaces
           
-          boolean isFkRef = (!isPrimitiveOrWrapper(field) & getCollectionEnclosedMetaInfo(field) == null);
-          boolean isFKChildCollection = (getCollectionEnclosedMetaInfo(field) != null); // FLAWED?
-          boolean currentMetaInfoIsChild = (!currentMetaInfo.equals(drivingMetaInfo));
+          boolean isFkRef = (!isPrimitiveOrWrapper(field) & getCollectionEnclosedEntityMeta(field) == null);
+          boolean isFKChildCollection = (getCollectionEnclosedEntityMeta(field) != null); // FLAWED?
+          boolean currentEntityMetaIsChild = (!currentEntityMeta.equals(drivingEntityMeta));
           String fieldType = field.getType().getSimpleName();
-          String drivingMetaInfoName = drivingMetaInfo.getSimpleName();
-          if (currentMetaInfoIsChild) { // NEED TO HANDLE MULTIPLE FKs back to same driving parent
-            if (fieldType.equals(drivingMetaInfoName)) break; 
+          String drivingEntityMetaName = drivingEntityMeta.getSimpleName();
+          if (currentEntityMetaIsChild) { // NEED TO HANDLE MULTIPLE FKs back to same driving parent
+            if (fieldType.equals(drivingEntityMetaName)) break; 
           }
           String htmlFormInputControl = field.getHtmlFormInputControl();
           boolean isVertical = token.startsWith(HTML_FORM_VERTICAL_INPUT);
@@ -978,7 +1011,8 @@ public class OutputStringTree extends IOStringTree {
           boolean isBlank = token.endsWith("_BLANK"); 
           if (field.isEmbeddedIdMemberField() & !isBlank) break;
           
-          sb.append(isVertical?indent + "<tr>\n":"");
+          sb.append(isVertical?"<tr>\n":"");
+          //sb.append(isVertical?indent + "<tr>\n":"");
           sb.append(isVertical?indent + "  <td><label for=\"" + field.getResolvedIdentifier() + "\">" + field.getLabel() + "</label></td>\n":"");
           String classVar = field.getDeclaringClassName().substring(0, 1).toLowerCase()+field.getDeclaringClassName().substring(1);
           String htmlFormVar = classVar + "." + field.getName();
@@ -988,7 +1022,7 @@ public class OutputStringTree extends IOStringTree {
           
           String fieldName = "";
           int fieldWidth = field.getFieldWidth();
-          if (currentMetaInfoIsChild) { // Horizontal
+          if (currentEntityMetaIsChild) { // Horizontal
             fieldName = classVar + (field.getName().substring(0, 1).toUpperCase()+field.getName().substring(1));
           }
           else { // Vertical
@@ -1017,7 +1051,7 @@ public class OutputStringTree extends IOStringTree {
             String fkRefEntityQualified = field.getLabel().replaceAll(" ", "");
             String fkRefEntityId = "COULD NOT GET fkRefEntityId";
             try {
-              fkRefEntityId = MetaInfo.getMetaInfo(field.getType().getName()).getIDField().getName();
+              fkRefEntityId = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(field.getType().getName()).getIDField().getName();
             } catch (IOException e) {}
             sb.append(indent + "  <td>\r\n");
             sb.append(indent + "  <select th:field=\"*{" + htmlFormVar + "}\">\r\n");
@@ -1049,7 +1083,7 @@ public class OutputStringTree extends IOStringTree {
           returnValue = field.getDeclaringClassName();
           break;
         case FK_CHILD_ENTITY_LABEL:
-          returnValue = currentMetaInfo.getLabel();
+          returnValue = currentEntityMeta.getLabel();
           break;
         case FK_CHILD_ENTITY_QUALIFIED:
           returnValue = field.getLabel().replaceAll(" ", "");
@@ -1076,31 +1110,31 @@ public class OutputStringTree extends IOStringTree {
     return returnValue;
   }
   
-  public String getAttributeAttribute ( MetaInfo drivingMetaInfo
-                                      , FieldMetaInfo drivingMetaInfoField
-                                      , MetaInfo currentMetaInfo
+  public String getAttributeAttribute ( EntityMeta drivingEntityMeta
+                                      , FieldMeta drivingEntityMetaField
+                                      , EntityMeta currentEntityMeta
                                       , String token
                                       , Map<String, String> parentTokenMap
                                       ) {
     String[] excluded = null;
-    return getAttributeAttribute (drivingMetaInfo, drivingMetaInfoField, currentMetaInfo, token, excluded);
+    return getAttributeAttribute (drivingEntityMeta, drivingEntityMetaField, currentEntityMeta, token, excluded);
   }
 
-  public String getAttributeAttribute ( MetaInfo drivingMetaInfo
-                                      , FieldMetaInfo drivingMetaInfoField
-                                      , MetaInfo currentMetaInfo
+  public String getAttributeAttribute ( EntityMeta drivingEntityMeta
+                                      , FieldMeta drivingEntityMetaField
+                                      , EntityMeta currentEntityMeta
                                       , String token
                                       , String[] excluded
                                       ) {
-//    out.println("getAttributeAttribute " + currentMetaInfo.getSimpleName() + ", " + token);
+//    out.println("getAttributeAttribute " + currentEntityMeta.getSimpleName() + ", " + token);
     String returnValue = null;
     String interim = null;
-    boolean currentMetaInfoIsChild = (!currentMetaInfo.equals(drivingMetaInfo));
-    String drivingMetaInfoName = drivingMetaInfo.getSimpleName();
+    boolean currentEntityMetaIsChild = (!currentEntityMeta.equals(drivingEntityMeta));
+    String drivingEntityMetaName = drivingEntityMeta.getSimpleName();
     
     switch (token) { 
     case ENTITY_ATTRIB_LABEL:
-      returnValue = drivingMetaInfoField.getLabel();
+      returnValue = drivingEntityMetaField.getLabel();
       break;
     
 //    case ENTITY_ATTRIB_UPPER_NAME:
@@ -1111,50 +1145,50 @@ public class OutputStringTree extends IOStringTree {
 //    break;
     case FIRST_NON_KEY_REQUIRED_ATTRIB:
     case FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP:
-  //    out.println("Found FK_CHILD_ENTITY " + FK_CHILD_ENTITY + " " + currentMetaInfo.getSimpleName() + ": " + currentMetaInfo);
-      returnValue = currentMetaInfo.getFirstNonKeyRequiredFieldName();
+  //    out.println("Found FK_CHILD_ENTITY " + FK_CHILD_ENTITY + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
+      returnValue = currentEntityMeta.getFirstNonKeyRequiredFieldName();
       if (token.equals(FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP)) {
         returnValue = returnValue.substring(0,1).toUpperCase() + returnValue.substring(1);  
       }
       break;
     case FK_CHILD_ENTITY:
-  //    out.println("Found FK_CHILD_ENTITY " + FK_CHILD_ENTITY + " " + currentMetaInfo.getSimpleName() + ": " + currentMetaInfo);
-      returnValue = currentMetaInfo.getSimpleName();
+  //    out.println("Found FK_CHILD_ENTITY " + FK_CHILD_ENTITY + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
+      returnValue = currentEntityMeta.getSimpleName();
       break;
     case FK_CHILD_ENTITY_IDENTIFIER:
-      returnValue = drivingMetaInfoField.getName();
+      returnValue = drivingEntityMetaField.getName();
       break;
     case FK_CHILD_ENTITY_INIT_SMALL:
-      interim = currentMetaInfo.getSimpleName();
+      interim = currentEntityMeta.getSimpleName();
       returnValue = interim.substring(0,1).toLowerCase()+interim.substring(1);
       break;
 //    case FK_CHILD_ENTITY_QUALIFIED:
-//      returnValue = currentMetaInfo.getLabel().replaceAll(" ", "");
+//      returnValue = currentEntityMeta.getLabel().replaceAll(" ", "");
 //      break;
     case FK_CHILD_ENTITY_LABEL:
-      returnValue = currentMetaInfo.getLabel();
+      returnValue = currentEntityMeta.getLabel();
       break;
     case FK_CHILD_ENTITY_LOWER:
-      returnValue = currentMetaInfo.getSimpleName().toLowerCase();
+      returnValue = currentEntityMeta.getSimpleName().toLowerCase();
       break;
     case FK_CHILD_ENTITY_LOWER_PLURAL:
-      returnValue = currentMetaInfo.getSimpleName().toLowerCase()+"s";
+      returnValue = currentEntityMeta.getSimpleName().toLowerCase()+"s";
       break;
     case FK_CHILD_ENTITY_UPPER:
-      returnValue = currentMetaInfo.getSimpleName().toUpperCase();
+      returnValue = currentEntityMeta.getSimpleName().toUpperCase();
       break;
     case FK_CHILD_ENTITY_UPPER_PLURAL:
-      returnValue = currentMetaInfo.getSimpleName().toUpperCase()+"S";
+      returnValue = currentEntityMeta.getSimpleName().toUpperCase()+"S";
       break;
     case FK_REF_ENTITY:
     case FK_REF_ENTITY_INIT_SMALL:
       {
-          out.println("Found FK_REF_ENTITY " + FK_REF_ENTITY + " " + currentMetaInfo.getSimpleName() + ": " + currentMetaInfo);
-        //returnValue = currentMetaInfo.getSimpleName();
-        MetaInfo[] embeddedIdRefEntities = currentMetaInfo.getEmbeddedIdRefEntities();
+          out.println("Found FK_REF_ENTITY " + FK_REF_ENTITY + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
+        //returnValue = currentEntityMeta.getSimpleName();
+        EntityMeta[] embeddedIdRefEntities = currentEntityMeta.getEmbeddedIdRefEntities();
         if (embeddedIdRefEntities == null) break; 
-        for (MetaInfo embeddedIdRefEntity: embeddedIdRefEntities) {
-          if (embeddedIdRefEntity.equals(drivingMetaInfo)) continue;
+        for (EntityMeta embeddedIdRefEntity: embeddedIdRefEntities) {
+          if (embeddedIdRefEntity.equals(drivingEntityMeta)) continue;
           returnValue = embeddedIdRefEntity.getSimpleName();
         }
         if (token.equals(FK_REF_ENTITY_INIT_SMALL)) {
@@ -1166,20 +1200,20 @@ public class OutputStringTree extends IOStringTree {
     case FK_REF_ENTITY_ID_INIT_CAP:
       returnValue = "";
       out.println("case FK_REF_ENTITY_ID: ");
-      out.println("  drivingMetaInfoName = " + drivingMetaInfoName);
-      out.println("  currentMetaInfo = " + currentMetaInfo.getSimpleName());
+      out.println("  drivingEntityMetaName = " + drivingEntityMetaName);
+      out.println("  currentEntityMeta = " + currentEntityMeta.getSimpleName());
       
-//      returnValue = MetaInfo.getMetaInfo(field.getType().getName()).getIDField().getName(); 
+//      returnValue = EntityMeta.getEntityMeta(field.getType().getName()).getIDField().getName(); 
       //if (returnValue == null) 
-      MetaInfo[] embeddedIdRefEntities = currentMetaInfo.getEmbeddedIdRefEntities();
+      EntityMeta[] embeddedIdRefEntities = currentEntityMeta.getEmbeddedIdRefEntities();
       if (embeddedIdRefEntities != null) {
-        for (MetaInfo embeddidIdRefEntity: embeddedIdRefEntities) {
+        for (EntityMeta embeddidIdRefEntity: embeddedIdRefEntities) {
   //        String embeddedIdRefFieldName = embeddidIdRefField.getName();
   //        String embeddedIdRefFieldType = embeddidIdRefField.getType().getSimpleName();
   //        embeddidIdRefField.get
   //        out.println("  embeddedIdRefFieldName = " + embeddedIdRefFieldName);
   //        out.println("  embeddedIdRefFieldType = " + embeddedIdRefFieldType);
-          if (embeddidIdRefEntity == null || embeddidIdRefEntity.equals(drivingMetaInfo)) {
+          if (embeddidIdRefEntity == null || embeddidIdRefEntity.equals(drivingEntityMeta)) {
             continue;
           }
           returnValue = embeddidIdRefEntity.getIDField().getName();
@@ -1191,31 +1225,31 @@ public class OutputStringTree extends IOStringTree {
       }
       break;
     case FK_REF_ENTITY_LOWER:
-      returnValue = currentMetaInfo.getSimpleName().toLowerCase();
+      returnValue = currentEntityMeta.getSimpleName().toLowerCase();
       break;
     case FK_REF_ENTITY_LOWER_PLURAL:
-      returnValue = currentMetaInfo.getSimpleName().toLowerCase()+"s";
+      returnValue = currentEntityMeta.getSimpleName().toLowerCase()+"s";
       break;
     case FK_REF_ENTITY_UPPER_PLURAL:
-      returnValue = currentMetaInfo.getSimpleName().toUpperCase()+"S";
+      returnValue = currentEntityMeta.getSimpleName().toUpperCase()+"S";
       break;
     case FK_CHILD_EMBEDDED_ID:
     case FK_CHILD_EMBEDDED_ID_INIT_SMALL:
-      returnValue = currentMetaInfo.getEmbeddedPKInfo().getSimpleName(); // .getEmbeddedPKInfo().getSimpleName();
+      returnValue = currentEntityMeta.getEmbeddedPKInfo().getSimpleName(); // .getEmbeddedPKInfo().getSimpleName();
       if (token.equals(FK_CHILD_EMBEDDED_ID_INIT_SMALL)) {
         returnValue = returnValue.substring(0, 1).toLowerCase()+ returnValue.substring(1);
       }
       break;      
 //    case FK_CHILD_EMBEDDED_ID:
 //    case FK_CHILD_EMBEDDED_ID_INIT_CAPS:
-//      out.println("Found FK_CHILD_EMBEDDED_ID " + FK_CHILD_EMBEDDED_ID + " " + currentMetaInfo.getSimpleName() + ": " + currentMetaInfo);
-//      String[] embeddedIdFieldIdentifiers = currentMetaInfo.getEmbeddedIdFieldIdentifiers();
+//      out.println("Found FK_CHILD_EMBEDDED_ID " + FK_CHILD_EMBEDDED_ID + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
+//      String[] embeddedIdFieldIdentifiers = currentEntityMeta.getEmbeddedIdFieldIdentifiers();
 //      out.println("embeddedIdFieldIdentifiers = " + embeddedIdFieldIdentifiers);
 //      if (embeddedIdFieldIdentifiers != null) {
 //        boolean complete = false;
 //        for (String fieldIdentifier: embeddedIdFieldIdentifiers) {
 //          out.println("fieldIdentifier = " + fieldIdentifier);
-//          if (fieldIdentifier.toLowerCase().startsWith(drivingMetaInfo.getSimpleName().toLowerCase())){ 
+//          if (fieldIdentifier.toLowerCase().startsWith(drivingEntityMeta.getSimpleName().toLowerCase())){ 
 //            continue; // We're looking for the 'other' key field
 //            // LATENT BUG ALERT! THIS MECHANISM IS INADEQUATE FOR HANDLING CHILD ENTITIES WITH COMPOUND PRIMARY KEYS EXCEEDING 2 FIELDS
 //          } 
@@ -1241,11 +1275,11 @@ public class OutputStringTree extends IOStringTree {
 //      break; 
     case PK_ID_FIELD:
     case PK_ID_FIELD_INIT_CAP:
-//      if (currentMetaInfo.hasEmbeddedId()) 
+//      if (currentEntityMeta.hasEmbeddedId()) 
       try {
-        returnValue = currentMetaInfo.getIDField().getName();
+        returnValue = currentEntityMeta.getIDField().getName();
       } catch (NullPointerException e) {
-//        returnValue = currentMetaInfo.getSimpleName() + " doesn't have a primary key ID field.";
+//        returnValue = currentEntityMeta.getSimpleName() + " doesn't have a primary key ID field.";
 //        returnValue = returnValue.toUpperCase();
         returnValue = null;
         break;
@@ -1257,16 +1291,16 @@ public class OutputStringTree extends IOStringTree {
     case PK_FK_REF_ENTITY: 
     case PK_FK_REF_ENTITY_INIT_SMALL:
       // THIS IS A MESS!
-      out.println("Found PK_FK_REF_ENTITY " + PK_FK_REF_ENTITY + " " + currentMetaInfo.getSimpleName() + ": " + currentMetaInfo);
+      out.println("Found PK_FK_REF_ENTITY " + PK_FK_REF_ENTITY + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
       //getEmbeddedIdRefEntityIdentifiers
-      String[] embeddedIdRefEntityIdentifiers = currentMetaInfo.getEmbeddedIdRefEntityIdentifiers();
+      String[] embeddedIdRefEntityIdentifiers = currentEntityMeta.getEmbeddedIdRefEntityIdentifiers();
       out.println("embeddedIdRefEntityIdentifiers = " + embeddedIdRefEntityIdentifiers);
       if (embeddedIdRefEntityIdentifiers != null) {
         boolean complete = false;
         for (String refEntityName: embeddedIdRefEntityIdentifiers) {
           out.println("refEntityName = " + refEntityName);
           if (refEntityName == null) break;
-          if (refEntityName.equals(drivingMetaInfo.getSimpleName())){ 
+          if (refEntityName.equals(drivingEntityMeta.getSimpleName())){ 
             continue; // We're looking for the 'other' key ref entity 
             // LATENT BUG ALERT! THIS MECHANISM IS INADEQUATE FOR HANDLING CHILD ENTITIES WITH COMPOUND PRIMARY KEYS EXCEEDING 2 FIELDS
           } 
@@ -1292,16 +1326,16 @@ public class OutputStringTree extends IOStringTree {
       break;
     case PK_FK_REF_ENTITIES_DECLARE_REPOSITORY_FIND: // Most hard-coded case so far 2018.03.04
       returnValue = "";
-      String currentTableVarPrefix = currentMetaInfo.getSimpleName().substring(0, 1).toLowerCase()+currentMetaInfo.getSimpleName().substring(1);
+      String currentTableVarPrefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase()+currentEntityMeta.getSimpleName().substring(1);
       int iteration = 0;
       String fieldNameInitCap = null;
       String embeddidIdRefClassNameInitSmall = null;
-      for (String embeddidIdRefClassName: currentMetaInfo.getEmbeddedIdRefEntityIdentifiers()) {
+      for (String embeddidIdRefClassName: currentEntityMeta.getEmbeddedIdRefEntityIdentifiers()) {
         if (iteration > 0) {returnValue += "\n    ";}
         if (embeddidIdRefClassName == null) break;
         embeddidIdRefClassNameInitSmall = embeddidIdRefClassName.substring(0,1).toLowerCase()+ embeddidIdRefClassName.substring(1);
-        out.println("getPkFkRefClassFieldMap() = " + currentMetaInfo.getPkFkRefClassFieldMap());
-        fieldNameInitCap = currentMetaInfo.getPkFkRefClassFieldMap().get(embeddidIdRefClassNameInitSmall);
+        out.println("getPkFkRefClassFieldMap() = " + currentEntityMeta.getPkFkRefClassFieldMap());
+        fieldNameInitCap = currentEntityMeta.getPkFkRefClassFieldMap().get(embeddidIdRefClassNameInitSmall);
         if (fieldNameInitCap != null) {
           fieldNameInitCap = fieldNameInitCap.substring(0, 1).toUpperCase() + fieldNameInitCap.substring(1);
           returnValue += embeddidIdRefClassName + " " + embeddidIdRefClassNameInitSmall
@@ -1313,10 +1347,10 @@ public class OutputStringTree extends IOStringTree {
       break;
     case CALL_COMPOUND_CONSTRUCTOR: 
     //FlightCrewMember(tempFlight, pilot)
-    returnValue = currentMetaInfo.getSimpleName() + "(";
+    returnValue = currentEntityMeta.getSimpleName() + "(";
     iteration = 0;
     fieldNameInitCap = null;
-    for (String embeddidIdRefClassName: currentMetaInfo.getEmbeddedIdRefEntityIdentifiers()) {
+    for (String embeddidIdRefClassName: currentEntityMeta.getEmbeddedIdRefEntityIdentifiers()) {
       if (iteration > 0) {returnValue += ", ";}
       if (embeddidIdRefClassName == null) break;
       embeddidIdRefClassNameInitSmall = embeddidIdRefClassName.substring(0,1).toLowerCase()+ embeddidIdRefClassName.substring(1);
@@ -1330,11 +1364,11 @@ public class OutputStringTree extends IOStringTree {
 //      //FlightCrewMember(tempFlight, pilot)
 //      iteration = 0;
 //  //    fieldNameInitCap = null;
-//      String compoundEntityPlusPK = currentMetaInfo.getSimpleName().substring(0,1).toLowerCase()+currentMetaInfo.getSimpleName().substring(1)
+//      String compoundEntityPlusPK = currentEntityMeta.getSimpleName().substring(0,1).toLowerCase()+currentEntityMeta.getSimpleName().substring(1)
 //                                  + "."
-//                                  + currentMetaInfo.getEmbeddedPKInfo().getSimpleName().substring(0,1).toLowerCase()
-//                                  + currentMetaInfo.getEmbeddedPKInfo().getSimpleName().substring(1);
-//      for (String embeddidIdField: currentMetaInfo.getEmbeddedIdFieldIdentifiers()) {
+//                                  + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(0,1).toLowerCase()
+//                                  + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(1);
+//      for (String embeddidIdField: currentEntityMeta.getEmbeddedIdFieldIdentifiers()) {
 //        if (iteration > 0) {returnValue += ", ";}
 //        returnValue += "dta-" + embeddidIdField + "${" + compoundEntityPlusPK + "." + embeddidIdField + "}";
 //  //    th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}, data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}"
@@ -1349,13 +1383,13 @@ public class OutputStringTree extends IOStringTree {
       boolean isPrefixed = false;
       if (token.equals(COMPOUND_PK_PARAM_LIST_CHILD_ENTITY)) {
         isPrefixed = true;
-        prefix = currentMetaInfo.getSimpleName().substring(0, 1).toLowerCase() + currentMetaInfo.getSimpleName().substring(1); 
+        prefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase() + currentEntityMeta.getSimpleName().substring(1); 
       }
       //FlightCrewMember(tempFlight, pilot)
       returnValue = "(";
       iteration = 0;
       fieldNameInitCap = null;
-      for (String embeddidIdFieldName: currentMetaInfo.getEmbeddedIdFieldIdentifiers()) {
+      for (String embeddidIdFieldName: currentEntityMeta.getEmbeddedIdFieldIdentifiers()) {
         if (iteration > 0) {returnValue += ", ";}
 //        embeddidIdFieldName = embeddidIdFieldName.substring(0,1).toLowerCase()+ embeddidIdRefClassName.substring(1);
         if (isPrefixed) {
@@ -1371,16 +1405,16 @@ public class OutputStringTree extends IOStringTree {
     }
     case COMPOUND_INSERT_PARAM_LIST_CHILD_ENTITY:
     {  
-      String prefix = currentMetaInfo.getSimpleName().substring(0, 1).toLowerCase() + currentMetaInfo.getSimpleName().substring(1); 
+      String prefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase() + currentEntityMeta.getSimpleName().substring(1); 
       //FlightCrewMember(tempFlight, pilot)
       returnValue = "(";
       iteration = 0;
       fieldNameInitCap = null;
-//      for (MetaInfo.FieldMetaInfo embeddidIdField: currentMetaInfo.getEmbeddedIdFields()) {
-      for (MetaInfo.FieldMetaInfo field: currentMetaInfo.getFieldMetaInfoArray()) {
+//      for (EntityMeta.FieldMeta embeddidIdField: currentEntityMeta.getEmbeddedIdFields()) {
+      for (EntityMeta.FieldMeta field: currentEntityMeta.getFieldMetaArray()) {
         if (field.getName().equals(SERIAL_VERSION_UID)) continue;
         if (iteration > 0) {returnValue += ", ";}
-        if (field.getType().getSimpleName().equals(drivingMetaInfo.getSimpleName())) {
+        if (field.getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) {
           returnValue += field.getName(); // need to pre-pend entity var name plus getter() call
         }
         else
@@ -1396,10 +1430,10 @@ public class OutputStringTree extends IOStringTree {
     case FIND_ONE_BY_PK_FK_CRITERIA: // Second most hard-coded case so far 2018.03.04
       //findOneByFlightAndPilot(flight, pilot);
       returnValue = "findOneBy";
-      currentTableVarPrefix = currentMetaInfo.getSimpleName().substring(0, 1).toLowerCase()+currentMetaInfo.getSimpleName().substring(1);
+      currentTableVarPrefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase()+currentEntityMeta.getSimpleName().substring(1);
       iteration = 0;
       fieldNameInitCap = null;
-      for (String embeddidIdRefClassName: currentMetaInfo.getEmbeddedIdRefEntityIdentifiers()) {
+      for (String embeddidIdRefClassName: currentEntityMeta.getEmbeddedIdRefEntityIdentifiers()) {
         if (iteration > 0) {returnValue += "And";}
         returnValue += embeddidIdRefClassName;
         iteration++;
@@ -1407,7 +1441,7 @@ public class OutputStringTree extends IOStringTree {
       returnValue += "(";
       iteration = 0;
       embeddidIdRefClassNameInitSmall = null;
-      for (String embeddidIdRefClassName: currentMetaInfo.getEmbeddedIdRefEntityIdentifiers()) {
+      for (String embeddidIdRefClassName: currentEntityMeta.getEmbeddedIdRefEntityIdentifiers()) {
         if (iteration > 0) {returnValue += ", ";}
         if (embeddidIdRefClassName == null) break;
         embeddidIdRefClassNameInitSmall = embeddidIdRefClassName.substring(0,1).toLowerCase()+ embeddidIdRefClassName.substring(1);
@@ -1420,7 +1454,7 @@ public class OutputStringTree extends IOStringTree {
       out.println("case FK_CHILD_EMBEDDED_PK");
     case FK_CHILD_EMBEDDED_PK_INIT_SMALL:
       out.println("case FK_CHILD_EMBEDDED_PK_INIT_SMALL");
-      MetaInfo embeddedPK = currentMetaInfo.getEmbeddedPKInfo();
+      EntityMeta embeddedPK = currentEntityMeta.getEmbeddedPKInfo();
       if (embeddedPK != null) {
         returnValue = embeddedPK.getSimpleName();
       }
@@ -1445,75 +1479,75 @@ public class OutputStringTree extends IOStringTree {
   }
   
 
-  public TempMetaInfo getCollectionEnclosedMetaInfo (MetaInfo.FieldMetaInfo testField) { 
-    List<TempMetaInfo> collectionOfMetaInfoList = getCollectionEnclosedMetaInfos (testField, 1); 
-    return (collectionOfMetaInfoList !=null?collectionOfMetaInfoList.get(0):null);
+  public TempEntityMeta getCollectionEnclosedEntityMeta (EntityMeta.FieldMeta testField) { 
+    List<TempEntityMeta> collectionOfEntityMetaList = getCollectionEnclosedEntityMetas (testField, 1); 
+    return (collectionOfEntityMetaList !=null?collectionOfEntityMetaList.get(0):null);
   }
 
   
-  public List<TempMetaInfo> getCollectionEnclosedMetaInfos (MetaInfo.FieldMetaInfo testField) { 
-    return getCollectionEnclosedMetaInfos (testField, 99); 
+  public List<TempEntityMeta> getCollectionEnclosedEntityMetas (EntityMeta.FieldMeta testField) { 
+    return getCollectionEnclosedEntityMetas (testField, 99); 
    }
      
-   public List<TempMetaInfo> getCollectionEnclosedMetaInfos (MetaInfo.FieldMetaInfo testField, int limit) { // SHOULDN'T THIS BE MOVED TO CLASS MetaInfo??
+  public List<TempEntityMeta> getCollectionEnclosedEntityMetas (EntityMeta.FieldMeta testField, int limit) { // SHOULDN'T THIS BE MOVED TO CLASS EntityMeta??
    //out.println("getCollectionEnclosedClasses");
    if (!(testField.getType().getName().equals(DATATYPE_COLLECTION))) { return null; }
-   List<TempMetaInfo> collectionOfMetaInfoList = new ArrayList<>();
-   MetaInfo enclosedClassInfo;
-   MetaInfo enclosedFKRefClassInfo;
-   TempMetaInfo tempMetaInfo;
-   TempMetaInfo tempEnclosedFKRefClassInfo;
-//   Set<String> duplicateMetaInfoSet = new HashSet();
+   List<TempEntityMeta> collectionOfEntityMetaList = new ArrayList<>();
+   EntityMeta enclosedClassInfo;
+   EntityMeta enclosedFKRefClassInfo;
+   TempEntityMeta tempEntityMeta;
+   TempEntityMeta tempEnclosedFKRefClassInfo;
+//   Set<String> duplicateEntityMetaSet = new HashSet();
    boolean xReferenced = false;
 //   if (testField.getType().getName().equals(DATATYPE_COLLECTION)) {
      out.println("isCollection() " + testField.getName());
      String collectionOfClassName = this.getEnclosedType(testField);
 //     out.println("  collectionOfClassName = " + collectionOfClassName);
      try {
-//       enclosedClassInfo = MetaInfo.getMetaInfo(MODEL_PACKAGE+"."+collectionOfClassName, ANNOTATION_ENTITY);
-       enclosedClassInfo = MetaInfo.getMetaInfo(MODEL_PACKAGE+"."+collectionOfClassName);
+//       enclosedClassInfo = EntityMeta.getEntityMeta(MODEL_PACKAGE+"."+collectionOfClassName, ANNOTATION_ENTITY);
+       enclosedClassInfo = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(MODEL_PACKAGE+"."+collectionOfClassName);
        if (enclosedClassInfo == null) return null;
-       tempMetaInfo = new TempMetaInfo(enclosedClassInfo);
-//       duplicateMetaInfoSet.add(tempMetaInfo.getMetaInfo().getSimpleName());
+       tempEntityMeta = new TempEntityMeta(enclosedClassInfo);
+//       duplicateEntityMetaSet.add(tempEntityMeta.getEntityMeta().getSimpleName());
        if (enclosedClassInfo.hasEmbeddedId()) {
          xReferenced = true;
        }
-       tempMetaInfo.setXReferenced(xReferenced);
-       collectionOfMetaInfoList.add(tempMetaInfo);
-       if (limit == 1) return collectionOfMetaInfoList;
-       MetaInfo.FieldMetaInfo[] fields = enclosedClassInfo.getFieldMetaInfoArray();
+       tempEntityMeta.setXReferenced(xReferenced);
+       collectionOfEntityMetaList.add(tempEntityMeta);
+       if (limit == 1) return collectionOfEntityMetaList;
+       EntityMeta.FieldMeta[] fields = enclosedClassInfo.getFieldMetaArray();
        enclosedFKRefClassInfo = null;
-       for (MetaInfo.FieldMetaInfo field: fields) {
+       for (EntityMeta.FieldMeta field: fields) {
          if (!isPrimitiveOrWrapper(field)) {
            out.println( "  FK Ref Field from child enclosed class = " + field.getResolvedIdentifier());
           out.println( "    FK Ref Field Type = " + field.getType().getName());
-           enclosedFKRefClassInfo = MetaInfo.getMetaInfo(field.getType().getName(), ANNOTATION_ENTITY);
+           enclosedFKRefClassInfo = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(field.getType().getName(), ANNOTATION_ENTITY);
            if (enclosedFKRefClassInfo != null) {
-//             if (duplicateMetaInfoSet.contains(enclosedFKRefClassInfo.getSimpleName())) continue;
-//             duplicateMetaInfoSet.add(enclosedFKRefClassInfo.getSimpleName());
-             tempEnclosedFKRefClassInfo = new TempMetaInfo(enclosedFKRefClassInfo);
+//             if (duplicateEntityMetaSet.contains(enclosedFKRefClassInfo.getSimpleName())) continue;
+//             duplicateEntityMetaSet.add(enclosedFKRefClassInfo.getSimpleName());
+             tempEnclosedFKRefClassInfo = new TempEntityMeta(enclosedFKRefClassInfo);
              tempEnclosedFKRefClassInfo.setXReferenced(xReferenced); 
              tempEnclosedFKRefClassInfo.setThirdEntity(true); 
 //             out.println( "    Adding " + enclosedFKRefClassInfo + " to collectionOfClassList... " );
-//             collectionOfMetaInfoList.add(field.getType());
-             collectionOfMetaInfoList.add(tempEnclosedFKRefClassInfo);
+//             collectionOfEntityMetaList.add(field.getType());
+             collectionOfEntityMetaList.add(tempEnclosedFKRefClassInfo);
            } else {
              out.println("enclosedFKRefClassInfo = " + enclosedFKRefClassInfo);
              out.println( "    NOT Adding " + field.getType().getName() + " to collectionOfClassList... " );
            }
          }
        }
-       if (collectionOfMetaInfoList != null) return collectionOfMetaInfoList;
+       if (collectionOfEntityMetaList != null) return collectionOfEntityMetaList;
        else return null;
        } catch (IOException e) {
          out.println("Sorry, IOException trying to load " + MODEL_PACKAGE+"."+collectionOfClassName);
        }
-//       out.println("boolean getCollectionEnclosedClasses() to return true on field " + testField.getName() + ": collectionOfClass = " + collectionOfMetaInfoList);
+//       out.println("boolean getCollectionEnclosedClasses() to return true on field " + testField.getName() + ": collectionOfClass = " + collectionOfEntityMetaList);
 //     } else return null;
      return null; // Dummy statement to satisfy compiler
    }
 
-   public String getEnclosedType (MetaInfo.FieldMetaInfo field) { // SHOULDN'T THIS BE MOVED TO CLASS MetaInfo??
+  public String getEnclosedType (EntityMeta.FieldMeta field) { // SHOULDN'T THIS BE MOVED TO CLASS EntityMeta??
      String fieldName = field.getName();
      String drivingEntityClassName = field.getDeclaringClassName();
 //     out.println("getEnclosedType(" + fieldName + ")");
@@ -1577,9 +1611,9 @@ public class OutputStringTree extends IOStringTree {
      return genericClassName;
    }
    
-   public String getEmbeddedIdEntityFindStatements(MetaInfo metaInfoWithEmbeddedPK) {
+   public String getEmbeddedIdEntityFindStatements(EntityMeta entityMetaWithEmbeddedPK) {
      StringBuilder stringB = new StringBuilder("");
-     for (MetaInfo.FieldMetaInfo field: metaInfoWithEmbeddedPK.getEmbeddedIdFields()) {
+     for (EntityMeta.FieldMeta field: entityMetaWithEmbeddedPK.getEmbeddedIdFields()) {
 //       stringB.append(field.getDeclaringClassName())
      }
       return null;

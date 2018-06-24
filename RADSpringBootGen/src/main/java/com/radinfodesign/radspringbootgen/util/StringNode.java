@@ -22,9 +22,9 @@ import java.util.List;
 /**
  * Represents a node in a hierarchical tree (input template or generated output code) of strings. 
  * May have zero or one parent nodes and zero or any number of child nodes.
- * If used in an @InputStringTree, will be read in from template file, which contains a mix
- * of verbatim code and token-identified expressions. These may result in simple substitution
- * of one generated value apiece, or multiple value based on some form of iteration,
+ * If used in an {@link InputStringTree}, will be read in from template file, which contains a mix
+ * of verbatim code and token-identified expressions. These tokens may result in simple substitution
+ * of one generated value apiece, or multiple values based on some form of iteration, for example
  * as with all of the columns within a database table. 
  */
 public class StringNode  {
@@ -54,9 +54,10 @@ public class StringNode  {
   protected int childCount = 0;
   
   /**
-   * Assigns @param nodeValue to member variable; If the node value is a single- or 
+   * Assigns nodeValue to member variable; If the node value is a single- or 
    * multi-valued expression, then tokenKey or tokenInstruction get assigned values
    * parsed from the nodeValue.
+   * @param nodeValue String value of this node
    */
   public StringNode (String nodeValue) {
     this.nodeValue=nodeValue;
@@ -116,6 +117,13 @@ public class StringNode  {
       return false;
     }
   }
+  
+  public boolean isLiteralExpression() {
+    return ((!isSingleTokenExpression() & (!isMultiTokenExpression ())));
+  }
+  
+
+  
   
   public static void main (String[] args) {
     String expression1 = "@RequestParam(name=ENTITY_ATT_ID, defaultValue=\"0\") Integer {${ENTITY_ATT_ID}$}";

@@ -18,6 +18,11 @@ import static java.lang.System.out;
 
 import java.util.StringTokenizer;
 
+/**
+ * Intermediate abstract parent class for hierarchical trees upon which code generation is based.
+ * @author Howard Hyde
+ *
+ */
 abstract class IOStringTree extends StringTree {
   protected boolean built = false;
   
@@ -25,9 +30,20 @@ abstract class IOStringTree extends StringTree {
     super(topValue);
   }
 
+  public IOStringTree() {
+  }
+
+  /**
+   * 
+   * @return Whether or not the tree is complete and ready for traversing, processing or outputting.
+   */
   public boolean isBuilt () { return this.built;}
   
-  public void build() throws Exception {}
+  /**
+   * Instructs the tree to build itself.
+   * @throws Exception KLUDGE because subclass OutputStringTree.build() doesn't work; must call overload with arguments
+   */
+  public abstract void build();// throws Exception {}
   
  }
 

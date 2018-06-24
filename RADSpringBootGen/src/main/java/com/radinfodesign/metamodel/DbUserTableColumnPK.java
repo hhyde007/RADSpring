@@ -22,7 +22,7 @@ import javax.persistence.Embeddable;
 
 /**
  *
- * @author Tarzan
+ * @author Howard Hyde
  */
 @Embeddable
 public class DbUserTableColumnPK implements Serializable {

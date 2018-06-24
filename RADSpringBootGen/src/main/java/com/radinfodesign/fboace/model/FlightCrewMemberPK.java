@@ -15,7 +15,7 @@ import com.radinfodesign.radspringbootgen.model.Label;
 
 /**
  *
- * @author Tarzan
+ * @author Howard Hyde
  */
 @Embeddable
 public class FlightCrewMemberPK implements Serializable {
@@ -26,7 +26,7 @@ public class FlightCrewMemberPK implements Serializable {
   private Integer flightId;
   @Basic(optional = false)
   @Column(name = "PILOT_ID")
-  @Label (name="Pie-Lot")
+  @Label (name="Pilot")
   private Integer pilotId;
 
   public FlightCrewMemberPK() {

@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Tarzan
+ * @author Howard Hyde
  */
 @Entity
 @Table(name = "USER_TAB_COLUMNS")

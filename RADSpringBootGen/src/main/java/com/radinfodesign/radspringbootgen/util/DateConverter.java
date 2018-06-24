@@ -20,6 +20,12 @@ import java.time.LocalDate;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
+/**
+ * 
+ * Methods for conversion of java.sql.Date to java.time.LocalDate and vice versa.
+ * @author Howard Hyde
+ *
+ */
 @Converter (autoApply=true)
 public class DateConverter implements AttributeConverter<LocalDate, java.sql.Date> {
 

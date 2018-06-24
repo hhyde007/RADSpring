@@ -45,6 +45,7 @@ public class Flight implements Serializable {
   @GeneratedValue(generator="InvSeq")
   @SequenceGenerator(name="InvSeq", sequenceName="FLIGHT_PK_SEQ")
   private Integer flightId;
+  
   @Basic(optional = false)
   @Column(name = "SHORT_NAME")
   private String shortName;

@@ -20,6 +20,14 @@ import java.io.IOException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * Main Spring Boot Launch application for RADSpringBootGen
+ * The main launch vehicle for the generation system is 
+ * radspringbootgen.util/GenJavaComponents
+ *
+ * @author Howard Hyde
+ * 
+ */
 @SpringBootApplication
 public class RADSpringBootGenApplication {
   
