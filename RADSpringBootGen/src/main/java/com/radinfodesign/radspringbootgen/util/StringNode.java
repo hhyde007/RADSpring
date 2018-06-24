@@ -85,12 +85,21 @@ public class StringNode  {
     return "" + this.nodeValue;
   }
   
+  /**
+   * Indicates whether or not the contents of the this node consists in an expression token alone; 
+   * with NO other expression tokens nested within it.
+   */
   public boolean isSingleTokenExpression () {
     return ((this.getValue().indexOf(TOKEN_OPEN) == 0) 
         && (this.getValue().indexOf(TOKEN_CLOSE)
                  ==(this.getValue().length()-TOKEN_CLOSE_LENGTH)));
         
   }
+  
+  /**
+   * Indicates whether or not the contents of the this node consists in an expression token 
+   * with one or more other expression tokens nested within it.
+   */
   public boolean isMultiTokenExpression () {
     int tokenOpenIndex = this.getValue().indexOf(TOKEN_OPEN);
     if (tokenOpenIndex!=0) return false;
@@ -118,6 +127,9 @@ public class StringNode  {
     }
   }
   
+  /**
+   * Indicates whether or not the contents of the this node starts and ends with expression token delimiters.
+   */
   public boolean isLiteralExpression() {
     return ((!isSingleTokenExpression() & (!isMultiTokenExpression ())));
   }
