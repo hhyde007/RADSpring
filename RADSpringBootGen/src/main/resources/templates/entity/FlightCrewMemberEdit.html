@@ -1,0 +1,133 @@
+<!--
+ *  Generated from RADSpringBootGen
+ *  Copyright(c) 2018 by RADical Information Design Corporation
+ *  Template: editTemplate.html.txt
+-->
+ 
+<html layout:decorator="layout">
+  <div layout:fragment="content">
+
+    <form method="post" name="comment_form" id="comment_form" th:action="${formAction}" modelAttribute="flightCrewMember" role="form">    
+      <table class="table table-striped" id="flightCrewMember_edit">
+        <thead> 
+          <tr>
+        <i th:text="${message}"></i>
+        <th><h3>Edit FlightCrewMember</h3></th>
+        <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <div class="form-group">
+          
+          <tr>
+            <td><label for="notes">Notes</label></td>
+            <td><textarea rows="1" id="notes" name="notes" cols="40" th:text="${flightCrewMember.notes}"/></td>
+          </tr>
+
+          
+          
+          
+        </div>
+        <input type="hidden" th:field="${flightCrewMember.flightCrewMemberPK}"/>
+        <button type="submit" id="submit" class="btn btn-primary">Save</button> 
+        <a class="btn btn-primary" th:href="@{'{list}'(list=${listPath})}">Cancel/Return</a>
+        <button data-btn="flightCrewMember-refresh" th:attr="data-flightCrewMemberId=${flightCrewMember.flightCrewMemberId}" type="SUBMIT" class="btn btn-primary" NAME="frmRefresh" VALUE="Refresh (Discard Changes)">Discard Changes/Refresh</button>
+        </tbody>
+      </table>
+      
+<HR />
+       
+
+      
+      <hr />
+      <hr />
+      <button type="submit" id="submit" class="btn btn-primary">Save</button>
+      <a class="btn btn-primary" th:href="@{'{list}'(list=${listPath})}">Cancel/Return</a>
+      <button data-btn="flightCrewMember-refresh" th:attr="data-flightCrewMemberId=${flightCrewMember.flightCrewMemberId}" type="SUBMIT" class="btn btn-primary" NAME="frmRefresh" VALUE="Refresh (Discard Changes)">Discard Changes/Refresh</button>
+    </form>
+    
+        
+    
+    <script>
+      $(document).ready(function(){
+      
+        $("button[data-btn='flightCrewMember-refresh']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='flightCrewMemberPK';
+            input.value=$(this).attr('data-flightCrewMemberPK');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/FlightCrewMember/Edit';
+            form.submit();
+          });
+          
+        $("button[data-btn='flightCrewMemberPK-edit']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='EntityMeta.getEntityMeta() SHOULD NOT THROW Exception (getAttributeAttribute case FK_REF_ENTITY_ID)';
+            input.value=$(this).attr('data-flightCrewMemberPK');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/FlightCrewMemberPK/Edit';
+            form.submit();
+          });
+          $("button[data-btn='flightId-edit']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='flightId';
+            input.value=$(this).attr('data-flightId');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/Flight/Edit';
+            form.submit();
+          });
+          $("button[data-btn='pilotId-edit']").on('click', function(e){
+            e.preventDefault();
+            var form=document.createElement('form');
+            document.body.appendChild(form);
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='pilotId';
+            input.value=$(this).attr('data-pilotId');
+            form.appendChild(input);
+            form.method='post';
+            form.action='/Pilot/Edit';
+            form.submit();
+          });
+          
+
+          
+        
+          
+
+<!--          var spacers = document.getElementsByClassName('spacer');
+          var numSpacers = spacers.length;
+          console.log('numSpacers: ', numSpacers);
+          console.log('typeof numSpacers: ', typeof numSpacers);
+          console.log('spacers: ', spacers);
+          for (var i=0; i<numSpacers; i++){
+          	console.log('spacers[i] = ', spacers[i]);
+            	spacers[i].style.visibility = "hidden";
+            }
+-->
+});
+    
+    
+    </script>
+
+    <script src='/js/flightcrewmember.js'></script>
+
+  </div>
+
+</html>
+

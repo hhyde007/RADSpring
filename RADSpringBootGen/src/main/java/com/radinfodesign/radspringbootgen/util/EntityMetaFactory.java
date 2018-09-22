@@ -31,8 +31,8 @@ import java.util.StringTokenizer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.radinfodesign.metamodel.DbUserTableColumn;
 import com.radinfodesign.radspringbootgen.dao.DbUserTableColumnRepository;
+import com.radinfodesign.radspringbootgen.metamodel.DbUserTableColumn;
 
 
 public interface EntityMetaFactory {

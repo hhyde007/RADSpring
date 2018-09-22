@@ -6,8 +6,9 @@
 package {${servicePackageName}$};
 
 import {${modelPackageName}$}.{${MODEL_ENTITY}$};
-{${ACT_THIRD_ENTITIES_ONLY=import {${modelPackageName}$}.{${FK_CHILD_ENTITY}$};
-}$}import java.util.List;
+!!{${ACT_THIRD_ENTITIES_ONLY=import {${modelPackageName}$}.{${FK_CHILD_ENTITY}$};
+!!}$}
+import java.util.List;
 
 public interface {${MODEL_ENTITY}$}Service {
 
@@ -22,16 +23,11 @@ public interface {${MODEL_ENTITY}$}Service {
       }$}) throws Exception;
   
   int deleteEntity(Integer {${ENTITY_ATT_ID}$});
-!!  {${ACT_FK_CHILD_ENTITIES=
-!!  Integer delete{${FK_CHILD_ENTITY}$} 
-!!           ( {${ACT_PK_ATTRIBS_COMMA_SEPARATED={${ENTITY_ATTRIB_DEFAULT_DATATYPE}$} {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}
-!!           }$}); 
-!!   }$}
 
   {${ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS=int delete{${FK_CHILD_ENTITY}$} 
                   ( {${ACT_PK_ATTRIBS_COMMA_SEPARATED={${ENTITY_ATTRIB_DEFAULT_DATATYPE}$} {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}
                   }$});
-  }$}{${ACT_FK_CHILD_ENTITIES=int delete{${FK_CHILD_ENTITY}$} (Integer {${PK_ID_FIELD}$});
+  }$}{${ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS=int delete{${FK_CHILD_ENTITY}$} (Integer {${PK_ID_FIELD}$});
   }$}
   {${ACT_THIRD_ENTITIES_ONLY=List<{${MODEL_ENTITY}$}> getQualified{${MODEL_ENTITY}$}sBy{${PK_ID_FIELD_INIT_CAP}$} (Integer {${PK_ID_FIELD}$});
   }$}    

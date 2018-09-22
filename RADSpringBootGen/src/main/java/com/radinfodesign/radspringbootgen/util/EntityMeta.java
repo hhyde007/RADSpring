@@ -31,8 +31,8 @@ import java.util.StringTokenizer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.radinfodesign.metamodel.DbUserTableColumn;
 import com.radinfodesign.radspringbootgen.dao.DbUserTableColumnRepository;
+import com.radinfodesign.radspringbootgen.metamodel.DbUserTableColumn;
 
 
 /**
@@ -54,14 +54,19 @@ public class EntityMeta {
   public static final String ANNOTATION_TABLE = "@Table";
   public static final String ANNOTATION_COLUMN = "@Column";
   public static final String ANNOTATION_LABEL = "@Label";
+  public static final String ANNOTATION_ONE_TO_MANY = "@OneToMany";
   public static final String ANNOTATION_JOIN_COLUMN = "@JoinColumn";
   public static final String ANNOTATION_BASIC = "@Basic";
   public static final String ANNOTATION_ENTITY = "@Entity";
-  public static final String ANNOTATION_EXCLUDED_EDIT_FROM_PARENT_MODULE = "@ExcludeEditFromParentModule";
+  public static final String ANNOTATION_EXCLUDED_EDIT_FROM_PARENT_MODULE = "@ExcludeFromParentModule";
   public static final String ANNOTATION_ATTRIBUTE_NAME = "name";
-  public static final String MODEL_PACKAGE = "com.radinfodesign.fboace.model";
+  public static final String ANNOTATION_ATTRIBUTE_MAPPED_BY = "mappedBy";
+  public static final String MODEL_PACKAGE = "com.radinfodesign.radspringbootgen.fboace.model";
   public static final String DATATYPE_COLLECTION = "java.util.Collection";
+  public static final String COLLECTION = "Collection";
 
+  protected static final String PATH_TO_MODEL_JAVA_FILES = "com/radinfodesign/radspringbootgen/fboace/model/"; // HARD-CODE ALERT!
+  
 //  private static Map<String, EntityMeta> entityMetaMap = new HashMap<>();
   
   // NOT @Autowired
@@ -86,6 +91,8 @@ public class EntityMeta {
   protected Map<String, String> pkFkRefClassFieldMap = null;
   protected String label;
   protected EntityMeta[] embeddedIdRefEntities = null;  
+
+  static Map<String, String> enclosedTypesMap = new HashMap<>(); // REVISIT THIS
   
   public FieldMeta getIDField() { 
     if (this.idField != null) return this.idField;
@@ -308,7 +315,7 @@ public class EntityMeta {
       return pkReferencedEntityMetas;
     }
     
-    public boolean isExcludedEditFromParentModule () {
+    public boolean isExcludedFromParentModule () {
       return (this.getAnnotationAttribute(ANNOTATION_EXCLUDED_EDIT_FROM_PARENT_MODULE) != null);
     }
     public String getLabel() {
@@ -888,6 +895,116 @@ public class EntityMeta {
   }
 
     
+  public static TempEntityMeta getCollectionEnclosedEntityMeta (EntityMeta.FieldMeta testField) { 
+    List<TempEntityMeta> collectionOfEntityMetaList = getCollectionEnclosedEntityMetas (testField, 1); 
+    return (collectionOfEntityMetaList !=null?collectionOfEntityMetaList.get(0):null);
+  }
+
+  
+  public static List<TempEntityMeta> getCollectionEnclosedEntityMetas (EntityMeta.FieldMeta testField) { 
+    return getCollectionEnclosedEntityMetas (testField, 99); 
+   }
+     
+  public static List<TempEntityMeta> getCollectionEnclosedEntityMetas (EntityMeta.FieldMeta testField, int limit) { // SHOULDN'T THIS BE MOVED TO CLASS EntityMeta??
+   //out.println("getCollectionEnclosedClasses");
+   if (!(testField.getType().getName().equals(DATATYPE_COLLECTION))) { return null; }
+   List<TempEntityMeta> collectionOfEntityMetaList = new ArrayList<>();
+   EntityMeta enclosedClassInfo;
+   EntityMeta enclosedFKRefClassInfo;
+   TempEntityMeta tempEntityMeta;
+   TempEntityMeta tempEnclosedFKRefClassInfo;
+   boolean xReferenced = false;
+     out.println("isCollection() " + testField.getName());
+     String collectionOfClassName = getEnclosedType(testField);
+     try {
+       enclosedClassInfo = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(MODEL_PACKAGE+"."+collectionOfClassName);
+       if (enclosedClassInfo == null) return null;
+       tempEntityMeta = new TempEntityMeta(enclosedClassInfo);
+       if (enclosedClassInfo.hasEmbeddedId()) {
+         xReferenced = true;
+       }
+       tempEntityMeta.setXReferenced(xReferenced);
+       collectionOfEntityMetaList.add(tempEntityMeta);
+       if (limit == 1) return collectionOfEntityMetaList;
+       EntityMeta.FieldMeta[] fields = enclosedClassInfo.getFieldMetaArray();
+       enclosedFKRefClassInfo = null;
+       for (EntityMeta.FieldMeta field: fields) {
+//         if (!isPrimitiveOrWrapper(field)) {
+         if (!(field.isPrimitiveOrWrapper())) {
+           out.println( "  FK Ref Field from child enclosed class = " + field.getResolvedIdentifier());
+          out.println( "    FK Ref Field Type = " + field.getType().getName());
+           enclosedFKRefClassInfo = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(field.getType().getName(), ANNOTATION_ENTITY);
+           if (enclosedFKRefClassInfo != null) {
+             tempEnclosedFKRefClassInfo = new TempEntityMeta(enclosedFKRefClassInfo);
+             tempEnclosedFKRefClassInfo.setXReferenced(xReferenced); 
+             tempEnclosedFKRefClassInfo.setThirdEntity(true); 
+             collectionOfEntityMetaList.add(tempEnclosedFKRefClassInfo);
+           } else {
+             out.println("enclosedFKRefClassInfo = " + enclosedFKRefClassInfo);
+             out.println( "    NOT Adding " + field.getType().getName() + " to collectionOfClassList... " );
+           }
+         }
+       }
+       if (collectionOfEntityMetaList != null) return collectionOfEntityMetaList;
+       else return null;
+       } catch (IOException e) {
+         out.println("Sorry, IOException trying to load " + MODEL_PACKAGE+"."+collectionOfClassName);
+       }
+     return null; // Unreachable Dummy statement to satisfy compiler
+   }
+
+  public static String getEnclosedType (EntityMeta.FieldMeta field) { // SHOULDN'T THIS BE MOVED TO CLASS EntityMeta??
+     String fieldName = field.getName();
+     String drivingEntityClassName = field.getDeclaringClassName();
+     fieldName = fieldName.substring(0,1).toUpperCase()+fieldName.substring(1);
+     if (fieldName.indexOf(COLLECTION) > 1) {
+       fieldName = fieldName.substring(0, fieldName.indexOf(COLLECTION));
+     }
+     String genericClassName = enclosedTypesMap.get(fieldName);
+     if (genericClassName != null) return genericClassName;
+     
+     
+     Path file = Paths.get(PATH_TO_MODEL_JAVA_FILES, drivingEntityClassName +".java");
+     String fileLine = null;
+     int indexOfKeyword = -1;
+     int indexEndKeyword = -1;
+     int indexOfFieldName = -1;
+     int indexOfOpenBracket = -1;
+     int indexOfCloseBracket = -1;
+     
+     try (BufferedReader reader = Files.newBufferedReader(file)){
+       while ((fileLine = reader.readLine())!=null) {
+         indexOfFieldName = fileLine.indexOf(fieldName);
+         if (indexOfFieldName >= 0) {
+           indexOfKeyword = fileLine.indexOf(COLLECTION+"<");
+           if (indexOfKeyword > 0) {
+             indexEndKeyword =  indexOfKeyword + COLLECTION.length()+1;
+               indexOfOpenBracket  = fileLine.indexOf("<");
+                 indexOfCloseBracket = fileLine.indexOf(">");
+                 if ((indexOfCloseBracket - indexOfFieldName)  > 1) {
+                   genericClassName = fileLine.substring(indexOfOpenBracket+1, indexOfCloseBracket);
+                   enclosedTypesMap.put(fieldName, genericClassName);
+                   break;
+                 }
+               }
+             }
+       }
+     }
+     catch (IOException e){
+       out.println("Sorry, could not read file " + file);
+       return null;
+     }
+     return genericClassName;
+   }
+   
+   public static String getEmbeddedIdEntityFindStatements(EntityMeta entityMetaWithEmbeddedPK) {
+     StringBuilder stringB = new StringBuilder("");
+     for (EntityMeta.FieldMeta field: entityMetaWithEmbeddedPK.getEmbeddedIdFields()) {
+//       stringB.append(field.getDeclaringClassName())
+     }
+      return null;
+   }
+   
   @Override
   public String toString () {
     String returnString = "EntityMeta TO_STRING for " + this.getClassName() + "\n"

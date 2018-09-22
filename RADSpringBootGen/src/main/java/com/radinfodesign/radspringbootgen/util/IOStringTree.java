@@ -41,9 +41,8 @@ abstract class IOStringTree extends StringTree {
   
   /**
    * Instructs the tree to build itself.
-   * @throws Exception KLUDGE because subclass OutputStringTree.build() doesn't work; must call overload with arguments
-   */
-  public abstract void build();// throws Exception {}
+  */
+  public abstract void build();
   
  }
 

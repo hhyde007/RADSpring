@@ -21,8 +21,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.radinfodesign.metamodel.DbUserTableColumn;
-import com.radinfodesign.metamodel.DbUserTableColumnPK;
+import com.radinfodesign.radspringbootgen.metamodel.DbUserTableColumn;
+import com.radinfodesign.radspringbootgen.metamodel.DbUserTableColumnPK;
 
 public interface DbUserTableColumnRepository extends CrudRepository<DbUserTableColumn, Integer> {
   DbUserTableColumn findOneByDbUserTableColumnPK(DbUserTableColumnPK pk);

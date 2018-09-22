@@ -90,6 +90,8 @@ public class StringNode  {
    * with NO other expression tokens nested within it.
    */
   public boolean isSingleTokenExpression () {
+    // The String value of this node begins with the token opening delimiters,
+    //   and the FIRST AND ONLY token closing delimiters are precisely at the end of the String value.
     return ((this.getValue().indexOf(TOKEN_OPEN) == 0) 
         && (this.getValue().indexOf(TOKEN_CLOSE)
                  ==(this.getValue().length()-TOKEN_CLOSE_LENGTH)));
@@ -101,6 +103,7 @@ public class StringNode  {
    * with one or more other expression tokens nested within it.
    */
   public boolean isMultiTokenExpression () {
+    // a.k.a. Has Nested Delimited Token Expressions
     int tokenOpenIndex = this.getValue().indexOf(TOKEN_OPEN);
     if (tokenOpenIndex!=0) return false;
     int tokenCloseIndex = this.getValue().indexOf(TOKEN_CLOSE, tokenOpenIndex);

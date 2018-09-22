@@ -153,8 +153,7 @@ public class GenJavaServiceImpl implements GenJavaService {
    * @param outputDir: Output file directory, typically "output" under the root of the RADSpringBootGen app.
    * @param components: List (array) of components to generate for each of the entities: Service interface, Service implementation class, 
    * (web) Controller class, and/or Edit.html.
-   */
-//  public void launch ( DbUserTableColumnRepository dbUserTableColumnRepository
+  */
   public void launch ( String entityList
                      , String basePackage
                      , String outputDir

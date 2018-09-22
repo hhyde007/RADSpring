@@ -1,6 +1,6 @@
 /*
  *  Generated from GenSpringBootGen
- *  Copyright(c) 2018 by RADical Information Design Corporation
+ *  Copyright(c) 2019 by RADical Information Design Corporation
  *  Template: ServiceImplTemplate.java.txt
 */ 
 package {${servicePackageName}$};
@@ -33,7 +33,7 @@ public class {${MODEL_ENTITY}$}ServiceImpl implements {${MODEL_ENTITY}$}Service{
   {${MODEL_ENTITY}$}Repository {${MODEL_ENTITY_INIT_SMALL}$}Repository; 
   {${ACT_FK_CHILD_W_COMPOUND_KEYS_AND_THIRD_ENTITIES=@Autowired
   {${FK_CHILD_ENTITY}$}Repository {${FK_CHILD_ENTITY_INIT_SMALL}$}Repository;
-  }$}{${ACT_FK_CHILD_ENTITIES=@Autowired
+  }$}{${ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS=@Autowired
   {${FK_CHILD_ENTITY}$}Repository {${FK_CHILD_ENTITY_INIT_SMALL}$}Repository;
   }$}{${ACT_FK_REF_ENTITIES=@Autowired
   {${FK_REF_ENTITY}$}Repository {${FK_REF_ENTITY_INIT_SMALL}$}Repository;
@@ -77,7 +77,7 @@ public class {${MODEL_ENTITY}$}ServiceImpl implements {${MODEL_ENTITY}$}Service{
     {${MODEL_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_DATE_ATTRIB_NAME}$}_);
     }$}
     {${ACT_NON_TEMPORAL_ATTRIBS={${MODEL_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_ATTRIB_NAME}$});
-    }$}{${ACT_FK_REF_ATTRIBS={${MODEL_ENTITY_INIT_SMALL}$}.set{${FK_REF_ATTRIB_INITCAPS}$}({${FK_REF_ENTITY_INIT_SMALL}$}Repository.findOne({${FK_REF_ATTRIB_NAME}$}));
+    }$}{${ACT_FK_REF_ATTRIBS={${MODEL_ENTITY_INIT_SMALL}$}.set{${FK_REF_ATTRIB_INITCAPS}$}({${FK_REF_ENTITY_INIT_SMALL}$}Repository.findOne({${FK_REF_ENTITY_IDENTIFIER}$}));
     }$}
     {${MODEL_ENTITY_INIT_SMALL}$} = {${MODEL_ENTITY_INIT_SMALL}$}Repository.save({${MODEL_ENTITY_INIT_SMALL}$});
     System.out.println("{${MODEL_ENTITY}$}ServiceImpl.putEntity: id = " + {${MODEL_ENTITY_INIT_SMALL}$}.get{${PK_ID_FIELD_INIT_CAP}$}());
@@ -132,7 +132,7 @@ public class {${MODEL_ENTITY}$}ServiceImpl implements {${MODEL_ENTITY}$}Service{
       }
     }
     }$}            
-    {${ACT_FK_CHILD_ENTITIES={${FK_CHILD_ENTITY}$} {${FK_CHILD_ENTITY_INIT_SMALL}$} = null;
+    {${ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS={${FK_CHILD_ENTITY}$} {${FK_CHILD_ENTITY_INIT_SMALL}$} = null;
     if ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s != null) {
       for (int i=0; i<{${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s.length; i++) {
       if ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s[i] == null |  {${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s[i].equals("")) continue;
@@ -159,7 +159,8 @@ public class {${MODEL_ENTITY}$}ServiceImpl implements {${MODEL_ENTITY}$}Service{
           {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s[i]);
         }$}{${ACT_FK_REF_ATTRIBS=if ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ATTRIB_INITCAPS}$}s.length > 0)
           {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${FK_REF_ATTRIB_INITCAPS}$}({${FK_REF_ENTITY_INIT_SMALL}$}Repository.findOne({${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ATTRIB_INITCAPS}$}s[i]));
-        }$}{${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATT_ID_INIT_CAP}$}({${MODEL_ENTITY_INIT_SMALL}$});
+!!        }$}{${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATT_ID_INIT_CAP}$}({${MODEL_ENTITY_INIT_SMALL}$});
+        }$}{${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP}$}({${MODEL_ENTITY_INIT_SMALL}$});
         {${FK_CHILD_ENTITY_INIT_SMALL}$} = {${FK_CHILD_ENTITY_INIT_SMALL}$}Repository.save({${FK_CHILD_ENTITY_INIT_SMALL}$});
       }
     }}$}             
@@ -194,7 +195,7 @@ public class {${MODEL_ENTITY}$}ServiceImpl implements {${MODEL_ENTITY}$}Service{
     else { return -1; }
   }
   }$}
-  {${ACT_FK_CHILD_ENTITIES=@Override
+  {${ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS=@Override
   @Transactional
   public int delete{${FK_CHILD_ENTITY}$} (Integer {${PK_ID_FIELD}$}) 
   {

@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.radinfodesign.fboace.model.Pilot;
+//import com.radinfodesign.radspringbootgen.fboace.model.Pilot;
 import com.radinfodesign.radspringbootgen.util.EntityMeta.FieldMeta;
 
 /**
@@ -58,9 +58,9 @@ public class InputStringTree extends IOStringTree {
   // All of these configuration and token values may be modified by the program
   // These first two drive all the others:
   protected String drivingEntityName ="Flight"; // Example/default
-  protected String basePackageName ="com.radinfodesign.fboace"; // Example/default
-  protected String fqDrivingEntityName ="com.radinfodesign.fboace.model.Flight";
-  protected String modelPackageName ="com.radinfodesign.fboace.model";
+  protected String basePackageName ="com.radinfodesign.radspringbootgen.fboace"; // Example/default
+  protected String fqDrivingEntityName ="com.radinfodesign.radspringbootgen.fboace.model.Flight";
+  protected String modelPackageName ="com.radinfodesign.radspringbootgen.fboace.model";
   
   protected TreeMap<String, String> tokenMap = new TreeMap<>();
   
@@ -232,6 +232,7 @@ public class InputStringTree extends IOStringTree {
   }
   
   private static Map<String, InputStringTree> inputStringTreeMap = new HashMap<>();
+  
   public static InputStringTree getInputStringTree ( String templateFileName
                                                    , String topValue
                                                    , String drivingEntityName
