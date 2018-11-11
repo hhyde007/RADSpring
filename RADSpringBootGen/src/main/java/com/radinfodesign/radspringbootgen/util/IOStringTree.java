@@ -35,9 +35,9 @@ abstract class IOStringTree extends StringTree {
 
   /**
    * 
-   * @return Whether or not the tree is complete and ready for traversing, processing or outputting.
+   * @return True if the tree is complete and ready for traversing, processing and/or outputting.
    */
-  public boolean isBuilt () { return this.built;}
+  public boolean isBuilt () {return this.built;}
   
   /**
    * Instructs the tree to build itself.

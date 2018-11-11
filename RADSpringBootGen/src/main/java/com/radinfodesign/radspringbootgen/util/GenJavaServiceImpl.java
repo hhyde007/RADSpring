@@ -30,23 +30,23 @@ import org.springframework.stereotype.Component;
 
 /**
  * Main entry point and master controller for RADSpringBootGen code generation system.
- * <br>NEED TO REFACTOR AS AN AUTOWIRED SERVICE WITH INSTANCE INSTEAD OF STATIC METHODS.
  * <br><br>VERY IMPORTANT CONCEPT: "DRIVING ENTITY": This is the focal database table in a business object. 
  * A module (suite of collaborating classes and UI forms) may expose elements from any number of tables linked by foreign key relationships 
  * (in OO terms, just think of classes that reference or 'use' one another).
- * One of them is the designated "Driver" around which the others revolve. 
+ * <br>One of them is the designated "Driver" around which the others revolve. 
  * <br>If the table has foreign keys to other tables in many-to-one relationships,
  * then those other tables may be represented as single values chosen from lists or drop-down boxes/HTML &lt;SELECT&gt; elements. 
- * If other tables reference the Driving table via foreign key relationships, then these may be represented as Collection attributes in the Model class
+ * <br>If other tables reference the Driving table via foreign key relationships, then these may be represented as Collection attributes in the Model class
  * and multi-valued block of value in UI forms. 
- * And if the child tables reference other tables besides the Driving table, these "Third" tables may be considered part of the business object or module. 
- * In particular, when facilitating the adding or editing of child records, provision must be made for choosing values of the Third table reference 
+ * <br>And if the child tables reference other tables besides the Driving table, these "Third" tables may be considered part of the business object or module. 
+ * <br>In particular, when facilitating the adding or editing of child records, provision must be made for choosing values of the Third table reference 
  * from a list of valid values, rather than typing in something, like a foreign key numeric value.
  * <br>All referenced and referencing entities, whether parents, children or third-table references from children of the Driving table, may be represented 
  * in the UI by navigational links, permitting the user to access the module in which that parent, child or third-entity is the Driving entity of its own module.  
  * <br>MAKE SURE THESE CONCEPTS MAKE SENSE TO YOU BEFORE CONTINUING ANY FURTHER WITH THIS FRAMEWORK, OTHERWISE YOU WILL BE LOST.
  *  
  * @author Howard Hyde
+ * @see <a href="https://github.com/hhyde007/RADSpringBootGen/blob/master/RADSpringBootGen/doc/RADSpringBootGen-Doc.docx">The detailed technical documentation</a>
  */
 @Component
 public class GenJavaServiceImpl implements GenJavaService {
@@ -136,11 +136,17 @@ public class GenJavaServiceImpl implements GenJavaService {
       try (BufferedWriter writer = Files.newBufferedWriter(outputFile)) {
         writer.write(fileString);
       } catch (IOException e) {
+        out.println("******");
         out.println("Sorry, could not write file " + outputFile);
+        e.printStackTrace();
+        out.println("******");
         return;
       }
     } catch (IOException e) {
-      out.println("Sorry, could not read file " + templateFile);
+      out.println("******");
+      out.println("ERROR! Sorry, could not read file " + templateFile);
+      e.printStackTrace();
+      out.println("******");
       return;
     }
   }

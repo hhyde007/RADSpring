@@ -76,9 +76,9 @@
         </thead>
         <tbody>
           <tr data-th-each="pilotCertification : ${pilot.pilotCertificationCollection}">
-             
+            
             <td>
-              <button data-btn="aircraftTypeId-edit" th:attr="data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}" 
+              <button data-btn="aircraftTypeId-edit" th:attr="data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}"
                       type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit AircraftType">
                 <span class="fa-stack">
                   <i class="glyphicon glyphicon-edit"></i>
@@ -86,9 +86,9 @@
               </button>
             </td>
             <td>
-              <button data-btn="pilotCertification-delete" 
-                      th:attr="data-pilotId=${pilotCertification.pilotCertificationPK.pilotId}, data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}" 
-                      type="SUBMIT" 
+            <button data-btn="pilotCertification-delete"
+                      th:attr="data-pilotId=${pilotCertification.pilotCertificationPK.pilotId}, data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}"
+                      type="SUBMIT"
                       class="frmDelete" 
                       NAME="frmDelete" 
                       VALUE="Delete Pilot Certification">
@@ -97,10 +97,10 @@
                 </span>
               </button>
             </td>
-            
+
             <td></td>
             <td class="aircraftType" data-th-text="${pilotCertification.aircraftType}"></td>
-              <input type="hidden" id="pilotCertificationAircraftTypeId" name="pilotCertificationAircraftTypeId" th:value="${pilotCertification.pilotCertificationPK}==null?null:${pilotCertification.pilotCertificationPK.aircraftTypeId}"/>                            
+              <input type="hidden" id="pilotCertificationAircraftTypeId" name="pilotCertificationAircraftTypeId" th:value="${pilotCertification.pilotCertificationPK}==null?null:${pilotCertification.pilotCertificationPK.aircraftTypeId}"/>
                           <td><input type="text" id="pilotCertificationCertificationNumber" size="20" name="pilotCertificationCertificationNumber" th:value="${pilotCertification.certificationNumber}"/></td>
             <td><input type="date" id="pilotCertificationValidFromDate" size="12" name="pilotCertificationValidFromDate" th:value="${pilotCertification.validFromDate}"/></td>
             <td><input type="date" id="pilotCertificationExpirationDate" size="12" name="pilotCertificationExpirationDate" th:value="${pilotCertification.expirationDate}"/></td>
@@ -161,9 +161,9 @@
         </thead>
         <tbody>
           <tr data-th-each="flightCrewMember : ${pilot.flightCrewMemberCollection}">
-             
+            
             <td>
-              <button data-btn="flightId-edit" th:attr="data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}" 
+              <button data-btn="flightId-edit" th:attr="data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}"
                       type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit Flight">
                 <span class="fa-stack">
                   <i class="glyphicon glyphicon-edit"></i>
@@ -171,9 +171,9 @@
               </button>
             </td>
             <td>
-              <button data-btn="flightCrewMember-delete" 
-                      th:attr="data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}, data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}" 
-                      type="SUBMIT" 
+            <button data-btn="flightCrewMember-delete"
+                      th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}, data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}"
+                      type="SUBMIT"
                       class="frmDelete" 
                       NAME="frmDelete" 
                       VALUE="Delete Flight Crew Member">
@@ -182,10 +182,10 @@
                 </span>
               </button>
             </td>
-            
+
             <td></td>
             <td class="flight" data-th-text="${flightCrewMember.flight}"></td>
-              <input type="hidden" id="flightCrewMemberFlightId" name="flightCrewMemberFlightId" th:value="${flightCrewMember.flightCrewMemberPK}==null?null:${flightCrewMember.flightCrewMemberPK.flightId}"/>                            
+              <input type="hidden" id="flightCrewMemberFlightId" name="flightCrewMemberFlightId" th:value="${flightCrewMember.flightCrewMemberPK}==null?null:${flightCrewMember.flightCrewMemberPK.flightId}"/>
                           <td><textarea rows="1" id="flightCrewMemberNotes" name="flightCrewMemberNotes" cols="40" th:text="${flightCrewMember.notes}"/></td>
 
         </tr>
@@ -241,11 +241,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='pilotId';
-            input.value=$(this).attr('data-pilotId');
-            form.appendChild(input);
+            var pilotId=document.createElement('pilotId');
+            pilotId.type='hidden';
+            pilotId.name='pilotId';
+            pilotId.value=$(this).attr('data-pilotId');
+            form.appendChild(pilotId);
             form.method='post';
             form.action='/Pilot/Edit';
             form.submit();
@@ -257,11 +257,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='aircraftTypeId';
-            input.value=$(this).attr('data-aircraftTypeId');
-            form.appendChild(input);
+            var aircraftTypeId=document.createElement('aircraftTypeId');
+            aircraftTypeId.type='hidden';
+            aircraftTypeId.name='aircraftTypeId';
+            aircraftTypeId.value=$(this).attr('data-aircraftTypeId');
+            form.appendChild(aircraftTypeId);
             form.method='post';
             form.action='/AircraftType/Edit';
             form.submit();
@@ -270,11 +270,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='flightId';
-            input.value=$(this).attr('data-flightId');
-            form.appendChild(input);
+            var flightId=document.createElement('flightId');
+            flightId.type='hidden';
+            flightId.name='flightId';
+            flightId.value=$(this).attr('data-flightId');
+            form.appendChild(flightId);
             form.method='post';
             form.action='/Flight/Edit';
             form.submit();
@@ -289,15 +289,12 @@
           pilotId.type='hidden';
           pilotId.name='pilotId';
           pilotId.value=$(this).attr('data-pilotId');
-
           formDelete.appendChild(pilotId);
           var aircraftTypeId=document.createElement('aircraftTypeId');
           aircraftTypeId.type='hidden';
           aircraftTypeId.name='aircraftTypeId';
           aircraftTypeId.value=$(this).attr('data-aircraftTypeId');
-
           formDelete.appendChild(aircraftTypeId);
-          
           
           formDelete.method='post';
           formDelete.action='/Pilot/DeletePilotCertification';
@@ -312,15 +309,12 @@
           flightId.type='hidden';
           flightId.name='flightId';
           flightId.value=$(this).attr('data-flightId');
-
           formDelete.appendChild(flightId);
           var pilotId=document.createElement('pilotId');
           pilotId.type='hidden';
           pilotId.name='pilotId';
           pilotId.value=$(this).attr('data-pilotId');
-
           formDelete.appendChild(pilotId);
-          
           
           formDelete.method='post';
           formDelete.action='/Pilot/DeleteFlightCrewMember';

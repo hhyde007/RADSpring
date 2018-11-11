@@ -35,7 +35,7 @@ package com.radinfodesign.radspringbootgen.util;
   public StringNode getTopNode() { return this.topNode; }
 
  
-  public StringNode addNode (String newNodeString, StringNode parentNode) {
+  protected StringNode addNode (String newNodeString, StringNode parentNode) {
     if (newNodeString == null) throw new RuntimeException ("null String passed to StringTree.addNode()");
     StringNode newNode = new StringNode(newNodeString);
     parentNode.addChild(newNode);

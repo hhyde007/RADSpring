@@ -178,16 +178,16 @@ public class FlightWebController {
 
   
   @PostMapping(value = "/DeleteFlightCrewMember")
-  public String deleteFlightCrewMember ( @RequestParam(name="flightId") Integer flightCrewMemberFlightId
-                                       , @RequestParam(name="pilotId") Integer flightCrewMemberPilotId
+  public String deleteFlightCrewMember ( @RequestParam(name="flightId") Integer flightId
+                                       , @RequestParam(name="pilotId") Integer pilotId
                                        , Model model
                                        , HttpServletRequest request
                                        ) 
   {
     out.println("");
     String message = null;
-    int deleteResult = service.deleteFlightCrewMember (flightCrewMemberFlightId, flightCrewMemberPilotId); 
-    
+    int deleteResult = service.deleteFlightCrewMember (flightId, pilotId);
+
     if (deleteResult == 1) { 
       message = "FlightCrewMember record deleted.";  
     }
@@ -196,7 +196,7 @@ public class FlightWebController {
       message = "FlightCrewMember deletion failed.";  
     }
     request.setAttribute(MSG, message);
-    Flight entity = service.getEntity(flightCrewMemberFlightId);
+    Flight entity = service.getEntity(flightId);
     model.addAttribute(INSTANCE, entity);
     request.setAttribute(ENTITY_ATT_ID, entity.getFlightId());
     request.setAttribute(RedirectView.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.TEMPORARY_REDIRECT);

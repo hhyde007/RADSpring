@@ -1,4 +1,4 @@
-  /* 
+/* 
  * Copyright 2018 by RADical Information Design Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,16 +17,32 @@ package com.radinfodesign.radspringbootgen.util;
 import static java.lang.System.out;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.radinfodesign.radspringbootgen.fboace.model.Flight;
 import com.radinfodesign.radspringbootgen.util.EntityMeta.FieldMeta;
 
 /**
- * Input tree of input template txt file transformed by relational metadata
+ * Input tree transformed into Output tree
+ * <br> by way of template txt file transformed by relational metadata
  * implicit in model entity class definitions and annotations plus some metadata
  * read from database into resulting output tree, to be written to output files. 
+ * <br><strong>This is the largest class in the RADSpringBoot framework</strong>, the one where the bulk of the code generation occurs.
+ * <br> Most of the public constants are the tokens that may be used in template 
+ * files to give an instruction about what elements to iterate over and/or what to substitute at that place in the code.
+ * <br>The values of these token constants are the same as their names.
+ * <br>Constants named "ACT_*" indicate instruction to ACT upon/iterate over various elements 
+ * of table/EntityMeta or column/attribute/FieldMeta; equivalent to a "for each" tag.
+ * These are the potentially multivalued elements; tokens that may nest other tokens within them.
+ * <br>  
+ * @see <a href="https://github.com/hhyde007/RADSpringBootGen/blob/master/RADSpringBootGen/doc/RADSpringBootGen-Doc.docx" target="_blank">See the detailed technical documentation</a>
+ * for a comprehensive explanation of the templates, literal/verbatim text, simple and nested expression tokens and their uses.
+ * Refer to the individual comments on each member for quick reference. 
+ * Their semantics range from the simple and obvious to increasingly complex to criminally hard-coded kludges unfit for a self-respecting template system.
+ * <br>Finally, search for a token value in one of the templates and see how it is resolved in the corresponding output file. 
  */
 public class OutputStringTree extends IOStringTree {
 // Constants named "ACT_*" indicate instruction to 
@@ -76,28 +92,28 @@ public class OutputStringTree extends IOStringTree {
   /**
    *  Non-key, non-collection attributes
    */
-  protected final String ACT_ALL_ATTRIBS = "ACT_ALL_ATTRIBS"; 
+  public static final String ACT_ALL_ATTRIBS = "ACT_ALL_ATTRIBS"; 
   
   /**
    *  Attributes permissible to expose to user interface (excludes keys, key components, child collections etc.)
    *  Most often encloses ENTITY_ATTRIB_LABEL 
    */
-  protected final String ACT_UI_ATTRIBS = "ACT_UI_ATTRIBS"; 
+  public static final String ACT_UI_ATTRIBS = "ACT_UI_ATTRIBS"; 
   
   /**
    *  Simple attributes (non-temporal primitives and wrapper types like Integer, String etc.)
    */
-  protected final String ACT_SIMPLE_ATTRIBS = "ACT_SIMPLE_ATTRIBS";  
+  public static final String ACT_SIMPLE_ATTRIBS = "ACT_SIMPLE_ATTRIBS";  
   
   /**
    *  Date- (LocalDate) type attributes
    */
-  protected final String ACT_DATE_ATTRIBS = "ACT_DATE_ATTRIBS"; 
+  public static final String ACT_DATE_ATTRIBS = "ACT_DATE_ATTRIBS"; 
 
   /**
    *  DateTime- (LocalDateTime) type attributes
    */
-  protected final String ACT_DATE_TIME_ATTRIBS = "ACT_DATE_TIME_ATTRIBS";
+  public static final String ACT_DATE_TIME_ATTRIBS = "ACT_DATE_TIME_ATTRIBS";
   
   /**
    *  Foreign key-referenced entities
@@ -106,52 +122,40 @@ public class OutputStringTree extends IOStringTree {
    *  <br>Example: On flight, will return Aircraft and Airport,
    *  only once each even though Airport is referenced twice from Flight. 
    */
-  protected final String ACT_FK_REF_ENTITIES = "ACT_FK_REF_ENTITIES"; 
+  public static final String ACT_FK_REF_ENTITIES = "ACT_FK_REF_ENTITIES"; 
   
   /** Attributes representing pointers to FK-referenced entities, 
    *   without elimination of duplicate foreign entities.
    *   <br>For example on the Flight entity, this will return both airportIdDeparture and airportIdDestination.
    * 
    */
-  protected final String ACT_FK_REF_ATTRIBS = "ACT_FK_REF_ATTRIBS"; 
+  public static final String ACT_FK_REF_ATTRIBS = "ACT_FK_REF_ATTRIBS"; 
   
   /**
    * Non-temporal (non-LocalDate or LocalDateTimeTime) attributes
    */ 
-  protected final String ACT_NON_TEMPORAL_ATTRIBS = "ACT_NON_TEMPORAL_ATTRIBS"; 
+  public static final String ACT_NON_TEMPORAL_ATTRIBS = "ACT_NON_TEMPORAL_ATTRIBS"; 
   
   /**
    *  Attributes that ARE members of the primary key (@Id or @EmbeddedId)
    */
-  protected final String ACT_PK_ATTRIBS = "ACT_PK_ATTRIBS"; 
+  public static final String ACT_PK_ATTRIBS = "ACT_PK_ATTRIBS"; 
  
   /** Attributes that ARE members of the primary key (@Id or @EmbeddedId),
    *  separated by commas in the case of compound key
    */  
-  protected final String ACT_PK_ATTRIBS_COMMA_SEPARATED = "ACT_PK_ATTRIBS_COMMA_SEPARATED"; 
+  public static final String ACT_PK_ATTRIBS_COMMA_SEPARATED = "ACT_PK_ATTRIBS_COMMA_SEPARATED"; 
   
   /**
    * Suffix to differentiate from W_COMPOUND_KEYS
    */
-  protected final String W_SIMPLE_KEYS = "W_SIMPLE_KEYS"; 
+  public static final String W_SIMPLE_KEYS = "W_SIMPLE_KEYS"; 
   
   /** Child entities with single-column/attribute primary key identifiers annotated with @Id; 
    *   entities that reference the current driving entity via foreign keys
   */
-  protected final String ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS = "ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS"; 
+  public static final String ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS = "ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS"; 
 
-  // Child entities, whether having simple or compound primary keys
-  //final String ACT_FK_CHILD_ENTITIES = "ACT_FK_CHILD_ENTITIES";  
-  // 
-  // ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS_FORCE_INCLUDE is the same as ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS EXCEPT:
-  // Will include even if model entity is annotated with @ExcludeEditFromParentModule
-  // Put another way, annotate your entities with @ExcludeEditFromParentModule and use ACT_FK_CHILD_ENTITIES
-  //     if you don't want them included as editable children in their parent entity's module.
-  // Note also that this means that in your template, some code blocks may be exclusive of other code blocks;
-  //   That is, some code is intended to be generated in the case of no annotation, and other code is intended
-  //     to be generated in the case of the annotation @ExcludeEditFromParentModule. 
-  //  See the sample Edit.html.template.txt for examples of this.
-  
   /**
    * Suffix indicating include child elements even if model entity is annotated with @ExcludeEditFromParentModule
    * Sometimes you want to exclude some child entity elements from some modules but not others.
@@ -169,7 +173,7 @@ public class OutputStringTree extends IOStringTree {
    * annotation is present (for example to included read-only child navigation links without editable controls,
    * use the token ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS_FORCE_INCLUDE. 
    */
-  protected final String FORCE_INCLUDE = "FORCE_INCLUDE";
+  public static final String FORCE_INCLUDE = "FORCE_INCLUDE";
   
   /**
    * ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS_FORCE_INCLUDE is the same as ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS EXCEPT:
@@ -181,43 +185,43 @@ public class OutputStringTree extends IOStringTree {
    * to be generated in the case of the annotation @ExcludeEditFromParentModule. 
    * <br>See the sample Edit.html.template.txt for examples of this.
    */
-  protected final String ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS_FORCE_INCLUDE = "ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS_FORCE_INCLUDE";   
+  public static final String ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS_FORCE_INCLUDE = "ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS_FORCE_INCLUDE";   
   
   /**
    * Suffix to differentiate from W_SIMPLE_KEYS
    */
-  protected final String W_COMPOUND_KEYS = "W_COMPOUND_KEYS";
+  public static final String W_COMPOUND_KEYS = "W_COMPOUND_KEYS";
   
   /** Child entities that have compound/multivalued primary keys (@EmbeddedId), 
    *  one component being inherited from the Driving Entity
   */
-  protected final String ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS = "ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS";  
+  public static final String ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS = "ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS";  
 
   /** Child entities that have compound/multivalued primary keys (@EmbeddedId), 
    *  one component being inherited from the Driving Entity.
    *  <br> Include even if model entity is annotated with @ExcludeEditFromParentModule.
   */
-  protected final String ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS_FORCE_INCLUDE = "ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS_FORCE_INCLUDE";  
+  public static final String ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS_FORCE_INCLUDE = "ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS_FORCE_INCLUDE";  
 
   /**
    *   Child entities and entities referenced by child entities, excluding the driving entity.
    */
-  protected final String ACT_FK_CHILD_AND_THIRD_ENTITIES = "ACT_FK_CHILD_AND_THIRD_ENTITIES";  
+  public static final String ACT_FK_CHILD_AND_THIRD_ENTITIES = "ACT_FK_CHILD_AND_THIRD_ENTITIES";  
   
   /**
    *  Child entities with compound primary keys, plus any third entities referenced by the same.
    */
-  protected final String ACT_FK_CHILD_W_COMPOUND_KEYS_AND_THIRD_ENTITIES = "ACT_FK_CHILD_W_COMPOUND_KEYS_AND_THIRD_ENTITIES";  
+  public static final String ACT_FK_CHILD_W_COMPOUND_KEYS_AND_THIRD_ENTITIES = "ACT_FK_CHILD_W_COMPOUND_KEYS_AND_THIRD_ENTITIES";  
 
   /**
    *  Only "Third" entities; entities besides the driving one referenced by child entities that have compound primary keys.
    */
-  protected final String ACT_THIRD_ENTITIES_ONLY = "ACT_THIRD_ENTITIES_ONLY";  
+  public static final String ACT_THIRD_ENTITIES_ONLY = "ACT_THIRD_ENTITIES_ONLY";  
 
   //final String ACT_THIRD_ENTITIES = "ACT_THIRD_ENTITIES"; // REMOVED FROM SERVICE
   
   /** Similar to ACT_THIRD_ENTITIES_ONLY, BUT... 
-  * <br>Used while nested within ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS_W_COMPOUND_KEYS.
+  * <br>Used while nested within ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS.
   * <br>In that context, returns all entities referenced by that child entity.
   * <br>Note that primary attributes of the child entity are still available.
   * So for example in an HTML UI form, a row representing a child entity 
@@ -225,96 +229,339 @@ public class OutputStringTree extends IOStringTree {
   *   may provide a navigation link to the third entity and also a Delete button for the child entity.
   *   <br>See Edit.html.template.txt
   */
-  protected final String ACT_OTHER_REF_ENTITIES = "ACT_OTHER_REF_ENTITIES";  
+  public static final String ACT_OTHER_REF_ENTITIES = "ACT_OTHER_REF_ENTITIES";  
   
   /**
    *  Attributes of child entities, excluding those referencing the driving entity (for now; how to handle multiple references? Future bug?)
    */
-  protected final String ACT_FK_CHILD_ENTITY_ATTRIBS = "ACT_FK_CHILD_ENTITY_ATTRIBS";  
+  public static final String ACT_FK_CHILD_ENTITY_ATTRIBS = "ACT_FK_CHILD_ENTITY_ATTRIBS";  
   
   /**
    *  Attributes of child entities that have compound primary keys (presumably inheriting one member from the present driving entity).
    */
-  protected final String ACT_FK_CHILD_ENTITY_W_COMPOUND_KEY_ATTRIBS = "ACT_FK_CHILD_ENTITY_W_COMPOUND_KEY_ATTRIBS";   
+  public static final String ACT_FK_CHILD_ENTITY_W_COMPOUND_KEY_ATTRIBS = "ACT_FK_CHILD_ENTITY_W_COMPOUND_KEY_ATTRIBS";   
   
+//  /**
+//   * Iterate over the field names of the @EmbeddedID/compound primary key, assuming it exists
+//   */
+//  public static final String ACT_EMBEDDED_ID_FIELDS = "ACT_EMBEDDED_ID_FIELDS";   
   
-  protected final String FK_REF_ENTITY = "FK_REF_ENTITY"; // Name of Entity class referenced by foreign key
-  protected final String FK_REF_ENTITY_QUALIFIED = "FK_REF_ENTITY_QUALIFIED"; // Qualified identifier of Entity class referenced by foreign key
-  protected final String FK_REF_ENTITY_ID = "FK_REF_ENTITY_ID"; // Primary key ID field of Entity class referenced by foreign key
-  protected final String FK_REF_ENTITY_ID_INIT_CAP = "FK_REF_ENTITY_ID_INIT_CAP"; // Primary key ID field of Entity class referenced by foreign key
-  protected final String FK_REF_ENTITY_INIT_SMALL = "FK_REF_ENTITY_INIT_SMALL"; // Name of Entity class referenced by foreign key
-  protected final String FK_REF_ENTITY_LOWER = "FK_REF_ENTITY_LOWER"; // Name of child Entity class in lowercasse
+  /**
+   * Name of Entity class referenced by a foreign key from the Driving entity
+   */
+  public static final String FK_REF_ENTITY = "FK_REF_ENTITY"; 
+  
+  /**
+   * Identifier of Entity class referenced by foreign key, filtered by some qualifying condition
+   * <br> This "feature" has not been fully developed and tested yet. The intention is to filter lists
+   * like drop-down list boxes/HTML SELECTs to "permissible" choices to reference in a given context.
+   */
+  public static final String FK_REF_ENTITY_QUALIFIED = "FK_REF_ENTITY_QUALIFIED";
+  
+  /**
+   * Qualified identifier of Entity class that is a child of the primary
+   */
+  public static final String FK_CHILD_ENTITY_QUALIFIED = "FK_CHILD_ENTITY_QUALIFIED"; 
 
-  protected final String FK_CHILD_ENTITY = "FK_CHILD_ENTITY"; // Name of Entity class that is a child of the primary
-  protected final String FK_CHILD_ENTITY_IDENTIFIER = "FK_CHILD_ENTITY_IDENTIFIER"; // Name given to reference to collection of Entity class that is a child of the primary, in context of parent
-  protected final String FK_CHILD_ENTITY_QUALIFIED = "FK_CHILD_ENTITY_QUALIFIED"; // Qualified identifier of Entity class that is a child of the primary
-  protected final String FK_CHILD_ENTITY_INIT_SMALL = "FK_CHILD_ENTITY_INIT_SMALL"; // Name of child Entity class referenced by foreign key
-  protected final String FK_CHILD_ENTITY_LOWER = "FK_CHILD_ENTITY_LOWER"; // Name of Entity class referenced by foreign key, in lowercase
-  protected final String FK_CHILD_ENTITY_UPPER = "FK_CHILD_ENTITY_UPPER"; // Name of Entity class referenced by foreign key, in UPPERCASE
-  protected final String FK_CHILD_ENTITY_LOWER_PLURAL = "FK_CHILD_ENTITY_LOWER_PLURAL"; // Lowercase plural name of child entity class 
-  protected final String FK_CHILD_ENTITY_UPPER_PLURAL = "FK_CHILD_ENTITY_UPPER_PLURAL"; // UPPERCASE plural name of child entity class 
-  protected final String FK_CHILD_ENTITY_LABEL = "FK_CHILD_ENTITY_LABEL"; 
-  protected final String FK_CHILD_EMBEDDED_ID = "FK_CHILD_EMBEDDED_ID"; // Embedded ID (foreign key column) field.  
-  protected final String FK_CHILD_EMBEDDED_ID_INIT_CAPS = "FK_CHILD_EMBEDDED_ID_INIT_CAPS"; // Embedded ID (foreign key column) field in initial caps.  
-  protected final String FK_CHILD_EMBEDDED_ID_INIT_SMALL = "FK_CHILD_EMBEDDED_ID_INIT_SMALL"; // Embedded ID (foreign key column) field in initial lower case.  
-  protected final String FK_CHILD_EMBEDDED_PK = "FK_CHILD_EMBEDDED_PK"; // Child Entity Embedded PK object.  
-  protected final String FK_CHILD_EMBEDDED_PK_INIT_SMALL = "FK_CHILD_EMBEDDED_PK_INIT_SMALL"; // Child Entity Embedded PK object in initial lowercase.  
-
-  protected final String PK_ID_FIELD = "PK_ID_FIELD"; // Name of single primary key/ID field  
-  protected final String PK_ID_FIELD_INIT_CAP = "PK_ID_FIELD_INIT_CAP"; // Name of single primary key/ID field  
-  protected final String PK_FK_REF_ENTITY = "PK_FK_REF_ENTITY"; // Name of entity referenced by foreign key and (embedded) primary key  
-  protected final String PK_FK_REF_ENTITY_INIT_SMALL = "PK_FK_REF_ENTITY_INIT_SMALL"; // ...with initial lowercase letter  
-  protected final String PK_FK_REF_ENTITIES_DECLARE_REPOSITORY_FIND = "PK_FK_REF_ENTITIES_DECLARE_REPOSITORY_FIND"; // Complete multiple delarations and initializations of Entities referenced by embedded PK object by call to repository.findOne()
-  // Example: Pilot pilot = pilotRepository.findOne(flightCrewMemberPilotId);
-  protected final String FIND_ONE_BY_PK_FK_CRITERIA = "FIND_ONE_BY_PK_FK_CRITERIA";
-  protected final String CALL_COMPOUND_CONSTRUCTOR = "CALL_COMPOUND_CONSTRUCTOR"; 
-  protected final String GET_TH_HTML_FORM_DATA_VARS = "GET_TH_HTML_FORM_DATA_VARS"; 
-  protected final String COMPOUND_PK_PARAM_LIST = "COMPOUND_PK_PARAM_LIST"; 
-  protected final String COMPOUND_PK_PARAM_LIST_CHILD_ENTITY = "COMPOUND_PK_PARAM_LIST_CHILD_ENTITY"; 
-  protected final String COMPOUND_INSERT_PARAM_LIST_CHILD_ENTITY = "COMPOUND_INSERT_PARAM_LIST_CHILD_ENTITY"; 
+  /**
+   * Primary key ID field of Entity class referenced by foreign key
+   */
+  public static final String FK_REF_ENTITY_ID = "FK_REF_ENTITY_ID";
   
-  protected final String FIRST_NON_KEY_REQUIRED_ATTRIB = "FIRST_NON_KEY_REQUIRED_ATTRIB"; // Name of the first required non-key field
-  protected final String FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP = "FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP"; // Name of the first required non-key field, with initial capital letter
-
-  // Given a driving entity and one of its children, 
-  //    return the attribute name of the child entity by which it references the parent. 
-  protected final String MODEL_ENTITY_MAPPED_REF_ATTRIB = "MODEL_ENTITY_MAPPED_REF_ATTRIB"; 
-  protected final String MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP = "MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP";
+  /**
+   * Primary key ID field of Entity class referenced by foreign key, with InitalCapital letter.
+   */
+  public static final String FK_REF_ENTITY_ID_INIT_CAP = "FK_REF_ENTITY_ID_INIT_CAP";
   
-  protected final String FK_REF_ATTRIB_NAME = "FK_REF_ATTRIB_NAME"; // Name of Entity member attribute representing class referenced by foreign key
-  protected final String FK_REF_ENTITY_IDENTIFIER = "FK_REF_ENTITY_IDENTIFIER"; // Looked-up Identifier attribute of class referenced by foreign key
-  protected final String FK_REF_ATTRIB_INITCAPS = "FK_REF_ATTRIB_INITCAPS"; // Name of Entity member attribute representing class referenced by foreign key, with Initial Capital
-  protected final String FK_REF_ENTITY_LOWER_PLURAL = "FK_REF_ENTITY_LOWER_PLURAL"; // Lowercase plural name of entity class referenced by foreign key, suitable as reference variable name
-  protected final String FK_REF_ENTITY_UPPER_PLURAL = "FK_REF_ENTITY_UPPER_PLURAL"; // UPPERCASE plural name of entity class referenced by foreign key, suitable as reference variable name
-  protected final String ENTITY_ATTRIB_UPPER_NAME = "ENTITY_ATTRIB_UPPER_NAME"; // Upper-case underscore-separated name of entity attribute (table column)
-  protected final String ENTITY_ATTRIB_NAME = "ENTITY_ATTRIB_NAME"; // Name of the entity attribute 
-  protected final String ENTITY_ATTRIB_LABEL = "ENTITY_ATTRIB_LABEL"; // Entity attribute formatted initcaps label
-  protected final String ENTITY_ATTRIB_DEFAULT_DATATYPE = "ENTITY_ATTRIB_DEFAULT_DATATYPE"; // Entity attribute datatype; Non-primitive non-wrappers (entity classes) return Integer; Dates return String
-  protected final String ENTITY_ATTRIB_INITCAPS = "ENTITY_ATTRIB_INITCAPS"; // Entity attribute name with initial capital, suitable in construction of prefixed identifier
-  protected final String ENTITY_DATE_ATTRIB_NAME = "ENTITY_DATE_ATTRIB_NAME"; // Date type attribute name
-  protected final String ENTITY_DATE_TIME_ATTRIB_NAME = "ENTITY_DATE_TIME_ATTRIB_NAME"; // Datetime type attribute name
-  protected final String ENTITY_DATE_ATTRIB_INITCAPS = "ENTITY_DATE_ATTRIB_INITCAPS"; // Date type attribute name
-  protected final String ENTITY_DATE_TIME_ATTRIB_INITCAPS = "ENTITY_DATE_TIME_ATTRIB_INITCAPS"; // Datetime type attribute name
-  protected final String ENTITY_ATRRIB_INITCAP_NAME = "ENTITY_ATRRIB_INITCAP_NAME"; // Entity attribute name with InitialCapital
-  protected final String MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB = "MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB"; 
-//  protected final String MODEL_ENTITY_IMPORT = "modelEntityImport"; // Token to retrieve fully-qualified name of primary driving entity class
+  /**
+   * Name of Entity class referenced by foreign key, with initial lower-case letter.
+   */
+  public static final String FK_REF_ENTITY_INIT_SMALL = "FK_REF_ENTITY_INIT_SMALL";
+  
+//  /**
+//   * Name of child Entity class in lowercase
+//   */
+//  public static final String FK_REF_ENTITY_LOWER = "FK_REF_ENTITY_LOWER"; 
+
+  /**
+   * Name given to reference to collection of Entity class that is a child of the Driving entity, in context of parent
+   * <br>For example, in the Demo app FBOAce, Pilot has pilotCertificationCollection and flightCrewMemberCollection. 
+   */
+  public static final String FK_CHILD_ENTITY_IDENTIFIER = "FK_CHILD_ENTITY_IDENTIFIER";
+  /**
+   * Name of Entity class that is a child of the primary
+   */
+  public static final String FK_CHILD_ENTITY = "FK_CHILD_ENTITY"; 
+  
+  /**
+   * Name of child entity class, with inital lower-case letter
+   */
+  public static final String FK_CHILD_ENTITY_INIT_SMALL = "FK_CHILD_ENTITY_INIT_SMALL"; 
+  
+  /**
+   * Name of child entity class, in all lower-case letters
+   */
+  public static final String FK_CHILD_ENTITY_LOWER = "FK_CHILD_ENTITY_LOWER"; 
+  
+  /**
+   * Name of child entity class, in all UPPERCASE letters
+   */
+  public static final String FK_CHILD_ENTITY_UPPER = "FK_CHILD_ENTITY_UPPER";
+  
+  /**
+   * lowercase plural name of child entity class
+   */
+  public static final String FK_CHILD_ENTITY_LOWER_PLURAL = "FK_CHILD_ENTITY_LOWER_PLURAL";  
+  
+  /**
+   * UPPERCASE name of child entity class
+   */
+  public static final String FK_CHILD_ENTITY_UPPER_PLURAL = "FK_CHILD_ENTITY_UPPER_PLURAL";
+  
+  /**
+   * Business-friendly version of the child entity name, typically the initcap of the class name.
+   * <br>Labels can be specified using this framework's @Label annotation on the entity or one of its attributes.
+   * <br>By default, RADSpringBootGen will parse table column names, and if an underscore is encountered, 
+   * a space will replace it and the next letter will be rendered in Upper case.  Thus, the table column 
+   * DEPARTURE_DATE_TIME is rendered as "Departure Date Time".
+   */
+  public static final String FK_CHILD_ENTITY_LABEL = "FK_CHILD_ENTITY_LABEL"; 
+  
+  /**
+   * Name of the child member variable annotated with @EmbeddedId annotation to represent a multivalued 
+   * identifier, with initial small letter guaranteed.
+   * <br>For example, the PILOT_CERTIFICATION table has a primary key consisting of PILOT_ID, 
+   * which is also the foreign key to the PILOT table, and AIRCRAFT_TYPE_ID, which is the FK
+   * to the AIRCRAFT_TYPE table. This compound primary key is represented in Java as its own class
+   * PilotCertificationPK, which has the two corresponding member attributes. An instance of PilotCertificationPK
+   * is declared in the PilotCertification class with the annotation @EmbeddedId.
+   * <br>This might be needed in an HTML form, for example 
+   * ${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}
+   * being transformed into ${pilotCertification.pilotCertificationPK.aircraftTypeId}.
+   */
+  public static final String FK_CHILD_EMBEDDED_ID_INIT_SMALL = "FK_CHILD_EMBEDDED_ID_INIT_SMALL";  
+
+//  public static final String FK_CHILD_EMBEDDED_PK = "FK_CHILD_EMBEDDED_PK"; // Child Entity Embedded PK object.  
+//  public static final String FK_CHILD_EMBEDDED_PK_INIT_SMALL = "FK_CHILD_EMBEDDED_PK_INIT_SMALL"; // Child Entity Embedded PK object in initial lowercase.  
+
+  /**
+   * Name of single primary key/ID field for entities other than the Driving entity, such as child entities
+   */
+  public static final String PK_ID_FIELD = "PK_ID_FIELD";  
+
+  /**
+   * Name of single primary key/ID field for entities other than the Driving entity, with InitialCapital letter.
+   */
+  public static final String PK_ID_FIELD_INIT_CAP = "PK_ID_FIELD_INIT_CAP";
+  
+  /**
+   * Aka "Third Entity"
+   * <br>Name of an other entity referenced by a child entity,
+   * which child entity inherits compound primary key components from the Driving entity and the Third entity. 
+   */
+  public static final String PK_FK_REF_ENTITY = "PK_FK_REF_ENTITY";  
+  
+  /**
+   * Same as PK_FK_REF_ENTITY but with initial lowercase letter.
+   */
+  public static final String PK_FK_REF_ENTITY_INIT_SMALL = "PK_FK_REF_ENTITY_INIT_SMALL";   
+  
+  /**
+   * HARD-WIRED KLUDGE for the ServiceImpl class delete-child-having-compound-key method.
+   * Needs work to make it more generic; too much content that should be literal text in the template
+   * is wired into the Java method that processes this token. 
+   * Too many, too narrow assumptions. But it works. 
+   * <br> Needs to get an instance of the entities referenced by the child entity,
+   * including the driving entity and the third entity, via calls to their respective Repository services.
+   * See the sample app methods FlightServiceImpl.deleteFlightCrewMember(), 
+   * PilotServiceImpl.deleteFlightCrewMember(), PilotServiceImpl.deletePilotCertification(), and
+   * AircraftTypeServiceImpl.deletePilotCertification().    
+   */
+  public static final String PK_FK_REF_ENTITIES_DECLARE_REPOSITORY_FIND = "PK_FK_REF_ENTITIES_DECLARE_REPOSITORY_FIND"; // Complete multiple declarations and initializations of Entities referenced by embedded PK object by call to repository.findOne()
+
+  /**
+   * Express a call to a custom Repository find() method on a child entity a having compound primary key/@Embedded id,
+   * which find method takes takes two parent entities as its arguments.
+   * <br>For example, the Demo app PilotCertificationRepository class (hand-written, not yet generated) declares a method:
+   * <br>PilotCertification findOneByPilotAndAircraftType(Pilot pilot, AircraftType aircraftType);
+   * <br>Therefore to call it requires something like 
+   * <br>findOneByPilotAndAircraftType(pilot, aircraftType);
+   * <br>Note that whether this is called from the Pilot module or the AircraftType module, the parameters are given in the same, correct order.
+   */
+  public static final String FIND_ONE_BY_PK_FK_CRITERIA = "FIND_ONE_BY_PK_FK_CRITERIA";
+  
+  /**
+   * Express a call to the constructor of an entity having a compound primary key/@EmbeddedId, which constructor
+   * takes instances of its parent entities as arguments.
+   * <br>Note that regardless of which parent module is calling this constructor, the order of parameters is the same and correct.
+   */
+  public static final String CALL_COMPOUND_CONSTRUCTOR = "CALL_COMPOUND_CONSTRUCTOR"; 
+  
+//  DEPRECATED; Hard-coded kludge for Edit.html.template.txt no longer necessary          
+//  public static final String GET_TH_HTML_FORM_DATA_VARS = "GET_TH_HTML_FORM_DATA_VARS"; 
+
+  /**
+   * Comma-separated list of primary key/ID fields.
+   * If single-column PK, this is equivalent to PK_ID_FIELD; returns with no comma or space
+   */
+  public static final String PK_ID_ATTRIB_LIST = "PK_ID_ATTRIB_LIST";  
+
+  // DEPRECATED
+  //public static final String COMPOUND_INSERT_PARAM_LIST_CHILD_ENTITY = "COMPOUND_INSERT_PARAM_LIST_CHILD_ENTITY"; 
+  
+  /**
+   * Name of the first required/not nullable non-key field in the current entity.
+   * <br>This is useful for testing whether a set of entity attribute variables missing a real database primary key value 
+   * represent a real business entity instance to be persisted, or a blank record to be discarded and/or ignored. 
+   * It is used as such by the ServiceImpl class to interpret variables passed from an Edit html submit form 
+   * through the web controller to the service for interpretation and processing. 
+   */
+  public static final String FIRST_NON_KEY_REQUIRED_ATTRIB = "FIRST_NON_KEY_REQUIRED_ATTRIB";
+  
+  /**
+   * Name of the first required non-key field, with initial capital letter
+   */
+  public static final String FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP = "FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP"; 
+
+  /**
+   *  Returns the mappedBy attribute value of the @OneToMany annotation 
+   *    of a child entity collection attribute, for example 
+   *    <br>  private Collection<Flight> flightDepartureCollection;
+   *    <br> in Airport.
+   *  Which is to say, given a driving entity and one of its child entities, 
+   *    returns the attribute name of the child entity by which it references the parent. 
+   *  This is needed because a child entity may reference the same parent entity more than once
+   *  and by different names, for example Flight.AirportDeparture and Flight.AirportDestination.
+  */
+  public static final String MODEL_ENTITY_MAPPED_REF_ATTRIB = "MODEL_ENTITY_MAPPED_REF_ATTRIB"; 
+  public static final String MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP = "MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP";
+  
+  /*
+   * DEPRECATED: Name of Entity member attribute representing class referenced by foreign key?
+   */
+  //public static final String FK_REF_ATTRIB_NAME = "FK_REF_ATTRIB_NAME"; 
+  
+  /**
+   * Virtual attribute name representing a foreign key-referenced entity, derived from the FK column name.
+   * <br>For example, The Flight table has a foreign key to Aircraft, implemented with the column Aircraft_ID
+   *   which references the Aircraft table's primary key column Aircraft_ID.
+   *   <br>The Flight Java data model entity class represents this relationship with an attribute of the type
+   *   Aircraft. But for purposes of passing identifying references of the Aircraft to from the data layer
+   *   to the UI layer and back, it is convenient to revert to the integer AIRCRAFT_ID value, and to refer
+   *   to it by the name aircraftId in Service interfaces, ServiceImpl and Controller classes, and Edit.html code.  
+   *   <br>For this reason, the Flight entity (again, as an example) has a getAircraftId() method (though no
+   *   setAircraftId) and there is the need to insert "aircraftId" into the code at strategic points related to Flight.
+   *   <br>That is what FK_REF_ENTITY_IDENTIFIER accomplishes.
+   * <br>Note one more twist: In the above example, the attribute in the referencING entity/table and in the
+   *   referencED entity/table have the same name. But that is not required, and in fact it is necessary 
+   *   that they should have different names when there is more than one foreign key reference from the 
+   *   child to parent entity/table, as is the case with Flight and Airport. There is one reference in the 
+   *   role of Departure, and a second in the role of Destination. The Flight attributes (of type Airport) 
+   *   are named airportDeparture and airportDestination. The numeric column names in the Flight table are 
+   *   AIRPORT_ID_DEPARTURE and AIRPORT_ID_DESTINATION. The derived/virtual Java and HTML identifiers are 
+   *   airportIdDeparture and airportIdDestination; and those are what get inserted into code generated 
+   *   from this framework by the token FK_REF_ENTITY_IDENTIFIER.
+   */
+  public static final String FK_REF_ENTITY_IDENTIFIER = "FK_REF_ENTITY_IDENTIFIER";
+  
+  /**
+   * Name of Entity member attribute representing class referenced by foreign key, with Initial Capital
+   * See notes for FK_REF_ENTITY_IDENTIFIER. Whereas that one returns an identifier derived from the 
+   * database foreign key column name, this one returns the original reference attribute name, 
+   * except with an initial capital letter.
+   * For example again using Flight as the example, iterating over the model entity class-reference (as opposed to simple 
+   * String, numeric or Date/time) attributes, this token returns "Aircraft" for aircraft, 
+   * "AirportDeparture" for airportDeparture, and "AirportDestination" for airportDestination. 
+   */
+  public static final String FK_REF_ATTRIB_INITCAPS = "FK_REF_ATTRIB_INITCAPS"; 
+  
+  /*
+   * DEPRECATED: Lowercase plural name of entity class referenced by foreign key, suitable as reference variable name
+   */
+  //public static final String FK_REF_ENTITY_LOWER_PLURAL = "FK_REF_ENTITY_LOWER_PLURAL"; 
+  
+  /**
+   * UPPERCASE plural name of entity class referenced by foreign key
+   * <br>This is useful for declarations and usages of String constants in UPPER_CASE 
+   * representing referenced model entity classes.
+   */
+  public static final String FK_REF_ENTITY_UPPER_PLURAL = "FK_REF_ENTITY_UPPER_PLURAL"; 
+  
+  /**
+   * Upper-case underscore-separated name of entity attribute (table column)
+   * <br>This is useful for declarations and usages of String constants in UPPER_CASE 
+   * representing attributes of referenced model entity classes.
+   */
+  public static final String ENTITY_ATTRIB_UPPER_NAME = "ENTITY_ATTRIB_UPPER_NAME"; 
+  
+  /**
+   * Name of the model entity attribute, unmodified as to case.
+   */
+  public static final String ENTITY_ATTRIB_NAME = "ENTITY_ATTRIB_NAME";
+  
+  /**
+   * Entity attribute formatted as a user-friendly label
+   * First looks for @Label annotation on model entity attribute;
+   * if none found, attempts to construct one from the attribute name.
+   */
+  public static final String ENTITY_ATTRIB_LABEL = "ENTITY_ATTRIB_LABEL";
+  
+  /**
+   * Entity attribute default datatype
+   * <br>Used for HTML parameters prior to parsing/conversion to richer datatypes,
+   * or to lookup instances of other classes. 
+   * <br>Non-primitive non-wrappers (entity classes) return "Integer"; Dates return "String"
+   */
+  public static final String ENTITY_ATTRIB_DEFAULT_DATATYPE = "ENTITY_ATTRIB_DEFAULT_DATATYPE"; 
+  
+  /**
+   * Entity attribute name with initial capital letter
+   * <br>Use for example in construction of variable name representing entity attribute
+   * where a prefix (such as the name of the entity) compels the upper case conversion.
+   */
+  public static final String ENTITY_ATTRIB_INITCAPS = "ENTITY_ATTRIB_INITCAPS";
+  
+  /*
+   * DEPRECATED: Date-type attribute name
+   */
+//  public static final String ENTITY_DATE_ATTRIB_NAME = "ENTITY_DATE_ATTRIB_NAME"; // 
+  
+  /*
+   * DEPRECATED: Datetime-type attribute name 
+   */
+//  public static final String ENTITY_DATE_TIME_ATTRIB_NAME = "ENTITY_DATE_TIME_ATTRIB_NAME";
+  
+  /*
+   * DEPRECATED: Date type attribute name, initial capital letter
+   */
+  //public static final String ENTITY_DATE_ATTRIB_INITCAPS = "ENTITY_DATE_ATTRIB_INITCAPS"; // Date type attribute name
+  
+  /*
+   * DEPRECATED: Datetime type attribute name
+   */
+//  public static final String ENTITY_DATE_TIME_ATTRIB_INITCAPS = "ENTITY_DATE_TIME_ATTRIB_INITCAPS";
+
+  /*
+   * DEPRECATED FOR NON-USE
+   */
+  //public static final String MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB = "MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB"; 
     
-  protected final String HTML_FORM_VERTICAL_INPUT = "HTML_FORM_VERTICAL_INPUT";
-  protected final String HTML_FORM_HORIZONTAL_INPUT = "HTML_FORM_HORIZONTAL_INPUT";
-  protected final String HTML_FORM_VERTICAL_INPUT_BLANK = "HTML_FORM_VERTICAL_INPUT_BLANK";
-  protected final String HTML_FORM_HORIZONTAL_INPUT_BLANK = "HTML_FORM_HORIZONTAL_INPUT_BLANK";
+  public static final String HTML_FORM_VERTICAL_INPUT = "HTML_FORM_VERTICAL_INPUT";
+  public static final String HTML_FORM_HORIZONTAL_INPUT = "HTML_FORM_HORIZONTAL_INPUT";
+  public static final String HTML_FORM_VERTICAL_INPUT_BLANK = "HTML_FORM_VERTICAL_INPUT_BLANK";
+  public static final String HTML_FORM_HORIZONTAL_INPUT_BLANK = "HTML_FORM_HORIZONTAL_INPUT_BLANK";
   
-  protected final String DATATYPE_INTEGER = "Integer"; 
-  protected final String DATATYPE_STRING = "String"; 
-  protected final String DATATYPE_LOCAL_DATE = "LocalDate"; 
-  protected final String DATATYPE_LOCAL_DATE_TIME = "LocalDateTime";
-  protected final String DATATYPE_COLLECTION = "java.util.Collection";
-  protected final String SERIAL_VERSION_UID = "serialVersionUID";
-  protected final String COLLECTION = "Collection";
-  protected final String ANNOTATION_COLUMN = "@Column";
-  protected final String ANNOTATION_ENTITY = "@Entity";
-  protected final String MODEL_PACKAGE = "com.radinfodesign.radspringbootgen.fboace.model"; // HARD-CODE ALERT!
-  protected final String PATH_TO_MODEL_JAVA_FILES = "com/radinfodesign/radspringbootgen/fboace/model/"; // HARD-CODE ALERT!
+  public static final String DATATYPE_INTEGER = "Integer"; 
+  public static final String DATATYPE_STRING = "String"; 
+  public static final String DATATYPE_LOCAL_DATE = "LocalDate"; 
+  public static final String DATATYPE_LOCAL_DATE_TIME = "LocalDateTime";
+  public static final String DATATYPE_COLLECTION = "java.util.Collection";
+  public static final String SERIAL_VERSION_UID = "serialVersionUID";
+  public static final String COLLECTION = "Collection";
+  public static final String ANNOTATION_COLUMN = "@Column";
+  public static final String ANNOTATION_ENTITY = "@Entity";
+  public static final String MODEL_PACKAGE = "com.radinfodesign.radspringbootgen.fboace.model"; // HARD-CODE ALERT!
+  public static final String PATH_TO_MODEL_JAVA_FILES = "com/radinfodesign/radspringbootgen/fboace/model/"; // HARD-CODE ALERT!
 
   public static final String JAVA_TIME_LOCAL_DATE = "java.time.LocalDate";
   public static final String JAVA_TIME_LOCAL_DATETIME = "java.time.LocalDateTime";
@@ -335,6 +582,13 @@ public class OutputStringTree extends IOStringTree {
   
   private static Map<InputStringTree, OutputStringTree> outputStringTreeMap = new HashMap<>();
   
+  /**
+   * 
+   * @param inputStringTree Input tree; hierarchy of text elements based on a parse of a template txt file,
+   * segregating nodes of literal text from those of nested and single-valued expression tokens.
+   * @return the tree of StringNodes fully generated and built out based on the input tree, 
+   * its template text and its implicit relational metadata. 
+   */
   public static OutputStringTree getOutputStringTree (InputStringTree inputStringTree) {
     OutputStringTree outputStringTree = outputStringTreeMap.get(inputStringTree);
     if (outputStringTree == null) {
@@ -356,23 +610,19 @@ public class OutputStringTree extends IOStringTree {
   
   public InputStringTree getInputStringTree() { return this.inputStringTree; } 
   
-  public static boolean isPrimitiveOrWrapper (Class testClass){ // DEPRECATED? USE EntityMeta methods instead
+  public static boolean isPrimitiveOrWrapper (Class testClass) { // DEPRECATED? USE EntityMeta methods instead
     if (testClass.getName().indexOf(".") < 0 ) return true;
     if (testClass.getName().startsWith(JAVA_PACKAGE)) return true;
     else return false;
   }
-  
-  public static boolean isPrimitiveOrWrapper (EntityMeta.FieldMeta testField){ // DEPRECATED? USE EntityMeta METHODS INSTEAD
-    if (testField.getType().getName().indexOf(EntityMeta.PERIOD) < 0 ) return true;
-    if (testField.getType().getName().startsWith(JAVA_PACKAGE)) return true;
-    else return false;
-  }
+
+//  public static boolean isPrimitiveOrWrapper (EntityMeta.FieldMeta testField){ // DEPRECATED? USE EntityMeta METHODS INSTEAD
+//    if (testField.getType().getName().indexOf(EntityMeta.PERIOD) < 0 ) return true;
+//    if (testField.getType().getName().startsWith(JAVA_PACKAGE)) return true;
+//    else return false;
+//  }
      
-//  public static boolean hasEmbeddedId(Class testClass) {
-//    return EntityMeta.foundFieldAnnotationContains(testClass, ANNOTATION_EMBEDDED_ID);
-///  } 
-  
-  public static boolean isLocalDate (EntityMeta.FieldMeta testField){
+  protected static boolean isLocalDate (EntityMeta.FieldMeta testField){
     //out.println("isLocalDate() testField = " + testField.getName() + ": " + testField.getType().getName());
     if (testField.getType().getName().equals(JAVA_TIME_LOCAL_DATE)) return true;
     else return false;
@@ -527,13 +777,26 @@ public class OutputStringTree extends IOStringTree {
         for (StringNode childNode: inputNode.getChildren()) {
 //          out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
           // DEBUGGING
-          if (currentEntityMeta.getSimpleName().equals("Flight") & fields[i].getName().startsWith("aircraft")) {
-            out.println("Debugging case ACT_ALL_ATTRIBS Flight.aircraft..."); // Set breakpoint on this line
-          }
+//          if (currentEntityMeta.getSimpleName().equals("Flight") & fields[i].getName().startsWith("aircraft")) {
+//            out.println("Debugging case ACT_ALL_ATTRIBS Flight.aircraft..."); // Set breakpoint on this line
+//          }
           // END DEBUG
           this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
         }
         break;
+
+//      case ACT_EMBEDDED_ID_FIELDS:
+//        String debugDummy = "debugDummy"; 
+//        out.println(debugDummy);
+//        if (!fields[i].isEmbeddedId()) break;
+//        EntityMeta.FieldMeta[] embeddedIdFields = fields[i].getEmbeddedIdFields();
+//        for (EntityMeta.FieldMeta childField : embeddedIdFields) {
+//          for (StringNode childNode: inputNode.getChildren()) {
+//            this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, childField);  // <-------------------------<
+//          }
+//        }
+//        break;          
+        
       case ACT_UI_ATTRIBS: 
         if (fields[i].isId()) continue;
 //        out.println("case " + ACT_ALL_ATTRIBS);
@@ -580,7 +843,7 @@ public class OutputStringTree extends IOStringTree {
         break;
       case ACT_SIMPLE_ATTRIBS:
         if (fields[i].isId()) continue;
-        if (isPrimitiveOrWrapper(fields[i])) {
+        if ((fields[i].isPrimitiveOrWrapper())) {
           for (StringNode childNode: inputNode.getChildren()) {
             this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
           }
@@ -605,7 +868,7 @@ public class OutputStringTree extends IOStringTree {
       case ACT_FK_REF_ATTRIBS:
         if (drivingEntityMeta.getSimpleName().equals("Flight")) { // Hard-coded test/debug
         }
-        if (!isPrimitiveOrWrapper(fields[i]) & EntityMeta.getCollectionEnclosedEntityMeta(fields[i]) == null) {
+        if (!(fields[i].isPrimitiveOrWrapper()) & EntityMeta.getCollectionEnclosedEntityMeta(fields[i]) == null) {
           out.println("    if (!isPrimitiveOrWrapper(fields["+i+"]) & getCollectionEnclosedEntityMeta(fields[i]) == null) PASSED");
           for (StringNode childNode: inputNode.getChildren()) {
             if (fields[i].getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) {
@@ -621,14 +884,14 @@ public class OutputStringTree extends IOStringTree {
             break;
           }
           duplicateFKRefClassMap.put(fields[i].getType().getName(), fields[i]);
-          if (!isPrimitiveOrWrapper(fields[i])) {
+          if (!(fields[i].isPrimitiveOrWrapper())) {
             for (StringNode childNode: inputNode.getChildren()) {
               this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
             }
           }
           break;
         case ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS:
-          String DebuggingDummy = "DebuggingDummy";
+//          String DebuggingDummy = "DebuggingDummy";
         case ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS:
         case ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS_FORCE_INCLUDE:
         case ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS_FORCE_INCLUDE:
@@ -712,6 +975,8 @@ public class OutputStringTree extends IOStringTree {
             }
           }
           break;
+
+          
 //        case ACT_THIRD_ENTITIES: // REMOVED FROM SERVICE
 //          if (duplicateFKChildClassMap.get(fields[i].getType().getName()) != null) {
 //            break;
@@ -755,9 +1020,22 @@ public class OutputStringTree extends IOStringTree {
             break;
           }
           break;
+          
+//        case ACT_EMBEDDED_ID_FIELDS:
+//          String debugDummy = "debugDummy"; 
+//          out.println(debugDummy);
+//          if (!fields[i].isEmbeddedId()) break;
+//          EntityMeta.FieldMeta[] embeddedIdFields = fields[i].getEmbeddedIdFields();
+//          for (EntityMeta.FieldMeta childField : embeddedIdFields) {
+//            for (StringNode childNode: inputNode.getChildren()) {
+//              this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, childField);  // <-------------------------<
+//            }
+//          }
+//          break;          
+//          
         case ACT_NON_TEMPORAL_ATTRIBS:
           if (fields[i].isId()) continue;
-          if ((isPrimitiveOrWrapper(fields[i])) & (!isTemporalType(fields[i]))
+          if (((fields[i].isPrimitiveOrWrapper())) & (!isTemporalType(fields[i]))
               & (EntityMeta.getCollectionEnclosedEntityMeta(fields[i]) == null) // Not collection type
           ) {
             for (StringNode childNode: inputNode.getChildren()) {
@@ -769,11 +1047,11 @@ public class OutputStringTree extends IOStringTree {
     }
   }
   
-  public String getAttributeAttribute ( EntityMeta drivingEntityMeta
-                                      , EntityMeta currentEntityMeta
-                                      , EntityMeta.FieldMeta field
-                                      , String token
-                                      ) {
+  protected String getAttributeAttribute ( EntityMeta drivingEntityMeta
+                                         , EntityMeta currentEntityMeta
+                                         , EntityMeta.FieldMeta field
+                                         , String token
+                                         ) {
     if (field.getName().equals(SERIAL_VERSION_UID)) return null;
   
     String returnValue = null;
@@ -786,6 +1064,7 @@ public class OutputStringTree extends IOStringTree {
         returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName();
         break;
       case FK_CHILD_ENTITY_LABEL:
+//      case ENTITY_ATTRIB_LABEL:
         returnValue = collectionOfEntityMeta.getEntityMeta().getLabel();
         break;
       case FK_CHILD_ENTITY_INIT_SMALL:
@@ -819,12 +1098,14 @@ public class OutputStringTree extends IOStringTree {
           interim = field.getType().getSimpleName();
           returnValue = interim.substring(0,1).toLowerCase()+interim.substring(1);
           break;
-        case FK_REF_ENTITY_LOWER:
-          returnValue = field.getType().getSimpleName().toLowerCase();
-          break;
-        case FK_REF_ENTITY_LOWER_PLURAL:
-          returnValue = field.getType().getSimpleName().toLowerCase()+"s";
-          break;
+//        case FK_REF_ENTITY_LOWER:
+//          returnValue = field.getType().getSimpleName().toLowerCase();
+//          break;
+          
+        // DEPRECATED FOR NON-USE:
+//        case FK_REF_ENTITY_LOWER_PLURAL:
+//          returnValue = field.getType().getSimpleName().toLowerCase()+"s";
+//          break;
         case FK_REF_ENTITY_UPPER_PLURAL:
           returnValue = field.getType().getSimpleName().toUpperCase()+"S";
           break;
@@ -837,10 +1118,12 @@ public class OutputStringTree extends IOStringTree {
           } catch (Exception e) {
             returnValue = "EntityMeta.getEntityMeta() SHOULD NOT THROW Exception (getAttributeAttribute case FK_REF_ENTITY_ID)";
           }
+          //out.println("***DEBUG: FK_REF_ENTITY_ID -> " + returnValue + "; FK_REF_ENTITY_IDENTIFIER -> " + field.getResolvedIdentifier());
           break;
-        case FK_REF_ATTRIB_NAME:
-          returnValue = field.getName();
-          break;
+        // DEPRECATED
+//        case FK_REF_ATTRIB_NAME:
+//          returnValue = field.getName();
+//          break;
         case FK_REF_ENTITY_IDENTIFIER:
           returnValue = field.getResolvedIdentifier();
           break;
@@ -851,18 +1134,18 @@ public class OutputStringTree extends IOStringTree {
         }
       } 
       switch (token) {
-        case FK_CHILD_EMBEDDED_ID:
+//        case FK_CHILD_EMBEDDED_ID:
         case FK_CHILD_EMBEDDED_ID_INIT_SMALL:
           returnValue = currentEntityMeta.getEmbeddedPKInfo().getSimpleName(); // .getEmbeddedPKInfo().getSimpleName();
           if (token.equals(FK_CHILD_EMBEDDED_ID_INIT_SMALL)) {
             returnValue = returnValue.substring(0, 1).toLowerCase()+ returnValue.substring(1);
           }
         break;
-        case ENTITY_ATRRIB_INITCAP_NAME:
-          if (!isPrimitiveOrWrapper(field.getType())) {
-            returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
-          }
-          break;
+//        case ENTITY_ATRRIB_INITCAP_NAME:
+//          if (!isPrimitiveOrWrapper(field.getType())) {
+//            returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
+//          }
+//          break;
         case ENTITY_ATTRIB_UPPER_NAME:
           returnValue = field.getResolvedIdentifier().toUpperCase();
           break;
@@ -878,14 +1161,14 @@ public class OutputStringTree extends IOStringTree {
           }
           break;
         case ENTITY_ATTRIB_DEFAULT_DATATYPE:
-          if (!isPrimitiveOrWrapper(field)) {
+          if (!(field.isPrimitiveOrWrapper())) {
             returnValue = DATATYPE_INTEGER;
           } else if (isTemporalType(field)) {
             returnValue = DATATYPE_STRING;
           } else {
             try { 
               returnValue = field.getType().getSimpleName();
-            } catch (Exception e) {
+            } catch (Exception e) { // what Exception?
               returnValue = field.getType().getName();
             }
           }
@@ -893,42 +1176,66 @@ public class OutputStringTree extends IOStringTree {
         case ENTITY_ATTRIB_INITCAPS:
           returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
           break;
-        case ENTITY_DATE_ATTRIB_NAME:
-          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE)){
-            returnValue = field.getResolvedIdentifier();
-          }
-          break;
-        case ENTITY_DATE_TIME_ATTRIB_NAME:
-          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE_TIME)){
-            returnValue = field.getResolvedIdentifier();
-          }
-          break;
-        case ENTITY_DATE_ATTRIB_INITCAPS:
-          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE)){
-            returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
-          }
-          break;
-        case ENTITY_DATE_TIME_ATTRIB_INITCAPS:
-          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE_TIME)){
-            returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
-          }
-          break;
-        case GET_TH_HTML_FORM_DATA_VARS: 
-        {
-          returnValue = "";
-          int iteration = 0;
-          String compoundEntityPlusPK = currentEntityMeta.getSimpleName().substring(0,1).toLowerCase()+currentEntityMeta.getSimpleName().substring(1)
-                                      + "."
-                                      + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(0,1).toLowerCase()
-                                      + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(1);
-          for (String embeddidIdField: currentEntityMeta.getEmbeddedIdFieldIdentifiers()) {
-            if (iteration > 0) {returnValue += ", ";}
-            returnValue += "data-" + embeddidIdField + "=${" + compoundEntityPlusPK + "." + embeddidIdField + "}";
-      //    th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}, data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}"
-            iteration++;
-          }
-          break;
-        }
+          
+        // DEPRECATED AS UNNECESSARY
+//        case ENTITY_DATE_ATTRIB_NAME:
+//          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE)){
+//            returnValue = field.getResolvedIdentifier();
+//          }
+//          break;
+
+          // DEPRECATED AS UNNECESSARY
+//        case ENTITY_DATE_TIME_ATTRIB_NAME:
+//          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE_TIME)){
+//            returnValue = field.getResolvedIdentifier();
+//          }
+//          break;
+
+          // DEPRECATED AS UNNECESSARY
+//        case ENTITY_DATE_ATTRIB_INITCAPS:
+//          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE)){
+//            returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
+//          }
+//          break;
+
+          // DEPRECATED AS UNNECESSARY
+//        case ENTITY_DATE_TIME_ATTRIB_INITCAPS:
+//          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE_TIME)){
+//            returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
+//          }
+//          break;
+          
+//        case ACT_EMBEDDED_ID_FIELDS:
+//          String debugDummy = "debugDummy"; 
+//          out.println(debugDummy);
+//          if (!field.isEmbeddedId()) break;
+//          EntityMeta.FieldMeta[] embeddedIdFields = field.getEmbeddedIdFields();
+//          for (EntityMeta.FieldMeta childField : embeddedIdFields) {
+//            for (StringNode childNode: inputNode.getChildren()) {
+//              this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, childField);  // <-------------------------<
+//            }
+//          }
+//          break;          
+          
+
+//        DEPRECATED; Hard-coded kludge for Edit.html.template.txt no longer necessary          
+//        case GET_TH_HTML_FORM_DATA_VARS: 
+//        {
+//          returnValue = "";
+//          int iteration = 0;
+//          String compoundEntityPlusPK = currentEntityMeta.getSimpleName().substring(0,1).toLowerCase()+currentEntityMeta.getSimpleName().substring(1)
+//                                      + "."
+//                                      + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(0,1).toLowerCase()
+//                                      + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(1);
+//          for (String embeddidIdField: currentEntityMeta.getEmbeddedIdFieldIdentifiers()) {
+//            if (iteration > 0) {returnValue += ", ";}
+//            returnValue += "data-" + embeddidIdField + "=${" + compoundEntityPlusPK + "." + embeddidIdField + "}";
+//      //    th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}, data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}"
+//            iteration++;
+//          }
+//          break;
+//        }
+       
         case HTML_FORM_VERTICAL_INPUT:
         case HTML_FORM_VERTICAL_INPUT_BLANK:
         case HTML_FORM_HORIZONTAL_INPUT:
@@ -944,7 +1251,7 @@ public class OutputStringTree extends IOStringTree {
           StringBuilder sb = new StringBuilder("");
           String indent = "          "; // 10 spaces
           
-          boolean isFkRef = (!isPrimitiveOrWrapper(field) & EntityMeta.getCollectionEnclosedEntityMeta(field) == null);
+          boolean isFkRef = (!(field.isPrimitiveOrWrapper()) & EntityMeta.getCollectionEnclosedEntityMeta(field) == null);
           boolean isFKChildCollection = (EntityMeta.getCollectionEnclosedEntityMeta(field) != null); // FLAWED?
           boolean currentEntityMetaIsChild = (!currentEntityMeta.equals(drivingEntityMeta));
           String fieldType = field.getType().getSimpleName();
@@ -1059,21 +1366,21 @@ public class OutputStringTree extends IOStringTree {
     return returnValue;
   }
   
-  public String getAttributeAttribute ( EntityMeta drivingEntityMeta
-                                      , FieldMeta drivingEntityMetaField
-                                      , EntityMeta currentEntityMeta
-                                      , String token
-                                      ) {
+  protected String getAttributeAttribute ( EntityMeta drivingEntityMeta
+                                         , FieldMeta drivingEntityMetaField
+                                         , EntityMeta currentEntityMeta
+                                         , String token
+                                         ) {
     String[] excluded = null;
     return getAttributeAttribute (drivingEntityMeta, drivingEntityMetaField, currentEntityMeta, token, excluded);
   }
 
-  public String getAttributeAttribute ( EntityMeta drivingEntityMeta
-                                      , FieldMeta drivingEntityMetaField
-                                      , EntityMeta currentEntityMeta
-                                      , String token
-                                      , String[] excluded
-                                      ) {
+  protected String getAttributeAttribute ( EntityMeta drivingEntityMeta
+                                         , FieldMeta drivingEntityMetaField
+                                         , EntityMeta currentEntityMeta
+                                         , String token
+                                         , String[] excluded
+                                         ) {
 //    out.println("getAttributeAttribute " + currentEntityMeta.getSimpleName() + ", " + token);
     String returnValue = null;
     String interim = null;
@@ -1081,11 +1388,9 @@ public class OutputStringTree extends IOStringTree {
     String drivingEntityMetaName = drivingEntityMeta.getSimpleName();
     
     switch (token) { 
-//    case MODEL_ENTITY_MAPPED_REF_ATTRIB:
-//    case MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP:
-//      returnValue = currentEntityMeta.get
-//      break;
     case ENTITY_ATTRIB_LABEL:
+//      returnValue = EntityMeta.getCollectionEnclosedEntityMeta (drivingEntityMetaField).getEntityMeta().getLabel();
+//      if (returnValue != null) break;
       returnValue = drivingEntityMetaField.getLabel();
       break;
     case FIRST_NON_KEY_REQUIRED_ATTRIB:
@@ -1098,11 +1403,9 @@ public class OutputStringTree extends IOStringTree {
       break;
     case MODEL_ENTITY_MAPPED_REF_ATTRIB:
     case MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP:
-      //interim = drivingEntityMetaField.getName();
       returnValue = drivingEntityMetaField.getAnnotationAttributeValue(EntityMeta.ANNOTATION_ONE_TO_MANY, EntityMeta.ANNOTATION_ATTRIBUTE_MAPPED_BY);
-      returnValue = token.equals(MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP)?
-                      returnValue.substring(0,1).toUpperCase()+returnValue.substring(1):
-                        returnValue;
+      if (token.equals(MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP))
+        returnValue = returnValue.substring(0,1).toUpperCase()+returnValue.substring(1);
       break;
     case FK_CHILD_ENTITY:
   //    out.println("Found FK_CHILD_ENTITY " + FK_CHILD_ENTITY + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
@@ -1166,16 +1469,17 @@ public class OutputStringTree extends IOStringTree {
         }
       }
       break;
-    case FK_REF_ENTITY_LOWER:
-      returnValue = currentEntityMeta.getSimpleName().toLowerCase();
-      break;
-    case FK_REF_ENTITY_LOWER_PLURAL:
-      returnValue = currentEntityMeta.getSimpleName().toLowerCase()+"s";
-      break;
+//    case FK_REF_ENTITY_LOWER:
+//      returnValue = currentEntityMeta.getSimpleName().toLowerCase();
+//      break;
+    // DEPRECATED  
+//    case FK_REF_ENTITY_LOWER_PLURAL:
+//      returnValue = currentEntityMeta.getSimpleName().toLowerCase()+"s";
+//      break;
     case FK_REF_ENTITY_UPPER_PLURAL:
       returnValue = currentEntityMeta.getSimpleName().toUpperCase()+"S";
       break;
-    case FK_CHILD_EMBEDDED_ID:
+//    case FK_CHILD_EMBEDDED_ID:
     case FK_CHILD_EMBEDDED_ID_INIT_SMALL:
       returnValue = currentEntityMeta.getEmbeddedPKInfo().getSimpleName(); // .getEmbeddedPKInfo().getSimpleName();
       if (token.equals(FK_CHILD_EMBEDDED_ID_INIT_SMALL)) {
@@ -1257,7 +1561,6 @@ public class OutputStringTree extends IOStringTree {
     //FlightCrewMember(tempFlight, pilot)
     returnValue = currentEntityMeta.getSimpleName() + "(";
     iteration = 0;
-    fieldNameInitCap = null;
     for (String embeddidIdRefClassName: currentEntityMeta.getEmbeddedIdRefEntityIdentifiers()) {
       if (iteration > 0) {returnValue += ", ";}
       if (embeddidIdRefClassName == null) break;
@@ -1267,57 +1570,46 @@ public class OutputStringTree extends IOStringTree {
     }
     returnValue += ")";
     break;
-    case COMPOUND_PK_PARAM_LIST:
-    case COMPOUND_PK_PARAM_LIST_CHILD_ENTITY:
+    case PK_ID_ATTRIB_LIST:
     {  
-      String prefix = "";
-      boolean isPrefixed = false;
-      if (token.equals(COMPOUND_PK_PARAM_LIST_CHILD_ENTITY)) {
-        isPrefixed = true;
-        prefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase() + currentEntityMeta.getSimpleName().substring(1); 
-      }
-      returnValue = "(";
+      returnValue = ""; //"(";
       iteration = 0;
-      fieldNameInitCap = null;
-      for (String embeddidIdFieldName: currentEntityMeta.getEmbeddedIdFieldIdentifiers()) {
-        if (iteration > 0) {returnValue += ", ";}
-        if (isPrefixed) {
-          returnValue += prefix+embeddidIdFieldName.substring(0,1).toUpperCase()+embeddidIdFieldName.substring(1);
-        }
-        else {
+      if (currentEntityMeta.getEmbeddedIdFieldIdentifiers() == null) {
+        returnValue = currentEntityMeta.getIDField().getName();
+      } else {      
+        for (String embeddidIdFieldName: currentEntityMeta.getEmbeddedIdFieldIdentifiers()) {
+          if (iteration > 0) {returnValue += ", ";}
+          iteration++;
           returnValue += embeddidIdFieldName;
         }
-        iteration++;
       }
-      returnValue += ")";
       break;
     }
-    case COMPOUND_INSERT_PARAM_LIST_CHILD_ENTITY:
-    {  
-      String prefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase() + currentEntityMeta.getSimpleName().substring(1); 
-      returnValue = "(";
-      iteration = 0;
-      fieldNameInitCap = null;
-      for (EntityMeta.FieldMeta field: currentEntityMeta.getFieldMetaArray()) {
-        if (field.getName().equals(SERIAL_VERSION_UID)) continue;
-        if (iteration > 0) {returnValue += ", ";}
-        if (field.getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) {
-          returnValue += field.getName(); // need to pre-pend entity var name plus getter() call
-        }
-        else
-        {
-          returnValue += prefix+field.getName().substring(0,1).toUpperCase()+field.getName().substring(1);
-        }
-        iteration++;
-      }
-      returnValue += ")";
-      break;
-    }
+    //DEPRECATED
+//    case COMPOUND_INSERT_PARAM_LIST_CHILD_ENTITY:
+//    {  
+//      String prefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase() + currentEntityMeta.getSimpleName().substring(1); 
+//      returnValue = "(";
+//      iteration = 0;
+//      for (EntityMeta.FieldMeta field: currentEntityMeta.getFieldMetaArray()) {
+//        if (field.getName().equals(SERIAL_VERSION_UID)) continue;
+//        if (iteration > 0) {returnValue += ", ";}
+//        if (field.getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) {
+//          returnValue += field.getName(); // need to pre-pend entity var name plus getter() call
+//        }
+//        else
+//        {
+//          returnValue += prefix+field.getName().substring(0,1).toUpperCase()+field.getName().substring(1);
+//        }
+//        iteration++;
+//      }
+//      returnValue += ")";
+//      break;
+//    }
     case FIND_ONE_BY_PK_FK_CRITERIA: // Second most hard-coded case so far 2018.03.04
       returnValue = "findOneBy";
       currentTableVarPrefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase()+currentEntityMeta.getSimpleName().substring(1);
       iteration = 0;
-      fieldNameInitCap = null;
       for (String embeddidIdRefClassName: currentEntityMeta.getEmbeddedIdRefEntityIdentifiers()) {
         if (iteration > 0) {returnValue += "And";}
         returnValue += embeddidIdRefClassName;
@@ -1335,19 +1627,19 @@ public class OutputStringTree extends IOStringTree {
       }
       returnValue += ")";
       break;
-    case FK_CHILD_EMBEDDED_PK:
-      out.println("case FK_CHILD_EMBEDDED_PK");
-    case FK_CHILD_EMBEDDED_PK_INIT_SMALL:
-      out.println("case FK_CHILD_EMBEDDED_PK_INIT_SMALL");
-      EntityMeta embeddedPK = currentEntityMeta.getEmbeddedPKInfo();
-      if (embeddedPK != null) {
-        returnValue = embeddedPK.getSimpleName();
-      }
-      if (returnValue!=null & token.equals(FK_CHILD_EMBEDDED_PK_INIT_SMALL)) {
-        returnValue=returnValue.substring(0,1).toLowerCase() + returnValue.substring(1);
-      }
-      out.println("returnValue = " + returnValue);
-      return returnValue;
+//    case FK_CHILD_EMBEDDED_PK:
+//      out.println("case FK_CHILD_EMBEDDED_PK");
+//    case FK_CHILD_EMBEDDED_PK_INIT_SMALL:
+//      out.println("case FK_CHILD_EMBEDDED_PK_INIT_SMALL");
+//      EntityMeta embeddedPK = currentEntityMeta.getEmbeddedPKInfo();
+//      if (embeddedPK != null) {
+//        returnValue = embeddedPK.getSimpleName();
+//      }
+//      if (returnValue!=null & token.equals(FK_CHILD_EMBEDDED_PK_INIT_SMALL)) {
+//        returnValue=returnValue.substring(0,1).toLowerCase() + returnValue.substring(1);
+//      }
+//      out.println("returnValue = " + returnValue);
+//      return returnValue;
     }
     return returnValue;
   }
@@ -1362,116 +1654,6 @@ public class OutputStringTree extends IOStringTree {
     return label;
   }
   
-
-//  public TempEntityMeta getCollectionEnclosedEntityMeta (EntityMeta.FieldMeta testField) { 
-//    List<TempEntityMeta> collectionOfEntityMetaList = getCollectionEnclosedEntityMetas (testField, 1); 
-//    return (collectionOfEntityMetaList !=null?collectionOfEntityMetaList.get(0):null);
-//  }
-//
-//  
-//  public List<TempEntityMeta> getCollectionEnclosedEntityMetas (EntityMeta.FieldMeta testField) { 
-//    return getCollectionEnclosedEntityMetas (testField, 99); 
-//   }
-//     
-//  public List<TempEntityMeta> getCollectionEnclosedEntityMetas (EntityMeta.FieldMeta testField, int limit) { // SHOULDN'T THIS BE MOVED TO CLASS EntityMeta??
-//   //out.println("getCollectionEnclosedClasses");
-//   if (!(testField.getType().getName().equals(DATATYPE_COLLECTION))) { return null; }
-//   List<TempEntityMeta> collectionOfEntityMetaList = new ArrayList<>();
-//   EntityMeta enclosedClassInfo;
-//   EntityMeta enclosedFKRefClassInfo;
-//   TempEntityMeta tempEntityMeta;
-//   TempEntityMeta tempEnclosedFKRefClassInfo;
-//   boolean xReferenced = false;
-//     out.println("isCollection() " + testField.getName());
-//     String collectionOfClassName = this.getEnclosedType(testField);
-//     try {
-//       enclosedClassInfo = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(MODEL_PACKAGE+"."+collectionOfClassName);
-//       if (enclosedClassInfo == null) return null;
-//       tempEntityMeta = new TempEntityMeta(enclosedClassInfo);
-//       if (enclosedClassInfo.hasEmbeddedId()) {
-//         xReferenced = true;
-//       }
-//       tempEntityMeta.setXReferenced(xReferenced);
-//       collectionOfEntityMetaList.add(tempEntityMeta);
-//       if (limit == 1) return collectionOfEntityMetaList;
-//       EntityMeta.FieldMeta[] fields = enclosedClassInfo.getFieldMetaArray();
-//       enclosedFKRefClassInfo = null;
-//       for (EntityMeta.FieldMeta field: fields) {
-//         if (!isPrimitiveOrWrapper(field)) {
-//           out.println( "  FK Ref Field from child enclosed class = " + field.getResolvedIdentifier());
-//          out.println( "    FK Ref Field Type = " + field.getType().getName());
-//           enclosedFKRefClassInfo = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(field.getType().getName(), ANNOTATION_ENTITY);
-//           if (enclosedFKRefClassInfo != null) {
-//             tempEnclosedFKRefClassInfo = new TempEntityMeta(enclosedFKRefClassInfo);
-//             tempEnclosedFKRefClassInfo.setXReferenced(xReferenced); 
-//             tempEnclosedFKRefClassInfo.setThirdEntity(true); 
-//             collectionOfEntityMetaList.add(tempEnclosedFKRefClassInfo);
-//           } else {
-//             out.println("enclosedFKRefClassInfo = " + enclosedFKRefClassInfo);
-//             out.println( "    NOT Adding " + field.getType().getName() + " to collectionOfClassList... " );
-//           }
-//         }
-//       }
-//       if (collectionOfEntityMetaList != null) return collectionOfEntityMetaList;
-//       else return null;
-//       } catch (IOException e) {
-//         out.println("Sorry, IOException trying to load " + MODEL_PACKAGE+"."+collectionOfClassName);
-//       }
-//     return null; // Unreachable Dummy statement to satisfy compiler
-//   }
-//
-//  public String getEnclosedType (EntityMeta.FieldMeta field) { // SHOULDN'T THIS BE MOVED TO CLASS EntityMeta??
-//     String fieldName = field.getName();
-//     String drivingEntityClassName = field.getDeclaringClassName();
-//     fieldName = fieldName.substring(0,1).toUpperCase()+fieldName.substring(1);
-//     if (fieldName.indexOf(COLLECTION) > 1) {
-//       fieldName = fieldName.substring(0, fieldName.indexOf(COLLECTION));
-//     }
-//     String genericClassName = enclosedTypesMap.get(fieldName);
-//     if (genericClassName != null) return genericClassName;
-//     
-//     
-//     Path file = Paths.get(PATH_TO_MODEL_JAVA_FILES, drivingEntityClassName +".java");
-//     String fileLine = null;
-//     int indexOfKeyword = -1;
-//     int indexEndKeyword = -1;
-//     int indexOfFieldName = -1;
-//     int indexOfOpenBracket = -1;
-//     int indexOfCloseBracket = -1;
-//     
-//     try (BufferedReader reader = Files.newBufferedReader(file)){
-//       while ((fileLine = reader.readLine())!=null) {
-//         indexOfFieldName = fileLine.indexOf(fieldName);
-//         if (indexOfFieldName >= 0) {
-//           indexOfKeyword = fileLine.indexOf(COLLECTION+"<");
-//           if (indexOfKeyword > 0) {
-//             indexEndKeyword =  indexOfKeyword + COLLECTION.length()+1;
-//               indexOfOpenBracket  = fileLine.indexOf("<");
-//                 indexOfCloseBracket = fileLine.indexOf(">");
-//                 if ((indexOfCloseBracket - indexOfFieldName)  > 1) {
-//                   genericClassName = fileLine.substring(indexOfOpenBracket+1, indexOfCloseBracket);
-//                   enclosedTypesMap.put(fieldName, genericClassName);
-//                   break;
-//                 }
-//               }
-//             }
-//       }
-//     }
-//     catch (IOException e){
-//       out.println("Sorry, could not read file " + file);
-//       return null;
-//     }
-//     return genericClassName;
-//   }
-//   
-//   public String getEmbeddedIdEntityFindStatements(EntityMeta entityMetaWithEmbeddedPK) {
-//     StringBuilder stringB = new StringBuilder("");
-//     for (EntityMeta.FieldMeta field: entityMetaWithEmbeddedPK.getEmbeddedIdFields()) {
-////       stringB.append(field.getDeclaringClassName())
-//     }
-//      return null;
-//   }
-   
   
- }
+}
 

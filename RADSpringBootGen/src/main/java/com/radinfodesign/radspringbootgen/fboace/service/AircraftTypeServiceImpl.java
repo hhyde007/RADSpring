@@ -132,7 +132,7 @@ public class AircraftTypeServiceImpl implements AircraftTypeService{
     Aircraft aircraft = null;
     if (aircraftShortNames != null) {
       for (int i=0; i<aircraftShortNames.length; i++) {
-      if (aircraftShortNames[i] == null |  aircraftShortNames[i].equals("")) continue;
+      if (aircraftShortNames[i] == null | aircraftShortNames[i].equals("")) continue;
         if ((aircraftAircraftIds.length == 0) || (aircraftAircraftIds[i] == null)) {
           aircraft = new Aircraft();
         } else {

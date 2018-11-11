@@ -119,9 +119,9 @@
         </thead>
         <tbody>
           <tr data-th-each="flightCrewMember : ${flight.flightCrewMemberCollection}">
-             
+            
             <td>
-              <button data-btn="pilotId-edit" th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}" 
+              <button data-btn="pilotId-edit" th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}"
                       type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit Pilot">
                 <span class="fa-stack">
                   <i class="glyphicon glyphicon-edit"></i>
@@ -129,9 +129,9 @@
               </button>
             </td>
             <td>
-              <button data-btn="flightCrewMember-delete" 
-                      th:attr="data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}, data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}" 
-                      type="SUBMIT" 
+            <button data-btn="flightCrewMember-delete"
+                      th:attr="data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}, data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}"
+                      type="SUBMIT"
                       class="frmDelete" 
                       NAME="frmDelete" 
                       VALUE="Delete Flight Crew Member">
@@ -140,10 +140,10 @@
                 </span>
               </button>
             </td>
-            
+
             <td></td>
             <td class="pilot" data-th-text="${flightCrewMember.pilot}"></td>
-              <input type="hidden" id="flightCrewMemberPilotId" name="flightCrewMemberPilotId" th:value="${flightCrewMember.flightCrewMemberPK}==null?null:${flightCrewMember.flightCrewMemberPK.pilotId}"/>                            
+              <input type="hidden" id="flightCrewMemberPilotId" name="flightCrewMemberPilotId" th:value="${flightCrewMember.flightCrewMemberPK}==null?null:${flightCrewMember.flightCrewMemberPK.pilotId}"/>
                           <td><textarea rows="1" id="flightCrewMemberNotes" name="flightCrewMemberNotes" cols="40" th:text="${flightCrewMember.notes}"/></td>
 
         </tr>
@@ -199,11 +199,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='flightId';
-            input.value=$(this).attr('data-flightId');
-            form.appendChild(input);
+            var flightId=document.createElement('flightId');
+            flightId.type='hidden';
+            flightId.name='flightId';
+            flightId.value=$(this).attr('data-flightId');
+            form.appendChild(flightId);
             form.method='post';
             form.action='/Flight/Edit';
             form.submit();
@@ -213,11 +213,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='aircraftId';
-            input.value=$(this).attr('data-aircraftId');
-            form.appendChild(input);
+            var aircraftId=document.createElement('aircraftId');
+            aircraftId.type='hidden';
+            aircraftId.name='aircraftId';
+            aircraftId.value=$(this).attr('data-aircraftId');
+            form.appendChild(aircraftId);
             form.method='post';
             form.action='/Aircraft/Edit';
             form.submit();
@@ -226,11 +226,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='airportId';
-            input.value=$(this).attr('data-airportIdDeparture');
-            form.appendChild(input);
+            var airportId=document.createElement('airportId');
+            airportId.type='hidden';
+            airportId.name='airportId';
+            airportId.value=$(this).attr('data-airportIdDeparture');
+            form.appendChild(airportId);
             form.method='post';
             form.action='/Airport/Edit';
             form.submit();
@@ -239,11 +239,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='airportId';
-            input.value=$(this).attr('data-airportIdDestination');
-            form.appendChild(input);
+            var airportId=document.createElement('airportId');
+            airportId.type='hidden';
+            airportId.name='airportId';
+            airportId.value=$(this).attr('data-airportIdDestination');
+            form.appendChild(airportId);
             form.method='post';
             form.action='/Airport/Edit';
             form.submit();
@@ -254,11 +254,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='pilotId';
-            input.value=$(this).attr('data-pilotId');
-            form.appendChild(input);
+            var pilotId=document.createElement('pilotId');
+            pilotId.type='hidden';
+            pilotId.name='pilotId';
+            pilotId.value=$(this).attr('data-pilotId');
+            form.appendChild(pilotId);
             form.method='post';
             form.action='/Pilot/Edit';
             form.submit();
@@ -273,15 +273,12 @@
           flightId.type='hidden';
           flightId.name='flightId';
           flightId.value=$(this).attr('data-flightId');
-
           formDelete.appendChild(flightId);
           var pilotId=document.createElement('pilotId');
           pilotId.type='hidden';
           pilotId.name='pilotId';
           pilotId.value=$(this).attr('data-pilotId');
-
           formDelete.appendChild(pilotId);
-          
           
           formDelete.method='post';
           formDelete.action='/Flight/DeleteFlightCrewMember';

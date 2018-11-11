@@ -10,18 +10,18 @@ import java.time.LocalDate;
 import java.util.Collection;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 //import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+//import com.radinfodesign.radspringbootgen.model.ExcludeFromParentModule;
 
 /**
  *
@@ -57,11 +57,10 @@ public class Pilot implements Serializable {
   private LocalDate birthdate;
   @Column(name = "NOTES")
   private String notes;
-
-//  @ExcludeFromParentModule
+  
+//  @ExcludeFromParentModule  
   @OneToMany(mappedBy = "pilot")
   private Collection<PilotCertification> pilotCertificationCollection;
-
   @OneToMany(mappedBy = "pilot")
   private Collection<FlightCrewMember> flightCrewMemberCollection;
   
@@ -143,7 +142,6 @@ public class Pilot implements Serializable {
     this.notes = notes;
   }
 
-  @XmlTransient
   public Collection<FlightCrewMember> getFlightCrewMemberCollection() {
     return flightCrewMemberCollection;
   }
@@ -152,7 +150,6 @@ public class Pilot implements Serializable {
     this.flightCrewMemberCollection = flightCrewMemberCollection;
   }
 
-  @XmlTransient
   public Collection<PilotCertification> getPilotCertificationCollection() {
     return pilotCertificationCollection;
   }

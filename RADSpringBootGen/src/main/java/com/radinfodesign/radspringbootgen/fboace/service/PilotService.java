@@ -6,8 +6,6 @@
 package com.radinfodesign.radspringbootgen.fboace.service;
 
 import com.radinfodesign.radspringbootgen.fboace.model.Pilot;
-import com.radinfodesign.radspringbootgen.fboace.model.AircraftType;
-import com.radinfodesign.radspringbootgen.fboace.model.Flight;
 import java.util.List;
 
 public interface PilotService {

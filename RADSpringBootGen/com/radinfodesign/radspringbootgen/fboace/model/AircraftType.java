@@ -110,7 +110,6 @@ public class AircraftType implements Serializable {
     this.notes = notes;
   }
 
-  @XmlTransient
   public Collection<Aircraft> getAircraftCollection() {
     return aircraftCollection;
   }
@@ -120,7 +119,6 @@ public class AircraftType implements Serializable {
   }
   
 
-  @XmlTransient
   public Collection<PilotCertification> getPilotCertificationCollection() {
     return pilotCertificationCollection;
   }

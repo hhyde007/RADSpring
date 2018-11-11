@@ -86,8 +86,8 @@ public class StringNode  {
   }
   
   /**
-   * Indicates whether or not the contents of the this node consists in an expression token alone; 
-   * with NO other expression tokens nested within it.
+   * @return true if this node consists in an expression token alone,  
+   * with NO other expression tokens nested within it; otherwise false
    */
   public boolean isSingleTokenExpression () {
     // The String value of this node begins with the token opening delimiters,
@@ -95,12 +95,11 @@ public class StringNode  {
     return ((this.getValue().indexOf(TOKEN_OPEN) == 0) 
         && (this.getValue().indexOf(TOKEN_CLOSE)
                  ==(this.getValue().length()-TOKEN_CLOSE_LENGTH)));
-        
   }
   
   /**
-   * Indicates whether or not the contents of the this node consists in an expression token 
-   * with one or more other expression tokens nested within it.
+   * @return true if this node consists in an expression token 
+   * with one or more other expression tokens nested within it; otherwise false
    */
   public boolean isMultiTokenExpression () {
     // a.k.a. Has Nested Delimited Token Expressions
@@ -131,7 +130,8 @@ public class StringNode  {
   }
   
   /**
-   * Indicates whether or not the contents of the this node starts and ends with expression token delimiters.
+   * @return true if this node consists in text without expression tokens; 
+   *  to be taken verbatim without conversion or transformation
    */
   public boolean isLiteralExpression() {
     return ((!isSingleTokenExpression() & (!isMultiTokenExpression ())));

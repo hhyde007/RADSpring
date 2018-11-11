@@ -33,7 +33,8 @@
       {${ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS=<table class="table table-hover">
         <thead>
           <tr>
-            <td colspan="5"><h4>{${FK_CHILD_ENTITY_LABEL}$}s</h4></td>
+!!            <td colspan="5"><h4>{${FK_CHILD_ENTITY_LABEL}$}s</h4></td>
+            <td colspan="5"><h4>{${ENTITY_ATTRIB_LABEL}$}s</h4></td>
           </tr>
           <tr>
             <td></td>
@@ -46,7 +47,9 @@
           <tr data-th-each="{${FK_CHILD_ENTITY_INIT_SMALL}$} : ${{${MODEL_ENTITY_INIT_SMALL}$}.{${FK_CHILD_ENTITY_INIT_SMALL}$}Collection}">
             {${ACT_OTHER_REF_ENTITIES=
             <td>
-              <button data-btn="{${FK_REF_ENTITY_ID}$}-edit" th:attr="data-{${FK_REF_ENTITY_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}" 
+!!              <button data-btn="aircraftTypeId-edit" th:attr="data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}"
+!!                      th:attr="data-pilotId=${pilotCertification.pilotCertificationPK.pilotId}, data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}"
+              <button data-btn="{${FK_REF_ENTITY_ID}$}-edit" th:attr="data-{${FK_REF_ENTITY_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}"
                       type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit {${FK_REF_ENTITY}$}">
                 <span class="fa-stack">
                   <i class="glyphicon glyphicon-edit"></i>
@@ -54,9 +57,17 @@
               </button>
             </td>
             <td>
-              <button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete" 
-                      th:attr="{${GET_TH_HTML_FORM_DATA_VARS}$}"
-                      type="SUBMIT" 
+            }$}<button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete"
+!!            }$}<button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP}$}-delete"
+!!                    th:attr="data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}, data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}"
+!!                      th:attr="{${GET_TH_HTML_FORM_DATA_VARS}$}"
+!!                      th:attr="{${ACT_EMBEDDED_ID_FIELDS=data-{${ENTITY_ATTRIB_NAME}$}=${"{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${ENTITY_ATTRIB_NAME}$}}";
+!!
+!!                    THIS WORKS, BUT IT'S ONE OF THE MANY PLACES WHERE COMPOUND KEYS OF 2 COMPONENTS AND NO MORE, ARE SUPPORTED. MUST GENERALIZE FURTHER.
+                      th:attr="data-{${ENTITY_ATT_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${ENTITY_ATT_ID}$}}, data-{${FK_REF_ENTITY_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}"
+!!                               }$}
+!!
+                      type="SUBMIT"
                       class="frmDelete" 
                       NAME="frmDelete" 
                       VALUE="Delete {${FK_CHILD_ENTITY_LABEL}$}">
@@ -65,11 +76,11 @@
                 </span>
               </button>
             </td>
-            }$}
+
 !!
             <td></td>
             <td class="{${FK_REF_ENTITY_INIT_SMALL}$}" data-th-text="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_FK_REF_ENTITY_INIT_SMALL}$}}"></td>
-              <input type="hidden" id="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ENTITY_ID_INIT_CAP}$}" name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ENTITY_ID_INIT_CAP}$}" th:value="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}}==null?null:${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}"/>                            
+              <input type="hidden" id="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ENTITY_ID_INIT_CAP}$}" name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ENTITY_ID_INIT_CAP}$}" th:value="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}}==null?null:${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${FK_CHILD_EMBEDDED_ID_INIT_SMALL}$}.{${FK_REF_ENTITY_ID}$}}"/>
               {${ACT_ALL_ATTRIBS={${HTML_FORM_HORIZONTAL_INPUT}$}}$}
         </tr>
         <tr>
@@ -109,7 +120,8 @@
       {${ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS=<table class="table table-hover">
         <thead>
           <tr>
-            <td colspan="5"><h4>{${FK_CHILD_ENTITY_LABEL}$}s</h4></td>
+!!            <td colspan="5"><h4>{${FK_CHILD_ENTITY_LABEL}$}</h4></td>
+              <td colspan="5"><h4>{${ENTITY_ATTRIB_LABEL}$}</h4></td>
           </tr>
           <tr>
             <td></td>
@@ -122,9 +134,9 @@
 !!          <tr data-th-each="{${FK_CHILD_ENTITY_INIT_SMALL}$} : ${{${MODEL_ENTITY_INIT_SMALL}$}.{${FK_CHILD_ENTITY_INIT_SMALL}$}Collection}">
           <tr data-th-each="{${FK_CHILD_ENTITY_INIT_SMALL}$} : ${{${MODEL_ENTITY_INIT_SMALL}$}.{${FK_CHILD_ENTITY_IDENTIFIER}$}}">
             <td>
-!!              <button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}-edit" th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}" 
-!!              <button data-btn="{${FK_CHILD_ENTITY_QUALIFIED}$}-edit" th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}" 
-              <button data-btn="{${PK_ID_FIELD}$}-edit" th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}" 
+!!              <button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}-edit" th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}"
+!!              <button data-btn="{${FK_CHILD_ENTITY_QUALIFIED}$}-edit" th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}"
+              <button data-btn="{${PK_ID_FIELD}$}-edit" th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}"
                       type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit {${FK_CHILD_ENTITY}$}">
                 <span class="fa-stack">
                   <i class="glyphicon glyphicon-edit"></i>
@@ -132,13 +144,14 @@
               </button>
             </td>
             <td>
-              <button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete" 
+!!              <button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP}$}-delete"
+              <button data-btn="{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete"
                       th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}, data-{${ENTITY_ATT_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${MODEL_ENTITY_MAPPED_REF_ATTRIB}$}.{${ENTITY_ATT_ID}$}}"
 !!                      th:attr="data-{${PK_ID_FIELD}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}, data-{${ENTITY_ATT_ID}$}=${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${ENTITY_ATT_ID}$}.{${ENTITY_ATT_ID}$}}"
 !!                      th:attr="{${GET_TH_HTML_FORM_DATA_VARS}$}"
-                      type="SUBMIT" 
-                      class="frmDelete" 
-                      NAME="frmDelete" 
+                      type="SUBMIT"
+                      class="frmDelete"
+                      NAME="frmDelete"
                       VALUE="Delete {${FK_CHILD_ENTITY_LABEL}$}">
                 <span class="fa-stack">
                   <i class="glyphicon glyphicon-trash"></i>
@@ -148,7 +161,7 @@
 !!            }$}
             <td></td>
 !!            <td class="{${FK_CHILD_ENTITY_INIT_SMALL}$}" data-th-text="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}"></td>
-              <input type="hidden" id="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" th:value="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}"/>                            
+              <input type="hidden" id="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" th:value="${{${FK_CHILD_ENTITY_INIT_SMALL}$}.{${PK_ID_FIELD}$}}"/>
               {${ACT_ALL_ATTRIBS={${HTML_FORM_HORIZONTAL_INPUT}$}}$}
         </tr>
         <tr>
@@ -169,7 +182,7 @@
           <td></td>
           <td></td>
           <td></td>
-            <input type="hidden" id="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" value=""/>                            
+            <input type="hidden" id="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" name="{${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}" value=""/>
             {${ACT_ALL_ATTRIBS={${HTML_FORM_HORIZONTAL_INPUT_BLANK}$}}$}
         </tr>
 
@@ -215,11 +228,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='{${ENTITY_ATT_ID}$}';
-            input.value=$(this).attr('data-{${ENTITY_ATT_ID}$}');
-            form.appendChild(input);
+            var {${ENTITY_ATT_ID}$}=document.createElement('{${ENTITY_ATT_ID}$}');
+            {${ENTITY_ATT_ID}$}.type='hidden';
+            {${ENTITY_ATT_ID}$}.name='{${ENTITY_ATT_ID}$}';
+            {${ENTITY_ATT_ID}$}.value=$(this).attr('data-{${ENTITY_ATT_ID}$}');
+            form.appendChild({${ENTITY_ATT_ID}$});
             form.method='post';
             form.action='/{${MODEL_ENTITY}$}/Edit';
             form.submit();
@@ -229,11 +242,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='{${FK_REF_ENTITY_ID}$}';
-            input.value=$(this).attr('data-{${FK_REF_ENTITY_IDENTIFIER}$}');
-            form.appendChild(input);
+            var {${FK_REF_ENTITY_ID}$}=document.createElement('{${FK_REF_ENTITY_ID}$}');
+            {${FK_REF_ENTITY_ID}$}.type='hidden';
+            {${FK_REF_ENTITY_ID}$}.name='{${FK_REF_ENTITY_ID}$}';
+            {${FK_REF_ENTITY_ID}$}.value=$(this).attr('data-{${FK_REF_ENTITY_IDENTIFIER}$}');
+            form.appendChild({${FK_REF_ENTITY_ID}$});
             form.method='post';
             form.action='/{${FK_REF_ENTITY}$}/Edit';
             form.submit();
@@ -244,16 +257,17 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='{${PK_ID_FIELD}$}';
-            input.value=$(this).attr('data-{${PK_ID_FIELD}$}');
-            form.appendChild(input);
+            var {${PK_ID_FIELD}$}=document.createElement('{${PK_ID_FIELD}$}');
+            {${PK_ID_FIELD}$}.type='hidden';
+            {${PK_ID_FIELD}$}.name='{${PK_ID_FIELD}$}';
+            {${PK_ID_FIELD}$}.value=$(this).attr('data-{${PK_ID_FIELD}$}');
+            form.appendChild({${PK_ID_FIELD}$});
             form.method='post';
             form.action='/{${FK_CHILD_ENTITY}$}/Edit';
             form.submit();
           });
         }$}  
+!!        {${ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS=$("button[data-btn='{${FK_CHILD_ENTITY_INIT_SMALL}$}{${MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP}$}-delete']").on('click', function(e){
         {${ACT_FK_CHILD_ENTITIES_W_COMPOUND_KEYS=$("button[data-btn='{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete']").on('click', function(e){
           e.preventDefault();
           var formDelete=document.createElement('form');
@@ -263,10 +277,8 @@
           {${ENTITY_ATTRIB_NAME}$}.type='hidden';
           {${ENTITY_ATTRIB_NAME}$}.name='{${ENTITY_ATTRIB_NAME}$}';
           {${ENTITY_ATTRIB_NAME}$}.value=$(this).attr('data-{${ENTITY_ATTRIB_NAME}$}');
-
           formDelete.appendChild({${ENTITY_ATTRIB_NAME}$});
           }$}
-          
           formDelete.method='post';
           formDelete.action='/{${MODEL_ENTITY}$}/Delete{${FK_CHILD_ENTITY}$}';
           formDelete.submit();
@@ -275,24 +287,26 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='{${PK_ID_FIELD}$}';
-            input.value=$(this).attr('data-{${PK_ID_FIELD}$}');
-            form.appendChild(input);
+            var {${PK_ID_FIELD}$}=document.createElement('{${PK_ID_FIELD}$}');
+            {${PK_ID_FIELD}$}.type='hidden';
+            {${PK_ID_FIELD}$}.name='{${PK_ID_FIELD}$}';
+            {${PK_ID_FIELD}$}.value=$(this).attr('data-{${PK_ID_FIELD}$}');
+            form.appendChild({${PK_ID_FIELD}$});
             form.method='post';
             form.action='/{${FK_CHILD_ENTITY}$}/Edit';
             form.submit();
           });
+!!          }$}{${ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS=$("button[data-btn='{${FK_CHILD_ENTITY_INIT_SMALL}$}{${MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP}$}-delete']").on('click', function(e){
           }$}{${ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS=$("button[data-btn='{${FK_CHILD_ENTITY_INIT_SMALL}$}-delete']").on('click', function(e){
             e.preventDefault();
             var formDelete=document.createElement('form');
             document.body.appendChild(formDelete);
+            var {${PK_ID_FIELD}$}=document.createElement('{${PK_ID_FIELD}$}');
             {${PK_ID_FIELD}$}.type='hidden';
             {${PK_ID_FIELD}$}.name='{${PK_ID_FIELD}$}';
             {${PK_ID_FIELD}$}.value=$(this).attr('data-{${PK_ID_FIELD}$}');
             formDelete.appendChild({${PK_ID_FIELD}$});
-            var {${ENTITY_ATT_ID}$}=document.createElement('input');
+            var {${ENTITY_ATT_ID}$}=document.createElement('{${ENTITY_ATT_ID}$}');
             {${ENTITY_ATT_ID}$}.type='hidden';
             {${ENTITY_ATT_ID}$}.name='{${ENTITY_ATT_ID}$}';
             {${ENTITY_ATT_ID}$}.value=$(this).attr('data-{${ENTITY_ATT_ID}$}');

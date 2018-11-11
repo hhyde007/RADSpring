@@ -1,4 +1,4 @@
-/*
+/**
  * Sample application model entity class for RADSpringBootGen
  * Copyright(c) 2018 by RADical Information Design Corporation
  * Flight
@@ -6,8 +6,9 @@
 package com.radinfodesign.radspringbootgen.fboace.model;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.time.LocalDateTime;
+import java.util.Collection;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,13 +17,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -135,7 +132,6 @@ public class Flight implements Serializable {
     this.notes = notes;
   }
 
-  @XmlTransient
   @Label (name="Flight Crew Member")
   public Collection<FlightCrewMember> getFlightCrewMemberCollection() {
     return flightCrewMemberCollection;

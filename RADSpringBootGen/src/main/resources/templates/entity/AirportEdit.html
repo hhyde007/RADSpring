@@ -62,7 +62,7 @@
     <table>
       <thead>
         <tr>
-          <th><h4>Flights as Departure</h4></th>
+          <th><h4>Flights as Departure Airport</h4></th>
           <th></th>
         </tr>
       </thead>
@@ -84,7 +84,7 @@
     <table>
       <thead>
         <tr>
-          <th><h4>Flights as Destination</h4></th>
+          <th><h4>Flights as Destination Airport</h4></th>
           <th></th>
         </tr>
       </thead>
@@ -111,11 +111,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='airportId';
-            input.value=$(this).attr('data-airportId');
-            form.appendChild(input);
+            var airportId=document.createElement('airportId');
+            airportId.type='hidden';
+            airportId.name='airportId';
+            airportId.value=$(this).attr('data-airportId');
+            form.appendChild(airportId);
             form.method='post';
             form.action='/Airport/Edit';
             form.submit();

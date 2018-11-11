@@ -61,20 +61,20 @@ public class {${MODEL_ENTITY}$}ServiceImpl implements {${MODEL_ENTITY}$}Service{
     if ({${PK_ID_FIELD}$}==null || {${PK_ID_FIELD}$}==0) {${MODEL_ENTITY_INIT_SMALL}$} = new {${MODEL_ENTITY}$}();
     else {${MODEL_ENTITY_INIT_SMALL}$} = {${MODEL_ENTITY_INIT_SMALL}$}Repository.findOne({${PK_ID_FIELD}$});
     
-    {${ACT_DATE_TIME_ATTRIBS=LocalDateTime {${ENTITY_DATE_TIME_ATTRIB_NAME}$}_ = null;
+    {${ACT_DATE_TIME_ATTRIBS=LocalDateTime {${ENTITY_ATTRIB_NAME}$}_ = null;
     try {
-       {${ENTITY_DATE_TIME_ATTRIB_NAME}$}_ = LocalDateTime.parse({${ENTITY_DATE_TIME_ATTRIB_NAME}$}, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+       {${ENTITY_ATTRIB_NAME}$}_ = LocalDateTime.parse({${ENTITY_ATTRIB_NAME}$}, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     } catch (DateTimeParseException e) {
-      out.println("No good value for {${ENTITY_DATE_TIME_ATTRIB_NAME}$}: " + e.getMessage());
+      out.println("No good value for {${ENTITY_ATTRIB_NAME}$}: " + e.getMessage());
     }
-    {${MODEL_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_DATE_TIME_ATTRIB_NAME}$}_);
-    }$}{${ACT_DATE_ATTRIBS=LocalDate {${ENTITY_DATE_ATTRIB_NAME}$}_ = null;
+    {${MODEL_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_ATTRIB_NAME}$}_);
+    }$}{${ACT_DATE_ATTRIBS=LocalDate {${ENTITY_ATTRIB_NAME}$}_ = null;
     try {
-       {${ENTITY_DATE_ATTRIB_NAME}$}_ = LocalDate.parse({${ENTITY_DATE_ATTRIB_NAME}$}, DateTimeFormatter.ISO_LOCAL_DATE);
+       {${ENTITY_ATTRIB_NAME}$}_ = LocalDate.parse({${ENTITY_ATTRIB_NAME}$}, DateTimeFormatter.ISO_LOCAL_DATE);
     } catch (DateTimeParseException e) {
-      out.println("No good value for {${ENTITY_DATE_ATTRIB_NAME}$}: " + e.getMessage());
+      out.println("No good value for {${ENTITY_ATTRIB_NAME}$}: " + e.getMessage());
     }
-    {${MODEL_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_DATE_ATTRIB_NAME}$}_);
+    {${MODEL_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_ATTRIB_NAME}$}_);
     }$}
     {${ACT_NON_TEMPORAL_ATTRIBS={${MODEL_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_ATTRIB_NAME}$});
     }$}{${ACT_FK_REF_ATTRIBS={${MODEL_ENTITY_INIT_SMALL}$}.set{${FK_REF_ATTRIB_INITCAPS}$}({${FK_REF_ENTITY_INIT_SMALL}$}Repository.findOne({${FK_REF_ENTITY_IDENTIFIER}$}));
@@ -97,30 +97,30 @@ public class {${MODEL_ENTITY}$}ServiceImpl implements {${MODEL_ENTITY}$}Service{
         else {
           {${FK_CHILD_ENTITY_INIT_SMALL}$} = {${FK_CHILD_ENTITY_INIT_SMALL}$}Repository.{${FIND_ONE_BY_PK_FK_CRITERIA}$};
         }
-        {${ACT_DATE_TIME_ATTRIBS=LocalDateTime {${ENTITY_DATE_TIME_ATTRIB_NAME}$}_ = null;
+        {${ACT_DATE_TIME_ATTRIBS=LocalDateTime {${ENTITY_ATTRIB_NAME}$}_ = null;
         try {
-          {${ENTITY_DATE_TIME_ATTRIB_NAME}$}_ = LocalDateTime.parse({${ENTITY_DATE_TIME_ATTRIB_NAME}$}, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+          {${ENTITY_ATTRIB_NAME}$}_ = LocalDateTime.parse({${ENTITY_ATTRIB_NAME}$}, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (DateTimeParseException e) {
-          out.println("No good value for {${ENTITY_DATE_TIME_ATTRIB_NAME}$}: " + e.getMessage());
+          out.println("No good value for {${ENTITY_ATTRIB_NAME}$}: " + e.getMessage());
         }
-        {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_DATE_TIME_ATTRIB_NAME}$}_);
-        }$}{${ACT_DATE_ATTRIBS=LocalDate {${ENTITY_DATE_ATTRIB_NAME}$}_ = null;
+        {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_ATTRIB_NAME}$}_);
+        }$}{${ACT_DATE_ATTRIBS=LocalDate {${ENTITY_ATTRIB_NAME}$}_ = null;
         try {
-           {${ENTITY_DATE_ATTRIB_NAME}$}_ = LocalDate.parse({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_DATE_ATTRIB_INITCAPS}$}s[i], DateTimeFormatter.ISO_LOCAL_DATE);
+           {${ENTITY_ATTRIB_NAME}$}_ = LocalDate.parse({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s[i], DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException e) {
-          out.println("No good value for {${ENTITY_DATE_ATTRIB_NAME}$}: " + e.getMessage());
+          out.println("No good value for {${ENTITY_ATTRIB_NAME}$}: " + e.getMessage());
         }
-        {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_DATE_ATTRIB_NAME}$}_);
+        {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_ATTRIB_NAME}$}_);
         }$}
         {${ACT_NON_TEMPORAL_ATTRIBS=if ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s.length > 0)
           {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s[i]);
         }$}
-!!        {${ACT_DATE_ATTRIBS=LocalDate {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_DATE_ATTRIB_NAME}$}_ = null;
+!!        {${ACT_DATE_ATTRIBS=LocalDate {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_NAME}$}_ = null;
 !!        try {
-!!          {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_DATE_ATTRIB_NAME}$}_ = LocalDate.parse({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_DATE_ATTRIB_INITCAPS}$}s[i], DateTimeFormatter.ISO_LOCAL_DATE);
-!!	      {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_DATE_ATTRIB_INITCAPS}$}({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_DATE_ATTRIB_NAME}$}_);
+!!          {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_NAME}$}_ = LocalDate.parse({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s[i], DateTimeFormatter.ISO_LOCAL_DATE);
+!!	      {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_NAME}$}_);
 !!        } catch (DateTimeParseException e) {
-!!	      out.println("No good value for {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_DATE_ATTRIB_NAME}$}: " + e.getMessage());
+!!	      out.println("No good value for {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_NAME}$}: " + e.getMessage());
 !!        }
 !!        }$}
         if (i==NEW_RECORD) {
@@ -135,26 +135,26 @@ public class {${MODEL_ENTITY}$}ServiceImpl implements {${MODEL_ENTITY}$}Service{
     {${ACT_FK_CHILD_ENTITIES_W_SIMPLE_KEYS={${FK_CHILD_ENTITY}$} {${FK_CHILD_ENTITY_INIT_SMALL}$} = null;
     if ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s != null) {
       for (int i=0; i<{${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s.length; i++) {
-      if ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s[i] == null |  {${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s[i].equals("")) continue;
+      if ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s[i] == null | {${FK_CHILD_ENTITY_INIT_SMALL}$}{${FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP}$}s[i].equals("")) continue;
         if (({${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}s.length == 0) || ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}s[i] == null)) {
           {${FK_CHILD_ENTITY_INIT_SMALL}$} = new {${FK_CHILD_ENTITY}$}();
         } else {
           {${FK_CHILD_ENTITY_INIT_SMALL}$} = {${FK_CHILD_ENTITY_INIT_SMALL}$}Repository.findOne({${FK_CHILD_ENTITY_INIT_SMALL}$}{${PK_ID_FIELD_INIT_CAP}$}s[i]);
         }
-        {${ACT_DATE_TIME_ATTRIBS=LocalDateTime {${ENTITY_DATE_TIME_ATTRIB_NAME}$}_ = null;
+        {${ACT_DATE_TIME_ATTRIBS=LocalDateTime {${ENTITY_ATTRIB_NAME}$}_ = null;
         try {
-         {${ENTITY_DATE_TIME_ATTRIB_NAME}$}_ = LocalDateTime.parse({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_DATE_ATTRIB_INITCAPS}$}s[i], DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+         {${ENTITY_ATTRIB_NAME}$}_ = LocalDateTime.parse({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s[i], DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (DateTimeParseException e) {
-          out.println("No good value for {${ENTITY_DATE_TIME_ATTRIB_NAME}$}: " + e.getMessage());
+          out.println("No good value for {${ENTITY_ATTRIB_NAME}$}: " + e.getMessage());
         }
-        {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_DATE_TIME_ATTRIB_NAME}$}_);
-        }$}{${ACT_DATE_ATTRIBS=LocalDate {${ENTITY_DATE_ATTRIB_NAME}$}_ = null;
+        {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_ATTRIB_NAME}$}_);
+        }$}{${ACT_DATE_ATTRIBS=LocalDate {${ENTITY_ATTRIB_NAME}$}_ = null;
         try {
-         {${ENTITY_DATE_ATTRIB_NAME}$}_ = LocalDate.parse({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_DATE_ATTRIB_INITCAPS}$}s[i], DateTimeFormatter.ISO_LOCAL_DATE);
+         {${ENTITY_ATTRIB_NAME}$}_ = LocalDate.parse({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s[i], DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException e) {
-          out.println("No good value for {${ENTITY_DATE_ATTRIB_NAME}$}: " + e.getMessage());
+          out.println("No good value for {${ENTITY_ATTRIB_NAME}$}: " + e.getMessage());
         }
-        {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_DATE_ATTRIB_NAME}$}_);
+        {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${ENTITY_ATTRIB_NAME}$}_);
         }$}{${ACT_NON_TEMPORAL_ATTRIBS=if ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s.length > 0)
           {${FK_CHILD_ENTITY_INIT_SMALL}$}.set{${ENTITY_ATTRIB_INITCAPS}$}({${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s[i]);
         }$}{${ACT_FK_REF_ATTRIBS=if ({${FK_CHILD_ENTITY_INIT_SMALL}$}{${FK_REF_ATTRIB_INITCAPS}$}s.length > 0)

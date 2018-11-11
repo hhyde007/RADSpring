@@ -117,7 +117,6 @@ public class Airport implements Serializable {
     this.portType = portType;
   }
 
-  @XmlTransient
   public Collection<Flight> getFlightDepartureCollection() {
     return flightDepartureCollection;
   }
@@ -126,7 +125,6 @@ public class Airport implements Serializable {
     this.flightDepartureCollection = flightDepartureCollection;
   }
 
-  @XmlTransient
   public Collection<Flight> getFlightDestinationCollection() {
 	    return flightDestinationCollection;
 	  }

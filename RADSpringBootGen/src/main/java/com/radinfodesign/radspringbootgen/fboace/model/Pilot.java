@@ -142,7 +142,6 @@ public class Pilot implements Serializable {
     this.notes = notes;
   }
 
-  @XmlTransient
   public Collection<FlightCrewMember> getFlightCrewMemberCollection() {
     return flightCrewMemberCollection;
   }
@@ -151,7 +150,6 @@ public class Pilot implements Serializable {
     this.flightCrewMemberCollection = flightCrewMemberCollection;
   }
 
-  @XmlTransient
   public Collection<PilotCertification> getPilotCertificationCollection() {
     return pilotCertificationCollection;
   }

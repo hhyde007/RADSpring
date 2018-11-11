@@ -180,16 +180,16 @@ public class AircraftTypeWebController {
 
   
   @PostMapping(value = "/DeletePilotCertification")
-  public String deletePilotCertification ( @RequestParam(name="pilotId") Integer pilotCertificationPilotId
-                                       , @RequestParam(name="aircraftTypeId") Integer pilotCertificationAircraftTypeId
+  public String deletePilotCertification ( @RequestParam(name="pilotId") Integer pilotId
+                                       , @RequestParam(name="aircraftTypeId") Integer aircraftTypeId
                                        , Model model
                                        , HttpServletRequest request
                                        ) 
   {
     out.println("");
     String message = null;
-    int deleteResult = service.deletePilotCertification (pilotCertificationPilotId, pilotCertificationAircraftTypeId); 
-    
+    int deleteResult = service.deletePilotCertification (pilotId, aircraftTypeId);
+
     if (deleteResult == 1) { 
       message = "PilotCertification record deleted.";  
     }
@@ -198,7 +198,7 @@ public class AircraftTypeWebController {
       message = "PilotCertification deletion failed.";  
     }
     request.setAttribute(MSG, message);
-    AircraftType entity = service.getEntity(pilotCertificationAircraftTypeId);
+    AircraftType entity = service.getEntity(aircraftTypeId);
     model.addAttribute(INSTANCE, entity);
     request.setAttribute(ENTITY_ATT_ID, entity.getAircraftTypeId());
     request.setAttribute(RedirectView.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.TEMPORARY_REDIRECT);
@@ -209,8 +209,8 @@ public class AircraftTypeWebController {
   
   @PostMapping(value = "/DeleteAircraft")
   public String deleteAircraft 
-                     ( @RequestParam(name="aircraftId") Integer aircraftAircraftId
-                     , @RequestParam(name="aircraftTypeId") Integer aircraftAircraftTypeId
+                     ( @RequestParam(name="aircraftId") Integer aircraftId
+                     , @RequestParam(name="aircraftTypeId") Integer aircraftTypeId
                      , Model model
                      , HttpServletRequest request
                      ) 
@@ -218,8 +218,8 @@ public class AircraftTypeWebController {
     out.println("");
     out.println("deleteAircraft()");
     String message = null;
-    int deleteResult = service.deleteAircraft ( aircraftAircraftId ); 
-    if (deleteResult == 1) { 
+    int deleteResult = service.deleteAircraft ( aircraftId );
+    if (deleteResult == 1) {
       message = "Aircraft record deleted.";  
     }
     else 
@@ -227,7 +227,7 @@ public class AircraftTypeWebController {
       message = "Aircraft deletion failed.";  
     }
     request.setAttribute(MSG, message);
-    AircraftType entity = service.getEntity(aircraftAircraftTypeId);
+    AircraftType entity = service.getEntity(aircraftTypeId);
     model.addAttribute(INSTANCE, entity);
     request.setAttribute(ENTITY_ATT_ID, entity.getAircraftTypeId());
     request.setAttribute(RedirectView.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.TEMPORARY_REDIRECT);

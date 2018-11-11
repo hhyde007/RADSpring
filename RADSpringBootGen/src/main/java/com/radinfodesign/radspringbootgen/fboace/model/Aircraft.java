@@ -130,7 +130,6 @@ public class Aircraft implements Serializable {
     this.aircraftType = aircraftType;
   }
 
-  @XmlTransient
   public Collection<Flight> getFlightCollection() {
     return flightCollection;
   }

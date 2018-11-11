@@ -66,9 +66,9 @@
         </thead>
         <tbody>
           <tr data-th-each="pilotCertification : ${aircraftType.pilotCertificationCollection}">
-             
+            
             <td>
-              <button data-btn="pilotId-edit" th:attr="data-pilotId=${pilotCertification.pilotCertificationPK.pilotId}" 
+              <button data-btn="pilotId-edit" th:attr="data-pilotId=${pilotCertification.pilotCertificationPK.pilotId}"
                       type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit Pilot">
                 <span class="fa-stack">
                   <i class="glyphicon glyphicon-edit"></i>
@@ -76,9 +76,9 @@
               </button>
             </td>
             <td>
-              <button data-btn="pilotCertification-delete" 
-                      th:attr="data-pilotId=${pilotCertification.pilotCertificationPK.pilotId}, data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}" 
-                      type="SUBMIT" 
+            <button data-btn="pilotCertification-delete"
+                      th:attr="data-aircraftTypeId=${pilotCertification.pilotCertificationPK.aircraftTypeId}, data-pilotId=${pilotCertification.pilotCertificationPK.pilotId}"
+                      type="SUBMIT"
                       class="frmDelete" 
                       NAME="frmDelete" 
                       VALUE="Delete Pilot Certification">
@@ -87,10 +87,10 @@
                 </span>
               </button>
             </td>
-            
+
             <td></td>
             <td class="pilot" data-th-text="${pilotCertification.pilot}"></td>
-              <input type="hidden" id="pilotCertificationPilotId" name="pilotCertificationPilotId" th:value="${pilotCertification.pilotCertificationPK}==null?null:${pilotCertification.pilotCertificationPK.pilotId}"/>                            
+              <input type="hidden" id="pilotCertificationPilotId" name="pilotCertificationPilotId" th:value="${pilotCertification.pilotCertificationPK}==null?null:${pilotCertification.pilotCertificationPK.pilotId}"/>
                           <td><input type="text" id="pilotCertificationCertificationNumber" size="20" name="pilotCertificationCertificationNumber" th:value="${pilotCertification.certificationNumber}"/></td>
             <td><input type="date" id="pilotCertificationValidFromDate" size="12" name="pilotCertificationValidFromDate" th:value="${pilotCertification.validFromDate}"/></td>
             <td><input type="date" id="pilotCertificationExpirationDate" size="12" name="pilotCertificationExpirationDate" th:value="${pilotCertification.expirationDate}"/></td>
@@ -141,7 +141,7 @@
       <table class="table table-hover">
         <thead>
           <tr>
-            <td colspan="5"><h4>Aircrafts</h4></td>
+              <td colspan="5"><h4>Aircraft</h4></td>
           </tr>
           <tr>
             <td></td>
@@ -156,7 +156,7 @@
         <tbody>
           <tr data-th-each="aircraft : ${aircraftType.aircraftCollection}">
             <td>
-              <button data-btn="aircraftId-edit" th:attr="data-aircraftId=${aircraft.aircraftId}" 
+              <button data-btn="aircraftId-edit" th:attr="data-aircraftId=${aircraft.aircraftId}"
                       type="SUBMIT" class="frmEdit" NAME="frmEdit" VALUE="View/Edit Aircraft">
                 <span class="fa-stack">
                   <i class="glyphicon glyphicon-edit"></i>
@@ -164,11 +164,11 @@
               </button>
             </td>
             <td>
-              <button data-btn="aircraft-delete" 
+              <button data-btn="aircraft-delete"
                       th:attr="data-aircraftId=${aircraft.aircraftId}, data-aircraftTypeId=${aircraft.aircraftType.aircraftTypeId}"
-                      type="SUBMIT" 
-                      class="frmDelete" 
-                      NAME="frmDelete" 
+                      type="SUBMIT"
+                      class="frmDelete"
+                      NAME="frmDelete"
                       VALUE="Delete Aircraft">
                 <span class="fa-stack">
                   <i class="glyphicon glyphicon-trash"></i>
@@ -176,7 +176,7 @@
               </button>
             </td>
             <td></td>
-              <input type="hidden" id="aircraftAircraftId" name="aircraftAircraftId" th:value="${aircraft.aircraftId}"/>                            
+              <input type="hidden" id="aircraftAircraftId" name="aircraftAircraftId" th:value="${aircraft.aircraftId}"/>
                           <td><input type="text" id="aircraftShortName" size="8" name="aircraftShortName" th:value="${aircraft.shortName}"/></td>
             <td><input type="text" id="aircraftLongName" size="40" name="aircraftLongName" th:value="${aircraft.longName}"/></td>
             <td><textarea rows="1" id="aircraftDescription" name="aircraftDescription" cols="40" th:text="${aircraft.description}"/></td>
@@ -204,7 +204,7 @@
           <td></td>
           <td></td>
           <td></td>
-            <input type="hidden" id="aircraftAircraftId" name="aircraftAircraftId" value=""/>                            
+            <input type="hidden" id="aircraftAircraftId" name="aircraftAircraftId" value=""/>
                         <td><input type="text" id="aircraftShortName" size="8" name="aircraftShortName" value=""/></td>
             <td><input type="text" id="aircraftLongName" size="40" name="aircraftLongName" value=""/></td>
             <td><textarea rows="2" id="aircraftDescription" name="aircraftDescription" cols="40" text=""/></td>
@@ -231,11 +231,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='aircraftTypeId';
-            input.value=$(this).attr('data-aircraftTypeId');
-            form.appendChild(input);
+            var aircraftTypeId=document.createElement('aircraftTypeId');
+            aircraftTypeId.type='hidden';
+            aircraftTypeId.name='aircraftTypeId';
+            aircraftTypeId.value=$(this).attr('data-aircraftTypeId');
+            form.appendChild(aircraftTypeId);
             form.method='post';
             form.action='/AircraftType/Edit';
             form.submit();
@@ -247,11 +247,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='pilotId';
-            input.value=$(this).attr('data-pilotId');
-            form.appendChild(input);
+            var pilotId=document.createElement('pilotId');
+            pilotId.type='hidden';
+            pilotId.name='pilotId';
+            pilotId.value=$(this).attr('data-pilotId');
+            form.appendChild(pilotId);
             form.method='post';
             form.action='/Pilot/Edit';
             form.submit();
@@ -266,15 +266,12 @@
           pilotId.type='hidden';
           pilotId.name='pilotId';
           pilotId.value=$(this).attr('data-pilotId');
-
           formDelete.appendChild(pilotId);
           var aircraftTypeId=document.createElement('aircraftTypeId');
           aircraftTypeId.type='hidden';
           aircraftTypeId.name='aircraftTypeId';
           aircraftTypeId.value=$(this).attr('data-aircraftTypeId');
-
           formDelete.appendChild(aircraftTypeId);
-          
           
           formDelete.method='post';
           formDelete.action='/AircraftType/DeletePilotCertification';
@@ -284,11 +281,11 @@
             e.preventDefault();
             var form=document.createElement('form');
             document.body.appendChild(form);
-            var input=document.createElement('input');
-            input.type='hidden';
-            input.name='aircraftId';
-            input.value=$(this).attr('data-aircraftId');
-            form.appendChild(input);
+            var aircraftId=document.createElement('aircraftId');
+            aircraftId.type='hidden';
+            aircraftId.name='aircraftId';
+            aircraftId.value=$(this).attr('data-aircraftId');
+            form.appendChild(aircraftId);
             form.method='post';
             form.action='/Aircraft/Edit';
             form.submit();
@@ -297,11 +294,12 @@
             e.preventDefault();
             var formDelete=document.createElement('form');
             document.body.appendChild(formDelete);
+            var aircraftId=document.createElement('aircraftId');
             aircraftId.type='hidden';
             aircraftId.name='aircraftId';
             aircraftId.value=$(this).attr('data-aircraftId');
             formDelete.appendChild(aircraftId);
-            var aircraftTypeId=document.createElement('input');
+            var aircraftTypeId=document.createElement('aircraftTypeId');
             aircraftTypeId.type='hidden';
             aircraftTypeId.name='aircraftTypeId';
             aircraftTypeId.value=$(this).attr('data-aircraftTypeId');

@@ -284,7 +284,7 @@ public class EntityMeta {
       for (String annotation: fieldAnnotationList) {
         int indexOfAnnotation = annotation.indexOf(annotationToken);
         if (indexOfAnnotation >= 0) {
-          out.println("FieldMeta.getAnnotationAttribute() found annotation "+ annotationToken + " on " + EntityMeta.this.getSimpleName() + "." + this.getName());
+          //out.println("FieldMeta.getAnnotationAttribute() found annotation "+ annotationToken + " on " + EntityMeta.this.getSimpleName() + "." + this.getName());
           return annotation;
         }
       }
@@ -330,14 +330,16 @@ public class EntityMeta {
             return refdEntityMeta.getLabel();
           }
         }
-//        return "Label";
       }
       if (this.label == null) {
         this.label = getAnnotationAttributeValue (ANNOTATION_LABEL, ANNOTATION_ATTRIBUTE_NAME);
         if (this.label == null) {
           String tempLabel = this.getAnnotationAttributeValue (ANNOTATION_COLUMN, ANNOTATION_ATTRIBUTE_NAME);
           if (tempLabel == null) {
-            this.label = this.getResolvedIdentifier();
+            this.label = EntityMeta.getCollectionEnclosedEntityMeta (this).getEntityMeta().getLabel();
+            if (this.label == null) {
+              this.label = this.getResolvedIdentifier();
+            }
           }
           else {
             String[] labelWords = tempLabel.split("_");
@@ -392,21 +394,44 @@ public class EntityMeta {
     }
     public String getResolvedIdentifier() {
 //      out.println("FieldMeta["+ getName() +"].getResolvedIdentifier()");
+      String returnValue = null;
       for (String annotationLine: fieldAnnotationList) {
         if (annotationLine.contains(ANNOTATION_JOIN_COLUMN)) {
           String annotationAttributeValue = EntityMeta.getAnnotationAttributeValue(ANNOTATION_JOIN_COLUMN, ANNOTATION_ATTRIBUTE_NAME, annotationLine);
           if (annotationAttributeValue != null) {
-            String returnValue = convertDBIdentifierToJava (annotationAttributeValue);
+            returnValue = convertDBIdentifierToJava (annotationAttributeValue);
 //            out.println("FieldMeta["+this.getName() +"].getResolvedIdentifier() returning " + returnValue);
             return returnValue;
           }
         }
+//        if (returnValue == null && this.getType().getName().equals(DATATYPE_COLLECTION))
       }
       return this.getName();
     }
     public EntityMeta getEnclosingEntityMeta() {
       return EntityMeta.this;
     }
+
+    public String[] getEmbeddedIdFieldIdentifiers() {
+      if (!this.isEmbeddedId()) return null;
+      String[] embeddedIdFieldNames = new String [embeddedPKInfo.fieldMetaArray.length];
+      for (int i=0; i<embeddedPKInfo.fieldMetaArray.length; i++) {
+        embeddedIdFieldNames[i] = embeddedPKInfo.fieldMetaArray[i].getResolvedIdentifier();
+      }
+      return embeddedIdFieldNames;    
+    }
+  
+    public FieldMeta[] getEmbeddedIdFields() {
+      if (!this.isEmbeddedId()) return null;
+      return embeddedPKInfo.fieldMetaArray;
+//      String[] embeddedIdFieldNames = new String [embeddedPKInfo.fieldMetaArray.length];
+//      for (int i=0; i<embeddedPKInfo.fieldMetaArray.length; i++) {
+//        embeddedIdFieldNames[i] = embeddedPKInfo.fieldMetaArray[i].getResolvedIdentifier();
+//      }
+//      return embeddedIdFieldNames;    
+    }
+  
+  
   }
   // END INNER CLASS FieldMeta
   
@@ -844,6 +869,7 @@ public class EntityMeta {
     }
     return null;
   }
+  
   public String getFirstNonKeyRequiredFieldName() {
     try {
       return this.getFirstNonKeyRequiredField().getName();

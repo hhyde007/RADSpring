@@ -47,6 +47,7 @@ import com.radinfodesign.radspringbootgen.util.EntityMeta.FieldMeta;
 public class EntityMetaFactoryImpl implements EntityMetaFactory {
 
   public static final String AT_SIGN = "@"; 
+  public static final String COMMENT_DELIMITER = "//"; 
   public static final String ANNOTATION_EMBEDDABLE = "@Embeddable";
   protected Map<String, EntityMeta> entityMetaMap = new HashMap<>();
   
@@ -95,8 +96,10 @@ public class EntityMetaFactoryImpl implements EntityMetaFactory {
       for (int i=0; i<entityMeta.sourceCodeLines.size(); i++) {
         if (entityMeta.sourceCodeLines.get(i).contains("public class " + entityMeta.subjectClass.getSimpleName())) {
           for (int j=i-1; j>0; j--) {
+            if (entityMeta.sourceCodeLines.get(j).trim().length()==0) continue;
+            if (entityMeta.sourceCodeLines.get(j).trim().startsWith(COMMENT_DELIMITER)) continue;
             if (entityMeta.sourceCodeLines.get(j).trim().startsWith(AT_SIGN)) {
-              out.println("Found class annotation: " + entityMeta.sourceCodeLines.get(j));
+              //out.println("Found class annotation: " + entityMeta.sourceCodeLines.get(j));
               entityMeta.classAnnotationList.add(entityMeta.sourceCodeLines.get(j));
             }
             else break;
@@ -116,8 +119,10 @@ public class EntityMetaFactoryImpl implements EntityMetaFactory {
         for (int i=0; i<entityMeta.sourceCodeLines.size(); i++) {
           if (entityMeta.sourceCodeLines.get(i).contains(searchField)) {
             for (int j=i-1; j>0; j--) {
+              if (entityMeta.sourceCodeLines.get(j).trim().length()==0) continue;
+              if (entityMeta.sourceCodeLines.get(j).trim().startsWith(COMMENT_DELIMITER)) continue;
               if (entityMeta.sourceCodeLines.get(j).trim().startsWith(AT_SIGN)) {
-                out.println("Found annotation: " + entityMeta.sourceCodeLines.get(j));
+                //out.println("Found annotation: " + entityMeta.sourceCodeLines.get(j));
                 annotationList.add(entityMeta.sourceCodeLines.get(j));
               }
               else break;
@@ -133,7 +138,7 @@ public class EntityMetaFactoryImpl implements EntityMetaFactory {
     if (entityMeta.fieldMetaArray != null) {
       for (FieldMeta fieldMeta: entityMeta.fieldMetaArray) {
         if (fieldMeta.isEmbeddedId()) {
-          out.println("fieldMeta " + fieldMeta.getName() + " is an Embedded ID.");
+          //out.println("fieldMeta " + fieldMeta.getName() + " is an Embedded ID.");
           this.setEmbeddedPKInfo(entityMeta, this.getEntityMeta(fieldMeta.getType().getName(), ANNOTATION_EMBEDDABLE));
           if (getEmbeddedPKInfo(entityMeta) != null) {
             entityMeta.setEmbeddedPKInfoClassName(getEmbeddedPKInfo(entityMeta).getClassName());
