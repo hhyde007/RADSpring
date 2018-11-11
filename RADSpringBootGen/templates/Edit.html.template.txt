@@ -1,6 +1,6 @@
 !! editTemplate.html.txt
 <!--
- *  Generated from GenSpringBootGen
+ *  Generated from RADSpringBootGen
  *  Copyright(c) 2019 by RADical Information Design Corporation
  *  Template: editTemplate.html.txt
 -->

@@ -1,6 +1,6 @@
 /*
- *  Generated from GenSpringBootGen
- *  Copyright(c) 2018 by RADical Information Design Corporation
+ *  Generated from RADSpringBootGen
+ *  Copyright(c) 2019 by RADical Information Design Corporation
  *  Template: ServiceTemplate.java.txt
 */ 
 package {${servicePackageName}$};

@@ -1,7 +1,7 @@
 package {${controllerPackageName}$};
 /*
  *  Generated from GenSpringBootGen
- *  Copyright(c) 2018 by RADical Information Design Corporation
+ *  Copyright(c) 2019 by RADical Information Design Corporation
  *  Template: WebControllerTemplate.java.txt
 */ 
 

@@ -1,5 +1,5 @@
 /*
- *  Generated from GenSpringBootGen
+ *  Generated from RADSpringBootGen
  *  Copyright(c) 2019 by RADical Information Design Corporation
  *  Template: ServiceImplTemplate.java.txt
 */ 
