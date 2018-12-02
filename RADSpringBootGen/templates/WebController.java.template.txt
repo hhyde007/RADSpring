@@ -3,6 +3,7 @@ package {${controllerPackageName}$};
  *  Generated from GenSpringBootGen
  *  Copyright(c) 2019 by RADical Information Design Corporation
  *  Template: WebControllerTemplate.java.txt
+ *  Template version 2018.11.19a
 */ 
 
 import static java.lang.System.out;
@@ -61,7 +62,7 @@ public class {${webControllerClass}$} {
     
   @Autowired
   {${MODEL_ENTITY}$}Service service;
-  {${ACT_THIRD_ENTITIES_ONLY=@Autowired 
+  {${ACT_THIRD_ENTITIES_ONLY=@Autowired
   {${FK_CHILD_ENTITY}$}Service {${FK_CHILD_ENTITY_INIT_SMALL}$}Service;
 !!  {${FK_REF_ENTITY}$}Service {${FK_REF_ENTITY_INIT_SMALL}$}Service;
   }$}{${ACT_FK_REF_ENTITIES=@Autowired

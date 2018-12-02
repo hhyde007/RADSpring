@@ -323,7 +323,7 @@ public class EntityMeta {
     }
     public String getLabel(EntityMeta drivingEntityMeta) {
       if (this.isEmbeddedId() & drivingEntityMeta != null) {
-        EntityMeta embeddedEntityMeta = EntityMeta.this;
+//        EntityMeta embeddedEntityMeta = EntityMeta.this;
         //for (EntityMeta refdEntityMeta: embeddedEntityMeta.getPkReferencedEntityMetas()) {
         for (EntityMeta refdEntityMeta: this.getPkReferencedEntityMetas()) {
           if (!refdEntityMeta.equals(drivingEntityMeta)) { // Because we want the name of the OTHER entity
@@ -336,7 +336,9 @@ public class EntityMeta {
         if (this.label == null) {
           String tempLabel = this.getAnnotationAttributeValue (ANNOTATION_COLUMN, ANNOTATION_ATTRIBUTE_NAME);
           if (tempLabel == null) {
-            this.label = EntityMeta.getCollectionEnclosedEntityMeta (this).getEntityMeta().getLabel();
+//            try {
+              this.label = EntityMeta.getCollectionEnclosedEntityMeta (this).getEntityMeta().getLabel();
+//            } catch (NullPointerException e)  {}
             if (this.label == null) {
               this.label = this.getResolvedIdentifier();
             }
@@ -919,19 +921,17 @@ public class EntityMeta {
     }
     return this.label;
   }
-
-    
+  
   public static TempEntityMeta getCollectionEnclosedEntityMeta (EntityMeta.FieldMeta testField) { 
     List<TempEntityMeta> collectionOfEntityMetaList = getCollectionEnclosedEntityMetas (testField, 1); 
     return (collectionOfEntityMetaList !=null?collectionOfEntityMetaList.get(0):null);
   }
-
   
   public static List<TempEntityMeta> getCollectionEnclosedEntityMetas (EntityMeta.FieldMeta testField) { 
     return getCollectionEnclosedEntityMetas (testField, 99); 
    }
      
-  public static List<TempEntityMeta> getCollectionEnclosedEntityMetas (EntityMeta.FieldMeta testField, int limit) { // SHOULDN'T THIS BE MOVED TO CLASS EntityMeta??
+  public static List<TempEntityMeta> getCollectionEnclosedEntityMetas (EntityMeta.FieldMeta testField, int limit) {
    //out.println("getCollectionEnclosedClasses");
    if (!(testField.getType().getName().equals(DATATYPE_COLLECTION))) { return null; }
    List<TempEntityMeta> collectionOfEntityMetaList = new ArrayList<>();
@@ -940,7 +940,7 @@ public class EntityMeta {
    TempEntityMeta tempEntityMeta;
    TempEntityMeta tempEnclosedFKRefClassInfo;
    boolean xReferenced = false;
-     out.println("isCollection() " + testField.getName());
+     //out.println("isCollection() " + testField.getName());
      String collectionOfClassName = getEnclosedType(testField);
      try {
        enclosedClassInfo = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(MODEL_PACKAGE+"."+collectionOfClassName);

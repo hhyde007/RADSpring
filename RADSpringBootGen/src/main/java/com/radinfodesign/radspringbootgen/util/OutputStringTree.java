@@ -17,12 +17,10 @@ package com.radinfodesign.radspringbootgen.util;
 import static java.lang.System.out;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.radinfodesign.radspringbootgen.fboace.model.Flight;
 import com.radinfodesign.radspringbootgen.util.EntityMeta.FieldMeta;
 
 /**
@@ -269,7 +267,7 @@ public class OutputStringTree extends IOStringTree {
   public static final String FK_REF_ENTITY_ID = "FK_REF_ENTITY_ID";
   
   /**
-   * Primary key ID field of Entity class referenced by foreign key, with InitalCapital letter.
+   * Primary key ID field of Entity class referenced by foreign key, with InitialCapital letter.
    */
   public static final String FK_REF_ENTITY_ID_INIT_CAP = "FK_REF_ENTITY_ID_INIT_CAP";
   
@@ -294,7 +292,7 @@ public class OutputStringTree extends IOStringTree {
   public static final String FK_CHILD_ENTITY = "FK_CHILD_ENTITY"; 
   
   /**
-   * Name of child entity class, with inital lower-case letter
+   * Name of child entity class, with initial lower-case letter
    */
   public static final String FK_CHILD_ENTITY_INIT_SMALL = "FK_CHILD_ENTITY_INIT_SMALL"; 
   
@@ -344,6 +342,11 @@ public class OutputStringTree extends IOStringTree {
 //  public static final String FK_CHILD_EMBEDDED_PK = "FK_CHILD_EMBEDDED_PK"; // Child Entity Embedded PK object.  
 //  public static final String FK_CHILD_EMBEDDED_PK_INIT_SMALL = "FK_CHILD_EMBEDDED_PK_INIT_SMALL"; // Child Entity Embedded PK object in initial lowercase.  
 
+  /*
+   * EXPERIMENTAL 2018.11.15
+   */
+  //public static final String FK_CHILD_ENTITY_FROM_COLLECTION = "FK_CHILD_ENTITY_FROM_COLLECTION";
+  
   /**
    * Name of single primary key/ID field for entities other than the Driving entity, such as child entities
    */
@@ -508,11 +511,17 @@ public class OutputStringTree extends IOStringTree {
   
   /**
    * Entity attribute default datatype
-   * <br>Used for HTML parameters prior to parsing/conversion to richer datatypes,
+   * <br>Used for HTTP-posted HTML parameters prior to parsing/conversion to richer datatypes,
    * or to lookup instances of other classes. 
    * <br>Non-primitive non-wrappers (entity classes) return "Integer"; Dates return "String"
    */
-  public static final String ENTITY_ATTRIB_DEFAULT_DATATYPE = "ENTITY_ATTRIB_DEFAULT_DATATYPE"; 
+  public static final String ENTITY_ATTRIB_DEFAULT_DATATYPE = "ENTITY_ATTRIB_DEFAULT_DATATYPE";
+  
+  /*
+   * EXPERIMENTAL
+   */
+  public static final String FK_CHILD_ATTRIB_DEFAULT_DATATYPE = "FK_CHILD_ATTRIB_DEFAULT_DATATYPE";
+  
   
   /**
    * Entity attribute name with initial capital letter
@@ -521,33 +530,21 @@ public class OutputStringTree extends IOStringTree {
    */
   public static final String ENTITY_ATTRIB_INITCAPS = "ENTITY_ATTRIB_INITCAPS";
   
-  /*
-   * DEPRECATED: Date-type attribute name
+  /**
+   * The tokens named with the prefix "HTML_FORM_*" are hard-coded kludges that generate specific HTML form code 
+   * output depending upon context. The purpose is to present the attributes or fields of the entity either 
+   * horizontally (for child entities) or vertically (for driving/parent entities), to provide a label or prompt 
+   * for each field, and to render each with the HTML form control (text, textarea, SELECT, datetime-local etc.) 
+   * appropriate to the data type and/or relation to the driving entity.
    */
-//  public static final String ENTITY_DATE_ATTRIB_NAME = "ENTITY_DATE_ATTRIB_NAME"; // 
-  
-  /*
-   * DEPRECATED: Datetime-type attribute name 
-   */
-//  public static final String ENTITY_DATE_TIME_ATTRIB_NAME = "ENTITY_DATE_TIME_ATTRIB_NAME";
-  
-  /*
-   * DEPRECATED: Date type attribute name, initial capital letter
-   */
-  //public static final String ENTITY_DATE_ATTRIB_INITCAPS = "ENTITY_DATE_ATTRIB_INITCAPS"; // Date type attribute name
-  
-  /*
-   * DEPRECATED: Datetime type attribute name
-   */
-//  public static final String ENTITY_DATE_TIME_ATTRIB_INITCAPS = "ENTITY_DATE_TIME_ATTRIB_INITCAPS";
-
-  /*
-   * DEPRECATED FOR NON-USE
-   */
-  //public static final String MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB = "MODEL_ADD_CHILD_ENTITY_RPSTRY_ATTRIB"; 
-    
   public static final String HTML_FORM_VERTICAL_INPUT = "HTML_FORM_VERTICAL_INPUT";
   public static final String HTML_FORM_HORIZONTAL_INPUT = "HTML_FORM_HORIZONTAL_INPUT";
+  
+  /**
+   * The "_BLANK" suffix indicates that the HTML controls rendered here are not to be pre-populated with 
+   * non-null values prior to display; they represent a new, unsaved instance of their entity. 
+   * 
+   */
   public static final String HTML_FORM_VERTICAL_INPUT_BLANK = "HTML_FORM_VERTICAL_INPUT_BLANK";
   public static final String HTML_FORM_HORIZONTAL_INPUT_BLANK = "HTML_FORM_HORIZONTAL_INPUT_BLANK";
   
@@ -616,12 +613,6 @@ public class OutputStringTree extends IOStringTree {
     else return false;
   }
 
-//  public static boolean isPrimitiveOrWrapper (EntityMeta.FieldMeta testField){ // DEPRECATED? USE EntityMeta METHODS INSTEAD
-//    if (testField.getType().getName().indexOf(EntityMeta.PERIOD) < 0 ) return true;
-//    if (testField.getType().getName().startsWith(JAVA_PACKAGE)) return true;
-//    else return false;
-//  }
-     
   protected static boolean isLocalDate (EntityMeta.FieldMeta testField){
     //out.println("isLocalDate() testField = " + testField.getName() + ": " + testField.getType().getName());
     if (testField.getType().getName().equals(JAVA_TIME_LOCAL_DATE)) return true;
@@ -658,21 +649,20 @@ public class OutputStringTree extends IOStringTree {
    * @param inputNode
    * @param outputNode
    * @param drivingEntityMeta
-   * @param drivingEntityMetaField
+   * @param currentField
    * @param currentEntityMeta
   */
   protected void build ( StringNode inputNode
                        , StringNode outputNode
                        , EntityMeta drivingEntityMeta
-                       , FieldMeta drivingEntityMetaField
+                       , FieldMeta currentField
                        , EntityMeta currentEntityMeta
-//                     , boolean childOfMultiToken
                      ) {
-//    out.println("build[EntityMeta] " + inputNode.getValue());
-//    out.println("  inputNode.getTokenKey() = " + inputNode.getTokenKey());
-//    out.println("  inputNode.getTokenInstruction() = " + inputNode.getTokenInstruction());
-//    out.println("  inputNode.isSingleTokenExpression() = " + inputNode.isSingleTokenExpression());
-//    out.println("[build]  inputNode.isMultiTokenExpression() = " + inputNode.isMultiTokenExpression());
+    if (currentField != null) {
+      // The main purpose for this is to set a debugging breakpoint.
+      //out.println("currentField != null: " + currentField.getName());
+      out.print("");
+    }
     List<StringNode> childNodes = inputNode.getChildren();
     StringNode nextOutputNode = outputNode;
     String tokenValue = null;
@@ -687,7 +677,7 @@ public class OutputStringTree extends IOStringTree {
     else if (inputNode.isSingleTokenExpression()) {
       tokenValue = getTokenMap().get(inputNode.getTokenKey());
       if (tokenValue==null) {
-        tokenValue = getAttributeAttribute (drivingEntityMeta, drivingEntityMetaField, currentEntityMeta, inputNode.getTokenKey());
+        tokenValue = getAttributeAttribute (drivingEntityMeta, currentField, currentEntityMeta, inputNode.getTokenKey());
       }
 //      out.println("addNode( (inputNode.isSingleTokenExpression() ): " + (tokenValue!=null?tokenValue:inputNode.getValue()));
       nextOutputNode = this.addNode(tokenValue!=null?tokenValue:inputNode.getValue(), outputNode);
@@ -711,40 +701,7 @@ public class OutputStringTree extends IOStringTree {
     return; // outputFileTree;
   }  
   
-  /** 
-   * Overload to call when operating at the level of a field/attribute of a child entity(?)
-   * @param inputNode
-   * @param outputNode
-   * @param drivingEntityMeta
-   * @param currentEntityMeta
-   * @param currentField
-   */
-  protected void build ( StringNode inputNode
-                       , StringNode outputNode
-                       , EntityMeta drivingEntityMeta
-                       , EntityMeta currentEntityMeta
-                       , FieldMeta currentField // Difference
-                       ) {
-//    out.println("OutputStringTree.build[FieldMeta] " + currentEntityMeta.getSimpleName()+"."+currentField.getName());
-    StringNode nextOutputNode = null;
-    String tokenValue = null;
-    String tokenInstruction = null;
-    
-    if (inputNode.isLiteralExpression()) {
-      nextOutputNode = this.addNode(inputNode.getValue(), outputNode);
-    }
-    if (inputNode.isSingleTokenExpression()) {
-      tokenValue = getTokenMap().get(inputNode.getTokenKey());
-      if (tokenValue==null) {
-        tokenValue = getAttributeAttribute (drivingEntityMeta, currentEntityMeta, currentField, inputNode.getTokenKey());
-      }
-      nextOutputNode = this.addNode(tokenValue!=null?tokenValue:inputNode.getValue(), outputNode);
-    }
-    return; 
-  }  
-  
-  
-  private void buildMultivaluedExpression ( StringNode inputNode
+  protected void buildMultivaluedExpression ( StringNode inputNode
                                           , StringNode outputNode
                                           , EntityMeta drivingEntityMeta
                                           , EntityMeta currentEntityMeta
@@ -781,7 +738,10 @@ public class OutputStringTree extends IOStringTree {
 //            out.println("Debugging case ACT_ALL_ATTRIBS Flight.aircraft..."); // Set breakpoint on this line
 //          }
           // END DEBUG
-          this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+          
+          // IF IT'S BROKEN, HERE'S WHAT BROKE IT:
+          //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+          this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION
         }
         break;
 
@@ -805,7 +765,10 @@ public class OutputStringTree extends IOStringTree {
         if (!(fields[i].isPrimitiveOrWrapper() | fields[i].isEmbeddedId())) continue; 
         for (StringNode childNode: inputNode.getChildren()) {
 //          out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-          this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+
+          // IF IT'S BROKEN, THIS IS WHAT BROKE IT:
+          //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+          this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION
         }
         break;
 
@@ -828,14 +791,17 @@ public class OutputStringTree extends IOStringTree {
         if (!(fields[i].isId() | fields[i].isEmbeddedIdMemberField())) { break; }// Process ONLY primary key column attributes
         for (StringNode childNode: inputNode.getChildren()) {
 //          out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-          this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+          // IF IT'S BROKEN, THIS IS WHAT BROKE IT!
+          //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+          this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION          
         }
         break;
       case ACT_PK_ATTRIBS_COMMA_SEPARATED: 
         if (!(fields[i].isId() | fields[i].isEmbeddedIdMemberField())) { break; }// Process ONLY primary key column attributes
         //int iteration = 0;
         for (StringNode childNode: inputNode.getChildren()) {
-          this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+          //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+          this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION
         }
         if (fields[i].isEmbeddedIdMemberField() & (!fields[i].isLastEmbeddedIdMemberField())) {
           this.addNode(", ", outputNode);
@@ -845,7 +811,8 @@ public class OutputStringTree extends IOStringTree {
         if (fields[i].isId()) continue;
         if ((fields[i].isPrimitiveOrWrapper())) {
           for (StringNode childNode: inputNode.getChildren()) {
-            this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+            //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+            this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION
           }
         }
         break;
@@ -853,7 +820,8 @@ public class OutputStringTree extends IOStringTree {
         if (fields[i].isId()) continue; // But what if the primary key contains a Date? Convention says don't do that.
         if (isLocalDate(fields[i])) {
           for (StringNode childNode: inputNode.getChildren()) {
-            this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+            //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+            this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION
           }
         }
         break;
@@ -861,7 +829,8 @@ public class OutputStringTree extends IOStringTree {
         if (isLocalDateTime(fields[i])) {
           for (StringNode childNode: inputNode.getChildren()) {
 //            out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-            this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+            //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+            this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION
           }
         }
         break;
@@ -874,7 +843,8 @@ public class OutputStringTree extends IOStringTree {
             if (fields[i].getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) {
               continue; 
             }
-              this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+              //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+              this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION
           }
         }
         break;
@@ -886,7 +856,8 @@ public class OutputStringTree extends IOStringTree {
           duplicateFKRefClassMap.put(fields[i].getType().getName(), fields[i]);
           if (!(fields[i].isPrimitiveOrWrapper())) {
             for (StringNode childNode: inputNode.getChildren()) {
-              this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+              //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);  // WORKING CORRECTLY VERSION
+              this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION
             }
           }
           break;
@@ -923,7 +894,7 @@ public class OutputStringTree extends IOStringTree {
             }
             for (StringNode childNode: inputNode.getChildren()) {
 //              out.println("childNode.getValue("+fields[i].getName()+") = " + childNode.getValue());
-              this.build(childNode, outputNode, drivingEntityMeta, fields[i], collectionOfEntityMeta.getEntityMeta()); // <------------< **************
+              this.build(childNode, outputNode, drivingEntityMeta, fields[i], collectionOfEntityMeta.getEntityMeta()); // WORKING CORRECTLY VERSION
             }
           }
           break;
@@ -970,7 +941,8 @@ public class OutputStringTree extends IOStringTree {
             }
             else { // This is an "other" that we want.
               for (StringNode childNode: inputNode.getChildren()) {
-                this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);
+                //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+                this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION
               }
             }
           }
@@ -1014,7 +986,15 @@ public class OutputStringTree extends IOStringTree {
                 continue; // [Skip;] WILL HAVE TO REVISIT THIS FOR MULTIPLE FOREIGN KEYS REFERENCING DRIVING ENTITY FROM CHILD ENTITY
               }
               for (StringNode childNode: inputNode.getChildren()) {
-                this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, childField);  // <-------------------------<
+//                out.println("");
+//                out.println("**********");
+//                out.println("  CALLING buildChild() with token " + childNode.getTokenKey());
+//                out.println("**********");
+//                out.println("");
+                //this.buildChild(childNode, outputNode, drivingEntityMeta, currentEntityMeta, childField);  // WORKING CORRECTLY VERSION
+                //this.build(childNode, outputNode, drivingEntityMeta, childField, currentEntityMeta); // EXPERIMENTAL VERSION
+                this.build(childNode, outputNode, drivingEntityMeta, childField, collectionOfEntityMeta.getEntityMeta()); // EXPERIMENTAL VERSION
+                // LAST HOLDOUT! THIS ONE CAUSES PROBLEMS AROUND FK_CHILD_ENTITY_INIT_SMALL IN WEB CONTROLLER.
               }
             }
             break;
@@ -1039,7 +1019,8 @@ public class OutputStringTree extends IOStringTree {
               & (EntityMeta.getCollectionEnclosedEntityMeta(fields[i]) == null) // Not collection type
           ) {
             for (StringNode childNode: inputNode.getChildren()) {
-              this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]);  
+              //this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, fields[i]); // WORKING CORRECTLY VERSION
+              this.build(childNode, outputNode, drivingEntityMeta, fields[i], currentEntityMeta); // EXPERIMENTAL VERSION  
             }
           }
           break;
@@ -1047,336 +1028,43 @@ public class OutputStringTree extends IOStringTree {
     }
   }
   
-  protected String getAttributeAttribute ( EntityMeta drivingEntityMeta
-                                         , EntityMeta currentEntityMeta
-                                         , EntityMeta.FieldMeta field
-                                         , String token
-                                         ) {
-    if (field.getName().equals(SERIAL_VERSION_UID)) return null;
-  
+  protected String getEntityAttribDefaultDatatype (EntityMeta.FieldMeta field) {
     String returnValue = null;
-    String interim = null;
-    //Field[] fields = entityClass.getDeclaredFields();
-    TempEntityMeta collectionOfEntityMeta = null;
-    if ((collectionOfEntityMeta = EntityMeta.getCollectionEnclosedEntityMeta (field)) != null) {
-      switch (token) {
-      case FK_CHILD_ENTITY:
-        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName();
-        break;
-      case FK_CHILD_ENTITY_LABEL:
-//      case ENTITY_ATTRIB_LABEL:
-        returnValue = collectionOfEntityMeta.getEntityMeta().getLabel();
-        break;
-      case FK_CHILD_ENTITY_INIT_SMALL:
-        interim = collectionOfEntityMeta.getEntityMeta().getSimpleName();
-        returnValue = interim.substring(0,1).toLowerCase()+interim.substring(1);
-        break;
-      case FK_CHILD_ENTITY_LOWER:
-        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName().toLowerCase();
-        break;
-
-      case FK_CHILD_ENTITY_LOWER_PLURAL:
-        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName().toLowerCase()+"s";
-        break;
-      case FK_CHILD_ENTITY_UPPER:
-        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName().toUpperCase();
-        break;
-      case FK_CHILD_ENTITY_UPPER_PLURAL:
-        returnValue = collectionOfEntityMeta.getEntityMeta().getSimpleName().toUpperCase()+"S";
-        break;
+    if (!(field.isPrimitiveOrWrapper())) {
+      returnValue = DATATYPE_INTEGER;
+    } else if (isTemporalType(field)) {
+      returnValue = DATATYPE_STRING;
+    } else {
+      try { 
+        returnValue = field.getType().getSimpleName();
+      } catch (Exception e) { // what Exception?
+        returnValue = field.getType().getName();
       }
     }
-    if (!field.isPrimitiveOrWrapper()) { // It's a FK Ref Entity
-      switch (token) {
-        case FK_REF_ENTITY: 
-          returnValue = field.getType().getSimpleName();
-        break;
-        case FK_REF_ENTITY_QUALIFIED: 
-          returnValue = field.getLabel().replaceAll(" ", "");
-        break;
-        case FK_REF_ENTITY_INIT_SMALL:
-          interim = field.getType().getSimpleName();
-          returnValue = interim.substring(0,1).toLowerCase()+interim.substring(1);
-          break;
-//        case FK_REF_ENTITY_LOWER:
-//          returnValue = field.getType().getSimpleName().toLowerCase();
-//          break;
-          
-        // DEPRECATED FOR NON-USE:
-//        case FK_REF_ENTITY_LOWER_PLURAL:
-//          returnValue = field.getType().getSimpleName().toLowerCase()+"s";
-//          break;
-        case FK_REF_ENTITY_UPPER_PLURAL:
-          returnValue = field.getType().getSimpleName().toUpperCase()+"S";
-          break;
-        case FK_REF_ENTITY_ID:
-          try {
-            out.println("case FK_REF_ENTITY_ID: ");
-            out.println("  currentEntityMeta = " + currentEntityMeta.getSimpleName());
-            out.println("  field = " + field.getName());
-            returnValue = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(field.getType().getName()).getIDField().getName(); 
-          } catch (Exception e) {
-            returnValue = "EntityMeta.getEntityMeta() SHOULD NOT THROW Exception (getAttributeAttribute case FK_REF_ENTITY_ID)";
-          }
-          //out.println("***DEBUG: FK_REF_ENTITY_ID -> " + returnValue + "; FK_REF_ENTITY_IDENTIFIER -> " + field.getResolvedIdentifier());
-          break;
-        // DEPRECATED
-//        case FK_REF_ATTRIB_NAME:
-//          returnValue = field.getName();
-//          break;
-        case FK_REF_ENTITY_IDENTIFIER:
-          returnValue = field.getResolvedIdentifier();
-          break;
-        case FK_REF_ATTRIB_INITCAPS:
-  //        returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
-          returnValue = field.getName().substring(0,1).toUpperCase()+field.getName().substring(1);
-          break;
-        }
-      } 
-      switch (token) {
-//        case FK_CHILD_EMBEDDED_ID:
-        case FK_CHILD_EMBEDDED_ID_INIT_SMALL:
-          returnValue = currentEntityMeta.getEmbeddedPKInfo().getSimpleName(); // .getEmbeddedPKInfo().getSimpleName();
-          if (token.equals(FK_CHILD_EMBEDDED_ID_INIT_SMALL)) {
-            returnValue = returnValue.substring(0, 1).toLowerCase()+ returnValue.substring(1);
-          }
-        break;
-//        case ENTITY_ATRRIB_INITCAP_NAME:
-//          if (!isPrimitiveOrWrapper(field.getType())) {
-//            returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
-//          }
-//          break;
-        case ENTITY_ATTRIB_UPPER_NAME:
-          returnValue = field.getResolvedIdentifier().toUpperCase();
-          break;
-        case ENTITY_ATTRIB_NAME:
-          returnValue = field.getResolvedIdentifier();
-          break;
-        case ENTITY_ATTRIB_LABEL:
-          if (field.isEmbeddedId()) {
-            returnValue = field.getLabel(drivingEntityMeta);
-          }
-          else {
-            returnValue = field.getLabel();
-          }
-          break;
-        case ENTITY_ATTRIB_DEFAULT_DATATYPE:
-          if (!(field.isPrimitiveOrWrapper())) {
-            returnValue = DATATYPE_INTEGER;
-          } else if (isTemporalType(field)) {
-            returnValue = DATATYPE_STRING;
-          } else {
-            try { 
-              returnValue = field.getType().getSimpleName();
-            } catch (Exception e) { // what Exception?
-              returnValue = field.getType().getName();
-            }
-          }
-          break;
-        case ENTITY_ATTRIB_INITCAPS:
-          returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
-          break;
-          
-        // DEPRECATED AS UNNECESSARY
-//        case ENTITY_DATE_ATTRIB_NAME:
-//          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE)){
-//            returnValue = field.getResolvedIdentifier();
-//          }
-//          break;
-
-          // DEPRECATED AS UNNECESSARY
-//        case ENTITY_DATE_TIME_ATTRIB_NAME:
-//          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE_TIME)){
-//            returnValue = field.getResolvedIdentifier();
-//          }
-//          break;
-
-          // DEPRECATED AS UNNECESSARY
-//        case ENTITY_DATE_ATTRIB_INITCAPS:
-//          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE)){
-//            returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
-//          }
-//          break;
-
-          // DEPRECATED AS UNNECESSARY
-//        case ENTITY_DATE_TIME_ATTRIB_INITCAPS:
-//          if (field.getType().getName().endsWith(DATATYPE_LOCAL_DATE_TIME)){
-//            returnValue = field.getResolvedIdentifier().substring(0,1).toUpperCase()+field.getResolvedIdentifier().substring(1);
-//          }
-//          break;
-          
-//        case ACT_EMBEDDED_ID_FIELDS:
-//          String debugDummy = "debugDummy"; 
-//          out.println(debugDummy);
-//          if (!field.isEmbeddedId()) break;
-//          EntityMeta.FieldMeta[] embeddedIdFields = field.getEmbeddedIdFields();
-//          for (EntityMeta.FieldMeta childField : embeddedIdFields) {
-//            for (StringNode childNode: inputNode.getChildren()) {
-//              this.build(childNode, outputNode, drivingEntityMeta, currentEntityMeta, childField);  // <-------------------------<
-//            }
-//          }
-//          break;          
-          
-
-//        DEPRECATED; Hard-coded kludge for Edit.html.template.txt no longer necessary          
-//        case GET_TH_HTML_FORM_DATA_VARS: 
-//        {
-//          returnValue = "";
-//          int iteration = 0;
-//          String compoundEntityPlusPK = currentEntityMeta.getSimpleName().substring(0,1).toLowerCase()+currentEntityMeta.getSimpleName().substring(1)
-//                                      + "."
-//                                      + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(0,1).toLowerCase()
-//                                      + currentEntityMeta.getEmbeddedPKInfo().getSimpleName().substring(1);
-//          for (String embeddidIdField: currentEntityMeta.getEmbeddedIdFieldIdentifiers()) {
-//            if (iteration > 0) {returnValue += ", ";}
-//            returnValue += "data-" + embeddidIdField + "=${" + compoundEntityPlusPK + "." + embeddidIdField + "}";
-//      //    th:attr="data-pilotId=${flightCrewMember.flightCrewMemberPK.pilotId}, data-flightId=${flightCrewMember.flightCrewMemberPK.flightId}"
-//            iteration++;
-//          }
-//          break;
-//        }
-       
-        case HTML_FORM_VERTICAL_INPUT:
-        case HTML_FORM_VERTICAL_INPUT_BLANK:
-        case HTML_FORM_HORIZONTAL_INPUT:
-        case HTML_FORM_HORIZONTAL_INPUT_BLANK:
-        {
-          // DEBUGGING
-          if (currentEntityMeta.getSimpleName().equals("Flight") & field.getName().startsWith("aircraft")) {
-            out.println("Debugging case HTML_FORM_* Flight.aircraft..."); // Set breakpoint on this line
-          }
-          // END DEBUG
-          returnValue = "";
-          if (field.isEmbeddedId()) break;
-          StringBuilder sb = new StringBuilder("");
-          String indent = "          "; // 10 spaces
-          
-          boolean isFkRef = (!(field.isPrimitiveOrWrapper()) & EntityMeta.getCollectionEnclosedEntityMeta(field) == null);
-          boolean isFKChildCollection = (EntityMeta.getCollectionEnclosedEntityMeta(field) != null); // FLAWED?
-          boolean currentEntityMetaIsChild = (!currentEntityMeta.equals(drivingEntityMeta));
-          String fieldType = field.getType().getSimpleName();
-          String drivingEntityMetaName = drivingEntityMeta.getSimpleName();
-          if (currentEntityMetaIsChild) { // NEED TO HANDLE MULTIPLE FKs back to same driving parent
-            if (fieldType.equals(drivingEntityMetaName)) break; // Ignore references back to driving parent
-          }
-          String htmlFormInputControl = field.getHtmlFormInputControl();
-          boolean isVertical = token.startsWith(HTML_FORM_VERTICAL_INPUT);
-          boolean isHorizontal = token.startsWith(HTML_FORM_HORIZONTAL_INPUT);
-          boolean isBlank = token.endsWith("_BLANK"); 
-          if (field.isEmbeddedIdMemberField() & !isBlank) break;
-          
-          sb.append(isVertical?"<tr>\n":"");
-          //sb.append(isVertical?indent + "<tr>\n":"");
-          sb.append(isVertical?indent + "  <td><label for=\"" + field.getResolvedIdentifier() + "\">" + field.getLabel() + "</label></td>\n":"");
-          String declaringClassVar = field.getDeclaringClassName().substring(0, 1).toLowerCase()+field.getDeclaringClassName().substring(1);
-//          String htmlFormVar = declaringClassVar + "." + field.getName();
-          String htmlFormVar = declaringClassVar + "." + field.getResolvedIdentifier(); // For example flight.aircraftId
-          String fqRefVar = declaringClassVar + "." + field.getName();                  // For example flight.aircraft
-          String valueClause = isBlank?" value=\"\"":" th:value=\"${" + htmlFormVar + "}\"";
-          String textClause = isBlank?" text=\"\"":" th:text=\"${" + htmlFormVar + "}\"";
-          String textAreaRows = (isBlank?"\"2\"":"\"1\"");
-          
-          String fieldName = "";
-          int fieldWidth = field.getFieldWidth();
-          if (currentEntityMetaIsChild) { // Horizontal
-//            fieldName = declaringClassVar + (field.getName().substring(0, 1).toUpperCase()+field.getName().substring(1));
-            fieldName = declaringClassVar + (field.getResolvedIdentifier().substring(0, 1).toUpperCase()+field.getResolvedIdentifier().substring(1));
-          }
-          else { // Vertical
-//            fieldName = field.getName();
-            fieldName = field.getResolvedIdentifier();
-          }
-          
-          if ((!isFkRef) & (!isFKChildCollection)) {
-            switch (htmlFormInputControl) {
-              case "text": // DECLARE CONSTANTS FOR THESE
-                sb.append(indent + "  <td><input type=\"" + htmlFormInputControl + "\" id=\"" + fieldName + "\" size=\"" + fieldWidth + "\" name=\"" + fieldName + "\""+valueClause+"/></td>\r\n");
-                break; 
-              case "textarea":
-                sb.append(indent + "  <td><" + htmlFormInputControl + " rows=" + textAreaRows + " id=\"" + fieldName + "\" name=\"" + fieldName + "\" cols=\"" + fieldWidth + "\""+textClause+"/></td>\n");
-                break;
-              case "date": 
-                sb.append(indent + "  <td><input type=\"" + htmlFormInputControl + "\" id=\"" + fieldName + "\" size=\"" + fieldWidth + "\" name=\"" + fieldName + "\""+valueClause+"/></td>\r\n");
-                break; 
-              case "datetime-local": 
-                sb.append(indent + "  <td><input type=\"" + htmlFormInputControl + "\" id=\"" + fieldName + "\" size=\"" + fieldWidth + "\" name=\"" + fieldName + "\""+valueClause+"/></td>\r\n");
-                break; 
-            }
-          } 
-          else if ((isFkRef) & (!isFKChildCollection) &(isVertical)) {
-            String fkRefEntityInitUpper = field.getType().getSimpleName();
-            String fkRefEntity = fkRefEntityInitUpper.substring(0, 1).toLowerCase() + fkRefEntityInitUpper.substring(1);
-            String fkRefEntityQualified = field.getLabel().replaceAll(" ", "");
-            String fkRefEntityId = "COULD NOT GET fkRefEntityId";
-            try {
-              fkRefEntityId = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(field.getType().getName()).getIDField().getName();
-            } catch (IOException e) {}
-            sb.append(indent + "  <td>\r\n");
-            sb.append(indent + "  <select th:field=\"*{" + htmlFormVar + "}\">\r\n");
-            sb.append(indent + "  <option value=\"0\">[Please select...]</option>\r\n");
-            sb.append(indent + "  <option th:each=\""+fkRefEntity+" : ${"+fkRefEntity+"s}\" \r\n");
-            sb.append(indent + "          th:value=\"${"+fkRefEntity+"."+fkRefEntityId+"}\" \r\n");
-            sb.append(indent + "          th:text=\"${"+fkRefEntity+"}\">null</option>\r\n");
-            sb.append(indent + "  </select>\r\n");
-//            sb.append(indent + "              <button data-btn=\""+fkRefEntityQualified+"-edit\" th:attr=\"data-"+fieldName+"=${"+htmlFormVar+"}==null?0:${"+htmlFormVar+"."+fkRefEntityId+"}\" type=\"SUBMIT\" class=\"frmEdit\" NAME=\"frmEdit\" VALUE=\"View/Edit "+fkRefEntityInitUpper+"\">\r\n");
-//            sb.append(indent + "              <button data-btn=\""+field.getName()+"-edit\" th:attr=\"data-"+fieldName+"=${"+htmlFormVar+"}==null?0:${"+htmlFormVar+"."+fkRefEntityId+"}\" type=\"SUBMIT\" class=\"frmEdit\" NAME=\"frmEdit\" VALUE=\"View/Edit "+fkRefEntityInitUpper+"\">\r\n");
-//            sb.append(indent + "              <button data-btn=\""+field.getResolvedIdentifier()+"-edit\" th:attr=\"data-"+fieldName+"=${"+htmlFormVar+"}==null?0:${"+htmlFormVar+"."+fkRefEntityId+"}\" type=\"SUBMIT\" class=\"frmEdit\" NAME=\"frmEdit\" VALUE=\"View/Edit "+fkRefEntityInitUpper+"\">\r\n");
-            sb.append(indent + "              <button data-btn=\""+field.getResolvedIdentifier()+"-edit\" th:attr=\"data-"+field.getResolvedIdentifier()+"=${"+fqRefVar+"}==null?0:${"+fqRefVar+"."+fkRefEntityId+"}\" type=\"SUBMIT\" class=\"frmEdit\" NAME=\"frmEdit\" VALUE=\"View/Edit "+fkRefEntityInitUpper+"\">\r\n");
-            sb.append(indent + "              <span class=\"fa-stack\">\r\n");
-            sb.append(indent + "                  <i class=\"glyphicon glyphicon-edit\"></i>\r\n");
-            sb.append(indent + "              </span>\r\n");
-            sb.append(indent + "              </button>\r\n");
-            sb.append(indent + "  </td>\r\n");
-          }
-          sb.append(isVertical?indent + "</tr>\n":"");
-          returnValue = sb.toString();
-        }
-        break;
-      }
-      if (returnValue == null) {
-        switch (token) {
-        case FK_CHILD_ENTITY:
-          returnValue = field.getDeclaringClassName();
-          break;
-        case FK_CHILD_ENTITY_LABEL:
-          returnValue = currentEntityMeta.getLabel();
-          break;
-        case FK_CHILD_ENTITY_QUALIFIED:
-          returnValue = field.getLabel().replaceAll(" ", "");
-          break;
-        case FK_CHILD_ENTITY_INIT_SMALL:
-          interim = field.getDeclaringClassName();
-          returnValue = interim.substring(0,1).toLowerCase()+interim.substring(1);
-          break;
-        case FK_CHILD_ENTITY_LOWER:
-          returnValue = field.getDeclaringClassName().toLowerCase();
-          break;
-        case FK_CHILD_ENTITY_LOWER_PLURAL:
-          returnValue = field.getDeclaringClassName().toLowerCase()+"s";
-          break;
-        case FK_CHILD_ENTITY_UPPER:
-          returnValue = field.getDeclaringClassName().toUpperCase();
-          break;
-        case FK_CHILD_ENTITY_UPPER_PLURAL:
-          returnValue = field.getDeclaringClassName().toUpperCase()+"S";
-          break;
-        }
-      }
-      //    out.println ("returnValue = " + returnValue );
     return returnValue;
   }
   
   protected String getAttributeAttribute ( EntityMeta drivingEntityMeta
-                                         , FieldMeta drivingEntityMetaField
+                                         , FieldMeta currentField
                                          , EntityMeta currentEntityMeta
                                          , String token
                                          ) {
     String[] excluded = null;
-    return getAttributeAttribute (drivingEntityMeta, drivingEntityMetaField, currentEntityMeta, token, excluded);
+    return getAttributeAttribute (drivingEntityMeta, currentField, currentEntityMeta, token, excluded);
   }
 
+  /**
+   * "Get the attributes of (data model entity) attributes."
+   * Like name, datatype etc.
+   * @param drivingEntityMeta
+   * @param currentField
+   * @param currentEntityMeta
+   * @param token
+   * @param excluded
+   * @return
+   */
   protected String getAttributeAttribute ( EntityMeta drivingEntityMeta
-                                         , FieldMeta drivingEntityMetaField
+                                         , FieldMeta currentField
                                          , EntityMeta currentEntityMeta
                                          , String token
                                          , String[] excluded
@@ -1386,12 +1074,52 @@ public class OutputStringTree extends IOStringTree {
     String interim = null;
     boolean currentEntityMetaIsChild = (!currentEntityMeta.equals(drivingEntityMeta));
     String drivingEntityMetaName = drivingEntityMeta.getSimpleName();
-    
+
     switch (token) { 
+    case FK_REF_ATTRIB_INITCAPS:
+      returnValue = currentField.getName().substring(0,1).toUpperCase()+currentField.getName().substring(1);
+      break;
+    case FK_REF_ENTITY_IDENTIFIER:
+      returnValue = currentField.getResolvedIdentifier();
+      break;
+    case ENTITY_ATTRIB_INITCAPS:
+      returnValue = currentField.getResolvedIdentifier().substring(0,1).toUpperCase()+currentField.getResolvedIdentifier().substring(1);
+      break;
+    // EXPERIMENTAL
+    case FK_CHILD_ATTRIB_DEFAULT_DATATYPE:
+      if (!(currentField.isPrimitiveOrWrapper())) {
+        returnValue = DATATYPE_INTEGER;
+      } else if (isTemporalType(currentField)) {
+        returnValue = DATATYPE_STRING;
+      } else {
+        try { 
+          returnValue = currentField.getType().getSimpleName();
+        } catch (Exception e) { // what Exception?
+          returnValue = currentField.getType().getName();
+        }
+      }
+      break;
+    
+    case ENTITY_ATTRIB_DEFAULT_DATATYPE:
+      returnValue = getEntityAttribDefaultDatatype(currentField);
+      break;
+    
+    case ENTITY_ATTRIB_NAME:
+      returnValue = currentField.getResolvedIdentifier();
+      break;
+    case ENTITY_ATTRIB_UPPER_NAME:
+      returnValue = currentField.getResolvedIdentifier().toUpperCase();
+      break;
     case ENTITY_ATTRIB_LABEL:
-//      returnValue = EntityMeta.getCollectionEnclosedEntityMeta (drivingEntityMetaField).getEntityMeta().getLabel();
-//      if (returnValue != null) break;
-      returnValue = drivingEntityMetaField.getLabel();
+      // EXPERIMENTAL... success 2018.11.19?
+      if (currentField.isEmbeddedId()) {
+        returnValue = currentField.getLabel(drivingEntityMeta);
+      }
+      else {
+        returnValue = currentField.getLabel();
+      }
+      // END EXPERIMENT
+      //returnValue = currentField.getLabel(); // THIS WAS WORKING BEFORE 
       break;
     case FIRST_NON_KEY_REQUIRED_ATTRIB:
     case FIRST_NON_KEY_REQUIRED_ATTRIB_INIT_CAP:
@@ -1403,7 +1131,7 @@ public class OutputStringTree extends IOStringTree {
       break;
     case MODEL_ENTITY_MAPPED_REF_ATTRIB:
     case MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP:
-      returnValue = drivingEntityMetaField.getAnnotationAttributeValue(EntityMeta.ANNOTATION_ONE_TO_MANY, EntityMeta.ANNOTATION_ATTRIBUTE_MAPPED_BY);
+      returnValue = currentField.getAnnotationAttributeValue(EntityMeta.ANNOTATION_ONE_TO_MANY, EntityMeta.ANNOTATION_ATTRIBUTE_MAPPED_BY);
       if (token.equals(MODEL_ENTITY_MAPPED_REF_ATTRIB_INIT_CAP))
         returnValue = returnValue.substring(0,1).toUpperCase()+returnValue.substring(1);
       break;
@@ -1412,7 +1140,7 @@ public class OutputStringTree extends IOStringTree {
       returnValue = currentEntityMeta.getSimpleName();
       break;
     case FK_CHILD_ENTITY_IDENTIFIER:
-      returnValue = drivingEntityMetaField.getName();
+      returnValue = currentField.getName();
       break;
     case FK_CHILD_ENTITY_INIT_SMALL:
       interim = currentEntityMeta.getSimpleName();
@@ -1427,16 +1155,27 @@ public class OutputStringTree extends IOStringTree {
     case FK_CHILD_ENTITY_LOWER_PLURAL:
       returnValue = currentEntityMeta.getSimpleName().toLowerCase()+"s";
       break;
+
     case FK_CHILD_ENTITY_UPPER:
       returnValue = currentEntityMeta.getSimpleName().toUpperCase();
       break;
     case FK_CHILD_ENTITY_UPPER_PLURAL:
       returnValue = currentEntityMeta.getSimpleName().toUpperCase()+"S";
       break;
+
+    case FK_REF_ENTITY_UPPER_PLURAL: // EXPERIMENTAL (Success 2018.11.19)
     case FK_REF_ENTITY:
     case FK_REF_ENTITY_INIT_SMALL:
+      returnValue = currentField.getType().getSimpleName();  
+      if (token.equals(FK_REF_ENTITY_INIT_SMALL)) {
+        returnValue = returnValue.substring(0,1).toLowerCase()+returnValue.substring(1);
+      }
+      if (token.equals(FK_REF_ENTITY_UPPER_PLURAL)) { 
+        returnValue = returnValue.toUpperCase()+"S";
+      }
+
       {
-          out.println("Found FK_REF_ENTITY " + FK_REF_ENTITY + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
+          out.println("Found " + FK_REF_ENTITY + " " + currentEntityMeta.getSimpleName() + ": " + currentEntityMeta);
         //returnValue = currentEntityMeta.getSimpleName();
         EntityMeta[] embeddedIdRefEntities = currentEntityMeta.getEmbeddedIdRefEntities();
         if (embeddedIdRefEntities == null) break; 
@@ -1452,6 +1191,9 @@ public class OutputStringTree extends IOStringTree {
     case FK_REF_ENTITY_ID:
     case FK_REF_ENTITY_ID_INIT_CAP:
       returnValue = "";
+      try { 
+        returnValue = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(currentField.getType().getName()).getIDField().getName(); 
+      } catch (Exception e) {}
 //      out.println("case FK_REF_ENTITY_ID: ");
 //      out.println("  drivingEntityMetaName = " + drivingEntityMetaName);
 //      out.println("  currentEntityMeta = " + currentEntityMeta.getSimpleName());
@@ -1469,17 +1211,6 @@ public class OutputStringTree extends IOStringTree {
         }
       }
       break;
-//    case FK_REF_ENTITY_LOWER:
-//      returnValue = currentEntityMeta.getSimpleName().toLowerCase();
-//      break;
-    // DEPRECATED  
-//    case FK_REF_ENTITY_LOWER_PLURAL:
-//      returnValue = currentEntityMeta.getSimpleName().toLowerCase()+"s";
-//      break;
-    case FK_REF_ENTITY_UPPER_PLURAL:
-      returnValue = currentEntityMeta.getSimpleName().toUpperCase()+"S";
-      break;
-//    case FK_CHILD_EMBEDDED_ID:
     case FK_CHILD_EMBEDDED_ID_INIT_SMALL:
       returnValue = currentEntityMeta.getEmbeddedPKInfo().getSimpleName(); // .getEmbeddedPKInfo().getSimpleName();
       if (token.equals(FK_CHILD_EMBEDDED_ID_INIT_SMALL)) {
@@ -1492,8 +1223,6 @@ public class OutputStringTree extends IOStringTree {
       try {
         returnValue = currentEntityMeta.getIDField().getName();
       } catch (NullPointerException e) {
-//        returnValue = currentEntityMeta.getSimpleName() + " doesn't have a primary key ID field.";
-//        returnValue = returnValue.toUpperCase();
         returnValue = null;
         break;
       }
@@ -1585,27 +1314,6 @@ public class OutputStringTree extends IOStringTree {
       }
       break;
     }
-    //DEPRECATED
-//    case COMPOUND_INSERT_PARAM_LIST_CHILD_ENTITY:
-//    {  
-//      String prefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase() + currentEntityMeta.getSimpleName().substring(1); 
-//      returnValue = "(";
-//      iteration = 0;
-//      for (EntityMeta.FieldMeta field: currentEntityMeta.getFieldMetaArray()) {
-//        if (field.getName().equals(SERIAL_VERSION_UID)) continue;
-//        if (iteration > 0) {returnValue += ", ";}
-//        if (field.getType().getSimpleName().equals(drivingEntityMeta.getSimpleName())) {
-//          returnValue += field.getName(); // need to pre-pend entity var name plus getter() call
-//        }
-//        else
-//        {
-//          returnValue += prefix+field.getName().substring(0,1).toUpperCase()+field.getName().substring(1);
-//        }
-//        iteration++;
-//      }
-//      returnValue += ")";
-//      break;
-//    }
     case FIND_ONE_BY_PK_FK_CRITERIA: // Second most hard-coded case so far 2018.03.04
       returnValue = "findOneBy";
       currentTableVarPrefix = currentEntityMeta.getSimpleName().substring(0, 1).toLowerCase()+currentEntityMeta.getSimpleName().substring(1);
@@ -1627,19 +1335,104 @@ public class OutputStringTree extends IOStringTree {
       }
       returnValue += ")";
       break;
-//    case FK_CHILD_EMBEDDED_PK:
-//      out.println("case FK_CHILD_EMBEDDED_PK");
-//    case FK_CHILD_EMBEDDED_PK_INIT_SMALL:
-//      out.println("case FK_CHILD_EMBEDDED_PK_INIT_SMALL");
-//      EntityMeta embeddedPK = currentEntityMeta.getEmbeddedPKInfo();
-//      if (embeddedPK != null) {
-//        returnValue = embeddedPK.getSimpleName();
+
+      
+    case HTML_FORM_VERTICAL_INPUT:
+    case HTML_FORM_VERTICAL_INPUT_BLANK:
+    case HTML_FORM_HORIZONTAL_INPUT:
+    case HTML_FORM_HORIZONTAL_INPUT_BLANK:
+    {
+      // DEBUGGING
+//      if (currentEntityMeta.getSimpleName().equals("Flight") & currentField.getName().startsWith("aircraft")) {
+//        out.println("Debugging case HTML_FORM_* Flight.aircraft..."); // Set breakpoint on this line
 //      }
-//      if (returnValue!=null & token.equals(FK_CHILD_EMBEDDED_PK_INIT_SMALL)) {
-//        returnValue=returnValue.substring(0,1).toLowerCase() + returnValue.substring(1);
-//      }
-//      out.println("returnValue = " + returnValue);
-//      return returnValue;
+      // END DEBUG
+      returnValue = "";
+      if (currentField.isEmbeddedId()) break;
+      StringBuilder sb = new StringBuilder("");
+      String indent = "          "; // 10 spaces
+      
+      boolean isFkRef = (!(currentField.isPrimitiveOrWrapper()) & EntityMeta.getCollectionEnclosedEntityMeta(currentField) == null);
+      boolean isFKChildCollection = (EntityMeta.getCollectionEnclosedEntityMeta(currentField) != null); // FLAWED?
+      currentEntityMetaIsChild = (!currentEntityMeta.equals(drivingEntityMeta));
+      String fieldType = currentField.getType().getSimpleName();
+      drivingEntityMetaName = drivingEntityMeta.getSimpleName();
+      if (currentEntityMetaIsChild) { // NEED TO HANDLE MULTIPLE FKs back to same driving parent
+        if (fieldType.equals(drivingEntityMetaName)) break; // Ignore references back to driving parent
+      }
+      String htmlFormInputControl = currentField.getHtmlFormInputControl();
+      boolean isVertical = token.startsWith(HTML_FORM_VERTICAL_INPUT);
+      boolean isHorizontal = token.startsWith(HTML_FORM_HORIZONTAL_INPUT);
+      boolean isBlank = token.endsWith("_BLANK"); 
+      if (currentField.isEmbeddedIdMemberField() & !isBlank) break;
+      
+      sb.append(isVertical?"<tr>\n":"");
+      //sb.append(isVertical?indent + "<tr>\n":"");
+      sb.append(isVertical?indent + "  <td><label for=\"" + currentField.getResolvedIdentifier() + "\">" + currentField.getLabel() + "</label></td>\n":"");
+      String declaringClassVar = currentField.getDeclaringClassName().substring(0, 1).toLowerCase()+currentField.getDeclaringClassName().substring(1);
+//      String htmlFormVar = declaringClassVar + "." + currentField.getName();
+      String htmlFormVar = declaringClassVar + "." + currentField.getResolvedIdentifier(); // For example flight.aircraftId
+      String fqRefVar = declaringClassVar + "." + currentField.getName();                  // For example flight.aircraft
+      String valueClause = isBlank?" value=\"\"":" th:value=\"${" + htmlFormVar + "}\"";
+      String textClause = isBlank?" text=\"\"":" th:text=\"${" + htmlFormVar + "}\"";
+      String textAreaRows = (isBlank?"\"2\"":"\"1\"");
+      
+      String fieldName = "";
+      int fieldWidth = currentField.getFieldWidth();
+      if (currentEntityMetaIsChild) { // Horizontal
+//        fieldName = declaringClassVar + (field.getName().substring(0, 1).toUpperCase()+field.getName().substring(1));
+        fieldName = declaringClassVar + (currentField.getResolvedIdentifier().substring(0, 1).toUpperCase()+currentField.getResolvedIdentifier().substring(1));
+      }
+      else { // Vertical
+//        fieldName = field.getName();
+        fieldName = currentField.getResolvedIdentifier();
+      }
+      
+      if ((!isFkRef) & (!isFKChildCollection)) {
+        switch (htmlFormInputControl) {
+          case "text": // DECLARE CONSTANTS FOR THESE
+            sb.append(indent + "  <td><input type=\"" + htmlFormInputControl + "\" id=\"" + fieldName + "\" size=\"" + fieldWidth + "\" name=\"" + fieldName + "\""+valueClause+"/></td>\r\n");
+            break; 
+          case "textarea":
+            sb.append(indent + "  <td><" + htmlFormInputControl + " rows=" + textAreaRows + " id=\"" + fieldName + "\" name=\"" + fieldName + "\" cols=\"" + fieldWidth + "\""+textClause+"/></td>\n");
+            break;
+          case "date": 
+            sb.append(indent + "  <td><input type=\"" + htmlFormInputControl + "\" id=\"" + fieldName + "\" size=\"" + fieldWidth + "\" name=\"" + fieldName + "\""+valueClause+"/></td>\r\n");
+            break; 
+          case "datetime-local": 
+            sb.append(indent + "  <td><input type=\"" + htmlFormInputControl + "\" id=\"" + fieldName + "\" size=\"" + fieldWidth + "\" name=\"" + fieldName + "\""+valueClause+"/></td>\r\n");
+            break; 
+        }
+      } 
+      else if ((isFkRef) & (!isFKChildCollection) &(isVertical)) {
+        String fkRefEntityInitUpper = currentField.getType().getSimpleName();
+        String fkRefEntity = fkRefEntityInitUpper.substring(0, 1).toLowerCase() + fkRefEntityInitUpper.substring(1);
+        String fkRefEntityQualified = currentField.getLabel().replaceAll(" ", "");
+        String fkRefEntityId = "COULD NOT GET fkRefEntityId";
+        try {
+          fkRefEntityId = EntityMetaFactoryImpl.entityMetaFactoryImplX.getEntityMeta(currentField.getType().getName()).getIDField().getName();
+        } catch (IOException e) {}
+        sb.append(indent + "  <td>\r\n");
+        sb.append(indent + "  <select th:field=\"*{" + htmlFormVar + "}\">\r\n");
+        sb.append(indent + "  <option value=\"0\">[Please select...]</option>\r\n");
+        sb.append(indent + "  <option th:each=\""+fkRefEntity+" : ${"+fkRefEntity+"s}\" \r\n");
+        sb.append(indent + "          th:value=\"${"+fkRefEntity+"."+fkRefEntityId+"}\" \r\n");
+        sb.append(indent + "          th:text=\"${"+fkRefEntity+"}\">null</option>\r\n");
+        sb.append(indent + "  </select>\r\n");
+//        sb.append(indent + "              <button data-btn=\""+fkRefEntityQualified+"-edit\" th:attr=\"data-"+fieldName+"=${"+htmlFormVar+"}==null?0:${"+htmlFormVar+"."+fkRefEntityId+"}\" type=\"SUBMIT\" class=\"frmEdit\" NAME=\"frmEdit\" VALUE=\"View/Edit "+fkRefEntityInitUpper+"\">\r\n");
+//        sb.append(indent + "              <button data-btn=\""+field.getName()+"-edit\" th:attr=\"data-"+fieldName+"=${"+htmlFormVar+"}==null?0:${"+htmlFormVar+"."+fkRefEntityId+"}\" type=\"SUBMIT\" class=\"frmEdit\" NAME=\"frmEdit\" VALUE=\"View/Edit "+fkRefEntityInitUpper+"\">\r\n");
+//        sb.append(indent + "              <button data-btn=\""+currentField.getResolvedIdentifier()+"-edit\" th:attr=\"data-"+fieldName+"=${"+htmlFormVar+"}==null?0:${"+htmlFormVar+"."+fkRefEntityId+"}\" type=\"SUBMIT\" class=\"frmEdit\" NAME=\"frmEdit\" VALUE=\"View/Edit "+fkRefEntityInitUpper+"\">\r\n");
+        sb.append(indent + "              <button data-btn=\""+currentField.getResolvedIdentifier()+"-edit\" th:attr=\"data-"+currentField.getResolvedIdentifier()+"=${"+fqRefVar+"}==null?0:${"+fqRefVar+"."+fkRefEntityId+"}\" type=\"SUBMIT\" class=\"frmEdit\" NAME=\"frmEdit\" VALUE=\"View/Edit "+fkRefEntityInitUpper+"\">\r\n");
+        sb.append(indent + "              <span class=\"fa-stack\">\r\n");
+        sb.append(indent + "                  <i class=\"glyphicon glyphicon-edit\"></i>\r\n");
+        sb.append(indent + "              </span>\r\n");
+        sb.append(indent + "              </button>\r\n");
+        sb.append(indent + "  </td>\r\n");
+      }
+      sb.append(isVertical?indent + "</tr>\n":"");
+      returnValue = sb.toString();
+    }
+    break;
     }
     return returnValue;
   }

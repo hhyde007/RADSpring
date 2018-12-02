@@ -54,6 +54,7 @@ public class {${MODEL_ENTITY}$}ServiceImpl implements {${MODEL_ENTITY}$}Service{
        ( Integer {${PK_ID_FIELD}$}
        {${ACT_ALL_ATTRIBS=, {${ENTITY_ATTRIB_DEFAULT_DATATYPE}$} {${ENTITY_ATTRIB_NAME}$}
        }$}{${ACT_FK_CHILD_ENTITY_ATTRIBS=, {${ENTITY_ATTRIB_DEFAULT_DATATYPE}$}[] {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s
+!!       }$}{${ACT_FK_CHILD_ENTITY_ATTRIBS=, {${FK_CHILD_ATTRIB_DEFAULT_DATATYPE}$}[] {${FK_CHILD_ENTITY_INIT_SMALL}$}{${ENTITY_ATTRIB_INITCAPS}$}s
        }$}) throws Exception
   {
     out.println("{${MODEL_ENTITY}$}ServiceClass.putEntity()");
